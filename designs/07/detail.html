@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="default">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THE TAEYOON TIMES — Feature Story 01 / RoomSync</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F1E8;
+    --text: #1A1A1A;
+    --accent: #B91C1C;
+    --rule: #2A2A2A;
+    --muted: #5A5A52;
+    --plate-bg: #ffffff;
+  }
+  [data-theme="alt"] {
+    --bg: #1A1A1A;
+    --text: #F4F1E8;
+    --accent: #FF4444;
+    --rule: #C8C0AE;
+    --muted: #9A9484;
+    --plate-bg: #0e0e0e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans KR', 'IBM Plex Sans', 'Pretendard', sans-serif;
+    font-size: 14px; line-height: 1.55;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    transition: background 200ms linear, color 200ms linear;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--accent); color: var(--bg); }
+
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 1px; width: 0%;
+    background: var(--accent); z-index: 9999;
+    transition: width 80ms linear;
+  }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 18px; z-index: 1100;
+    min-height: 44px; min-width: 88px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--rule); padding: 10px 14px;
+    cursor: pointer; user-select: none;
+    transition: background 200ms linear, color 200ms linear, border-color 200ms linear;
+  }
+  .theme-toggle .seg { padding: 2px 6px; }
+  .theme-toggle .seg.active { background: var(--text); color: var(--bg); }
+  .theme-toggle:hover { border-color: var(--accent); }
+  .theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .paper { max-width: 1240px; margin: 0 auto; padding: 28px 36px 80px; }
+
+  /* GALLERY BACK LINK */
+  .gallery-back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text); text-decoration: none;
+    border: 1px solid var(--rule);
+    transition: background 200ms, color 200ms, border-color 200ms;
+  }
+  .gallery-back:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .gallery-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 14px;
+    padding-right: 120px; /* reserve space for fixed toggle */
+  }
+  .masthead .nameplate {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-weight: 900; font-size: 36px; line-height: 1; letter-spacing: -0.01em;
+    color: var(--text); overflow: hidden; white-space: nowrap;
+  }
+  .masthead .nameplate .reveal-mask {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 800ms cubic-bezier(.7,0,.3,1);
+  }
+  .masthead .nameplate.in-view .reveal-mask { clip-path: inset(0 0 0 0); }
+  .masthead .meta {
+    text-align: right; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .masthead .meta .row { display: block; line-height: 1.5; }
+  .masthead .meta .row.muted { color: var(--muted); }
+  .double-rule { border-top: 2px solid var(--rule); margin-top: 2px; }
+  .double-rule::after { content: ''; display: block; height: 1px; background: var(--rule); margin-top: 3px; }
+
+  /* SECTION HEADER (Feature) */
+  .feature-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 0; margin-top: 14px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+  .feature-tag .right { color: var(--muted); }
+
+  .back-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat; background-size: 0% 1px; background-position: 0 100%;
+    transition: background-size 200ms, color 200ms;
+  }
+  .back-link:hover { color: var(--accent); background-size: 100% 1px; }
+
+  /* HERO HEADLINE */
+  .feature-hero {
+    padding: 36px 0 18px;
+    opacity: 0; transition: opacity 600ms ease-out;
+  }
+  .feature-hero.in-view { opacity: 1; }
+  .feature-hero .kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .feature-hero .kicker::after {
+    content: ''; flex: 1; height: 1px; background: var(--accent); opacity: 0.4;
+  }
+  .feature-hero h1 {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-weight: 700;
+    font-size: 84px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+  .feature-hero .deck {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-style: italic; font-weight: 400;
+    font-size: 20px; line-height: 1.45;
+    max-width: 72ch; margin-bottom: 16px;
+  }
+  .feature-hero .byline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 6px 0; margin-bottom: 22px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .feature-hero .byline strong { color: var(--text); font-weight: 500; }
+
+  .split-word {
+    display: inline-block; opacity: 0;
+    transition: opacity 600ms ease-out;
+  }
+  .split-word.in { opacity: 1; }
+
+  /* PLATE */
+  .plate {
+    background: var(--plate-bg);
+    border: 1px solid #000;
+    padding: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  [data-theme="alt"] .plate { border-color: var(--rule); }
+  .plate .frame {
+    position: relative; overflow: hidden; background: #ddd;
+  }
+  .plate .frame::after {
+    display: none;
+  }
+  .plate img {
+    display: block; width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+    transition: transform 1500ms cubic-bezier(.2,.6,.2,1);
+  }
+  .plate.in-view img { transform: scale(1.0); }
+  .plate-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; font-style: italic;
+    color: var(--muted); line-height: 1.4;
+    padding-top: 6px; border-top: 1px solid var(--rule);
+    margin-top: 6px; margin-bottom: 18px;
+  }
+  .plate-caption strong { color: var(--text); font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-right: 6px; }
+
+  /* HERO LEDE PLATE */
+  .hero-lede-plate { display: block; width: 100%; margin: 0 0 8px; }
+  .hero-lede-plate .frame { width: 100%; aspect-ratio: 16 / 9; }
+
+  /* SECTION ARTICLE */
+  .section-article {
+    padding: 36px 0 28px;
+    border-top: 3px double var(--rule);
+    opacity: 0; transition: opacity 600ms ease-out;
+  }
+  .section-article.in-view { opacity: 1; }
+  .section-article:first-of-type { border-top: none; }
+  .section-article .kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .section-article h2 {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-weight: 700; font-size: 40px; line-height: 1.08; letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .section-article .deck {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-style: italic; font-size: 17px; line-height: 1.45;
+    margin-bottom: 16px; max-width: 70ch;
+  }
+
+  /* BODY MULTI-COL */
+  .body-cols {
+    column-count: 3; column-gap: 28px;
+    column-rule: 1px solid var(--rule);
+    font-size: 14px; line-height: 1.6;
+    text-align: justify; hyphens: auto; word-break: keep-all;
+  }
+  .body-cols p { margin-bottom: 12px; break-inside: avoid; }
+  .body-cols p.dropcap::first-letter {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-weight: 900; font-size: 56px; float: left; line-height: 0.88;
+    padding: 4px 8px 0 0; color: var(--accent);
+  }
+  .body-cols h3 {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-size: 16px; font-weight: 700;
+    margin: 6px 0 6px; break-after: avoid;
+  }
+  .body-cols .pullquote {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-style: italic; font-size: 17px; line-height: 1.35;
+    border-top: 2px solid var(--rule); border-bottom: 2px solid var(--rule);
+    padding: 10px 0; margin: 12px 0;
+    text-align: left; break-inside: avoid;
+  }
+  .body-cols ul.box {
+    list-style: none; padding: 10px 12px;
+    border: 1px solid var(--rule);
+    break-inside: avoid; margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .body-cols ul.box li {
+    padding: 4px 0; border-bottom: 1px dashed var(--rule);
+  }
+  .body-cols ul.box li:last-child { border-bottom: none; }
+  .body-cols ul.box li::before {
+    content: '▸  '; color: var(--accent); font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* 2-COL SPAN PLATE (inside body-cols) */
+  .span-plate-wrap {
+    column-span: all;
+    margin: 12px 0 18px;
+    display: grid; grid-template-columns: 2fr 1fr;
+    gap: 20px; align-items: end;
+  }
+  .span-plate-wrap .plate { display: block; }
+  .span-plate-wrap .plate .frame { width: 100%; aspect-ratio: 16/9; }
+  .span-plate-wrap .side-fact {
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-size: 12px; line-height: 1.5;
+    border-left: 3px solid var(--accent); padding-left: 12px;
+  }
+  .span-plate-wrap .side-fact .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); display: block; margin-bottom: 6px;
+  }
+
+  /* FULL-WIDTH IMAGE WITH METRIC CALLOUT */
+  .full-plate-wrap {
+    column-span: all;
+    margin: 16px 0;
+    display: grid; grid-template-columns: 1fr; gap: 12px;
+  }
+  .full-plate-wrap .plate .frame { width: 100%; aspect-ratio: 21 / 9; }
+  .metric-callout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 3px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .metric-callout .metric {
+    padding: 14px 18px;
+    border-right: 1px solid var(--rule);
+  }
+  .metric-callout .metric:last-child { border-right: none; }
+  .metric-callout .metric .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); display: block; margin-bottom: 6px;
+  }
+  .metric-callout .metric .value {
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-weight: 900; font-size: 38px; line-height: 1;
+    color: var(--accent);
+  }
+  .metric-callout .metric .sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--text); margin-top: 4px; display: block;
+  }
+
+  /* INLINE 1-COL PLATE (image inside a single column) */
+  .inline-plate {
+    display: block; margin: 6px 0 10px;
+    break-inside: avoid;
+  }
+  .inline-plate .frame { width: 100%; aspect-ratio: 4 / 5; }
+
+  /* TOP SIDEBAR FACT BOX (right-pulled) */
+  .case-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    margin-bottom: 28px;
+    align-items: start;
+  }
+  .case-meta-grid .factbox {
+    border: 1px solid var(--rule); padding: 14px 16px;
+  }
+  .case-meta-grid .factbox .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); display: block; margin-bottom: 8px;
+    border-bottom: 1px solid var(--rule); padding-bottom: 6px;
+  }
+  .case-meta-grid .factbox dl { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; font-size: 12px; }
+  .case-meta-grid .factbox dt { color: var(--muted); }
+  .case-meta-grid .factbox dd { font-weight: 500; text-align: right; }
+
+  .key-quote {
+    column-span: all;
+    margin: 14px 0;
+    padding: 18px 0;
+    border-top: 3px solid var(--accent);
+    border-bottom: 1px solid var(--rule);
+    font-family: 'IBM Plex Serif', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 1.32;
+    color: var(--text);
+  }
+  .key-quote cite {
+    display: block; margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: normal; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* NAV ROW BOTTOM */
+  .feature-nav {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    gap: 10px; padding: 18px 0;
+    border-top: 3px solid var(--rule);
+    margin-top: 30px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .feature-nav a {
+    color: var(--text); text-decoration: none;
+    background-image: linear-gradient(var(--accent), var(--accent));
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    transition: background-size 200ms;
+  }
+  .feature-nav a:hover { background-size: 100% 2px; }
+  .feature-nav .center { color: var(--muted); }
+
+  .colophon {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+
+  @media (max-width: 900px) {
+    .paper { padding: 18px 18px 60px; }
+    .masthead { flex-direction: column; align-items: flex-start; gap: 10px; padding-top: 60px; padding-right: 0; }
+    .masthead .meta { text-align: left; }
+    .masthead .nameplate { font-size: 28px; white-space: normal; }
+    .feature-hero h1 { font-size: 44px; }
+    .feature-hero .deck { font-size: 17px; }
+    .body-cols { column-count: 1; column-rule: none; }
+    .case-meta-grid { grid-template-columns: 1fr; }
+    .metric-callout { grid-template-columns: 1fr; }
+    .metric-callout .metric { border-right: none; border-bottom: 1px solid var(--rule); }
+    .metric-callout .metric:last-child { border-bottom: none; }
+    .span-plate-wrap { grid-template-columns: 1fr; }
+    .section-article h2 { font-size: 30px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+    .feature-hero, .section-article { opacity: 1 !important; }
+    .plate img { transform: scale(1.0) !important; }
+    .split-word { opacity: 1 !important; }
+    .masthead .nameplate .reveal-mask { clip-path: inset(0 0 0 0) !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle edition">
+  <span class="seg" data-mode="default">AM</span>
+  <span>/</span>
+  <span class="seg" data-mode="alt">PM</span>
+</button>
+
+<div class="paper">
+
+  <a href="../../index.html" class="gallery-back" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="nameplate"><span class="reveal-mask">THE TAEYOON TIMES</span></div>
+    <div class="meta">
+      <span class="row">Vol. 01 / Issue 2026</span>
+      <span class="row muted" id="todayDate">2026.05.22 · THURSDAY</span>
+      <span class="row muted">FEATURE STORY · 01 / ROOMSYNC</span>
+    </div>
+  </header>
+  <div class="double-rule"></div>
+
+  <!-- FEATURE TAG STRIP -->
+  <div class="feature-tag">
+    <span>FEATURE STORY · 01 / ROOMSYNC</span>
+    <span><a href="index.html" class="back-link">← BACK TO FRONT PAGE</a></span>
+    <span class="right">PAGE B · 2 of 2</span>
+  </div>
+
+  <!-- FEATURE HERO -->
+  <section class="feature-hero" data-anim>
+    <div class="kicker mono">Case Study · Long Read</div>
+    <h1 class="serif" data-split>수기 예약을 끊어낸 한 학기, RoomSync</h1>
+    <p class="deck serif">
+      학내 50개 동아리, 회의실 한 곳, 겹침 사고. PM 김태윤은 설문지 한 장과 MVP 전략으로 한 달 만에 30개 동아리를 끌어들이고 노쇼율 60%를 잘라냈다.
+    </p>
+    <div class="byline mono">
+      <span>By <strong>EDITORIAL DESK</strong> · 2023.07 — 2023.11 · Seoul</span>
+      <span>CASE FILE · ROOMSYNC</span>
+    </div>
+  </section>
+
+  <!-- LEDE PLATE: full-width 16:9 -->
+  <figure class="plate hero-lede-plate" data-anim-plate>
+    <div class="frame">
+      <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 회의 현장" loading="lazy" />
+    </div>
+  </figure>
+  <div class="plate-caption">
+    <strong>FIG. 01</strong>스크럼 보드 앞의 RoomSync 팀. Jira 도입 1주차, 동아리 라운지. Photo: 김태윤.
+  </div>
+
+  <!-- META + FACTBOX TOP -->
+  <div class="case-meta-grid">
+    <div>
+      <div class="kicker mono" style="font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent); margin-bottom:10px;">Editor's Note</div>
+      <p class="serif" style="font-family:'IBM Plex Serif','Noto Serif KR',serif; font-size:18px; line-height:1.5; font-style:italic;">
+        이 케이스 스터디는 단순한 기능 출시기가 아니다. 데이터로 가설을 검증하고, 무엇을 빼야 살아남는지를 결정한 한 PM의 일주일 단위 의사결정의 기록이다.
+      </p>
+    </div>
+    <aside class="factbox">
+      <span class="label">Project Vitals</span>
+      <dl>
+        <dt>역할</dt><dd>팀 리더 · 기획</dd>
+        <dt>기간</dt><dd>2023.07 — 2023.11</dd>
+        <dt>팀 구성</dt><dd>PM 1 · BE 2</dd>
+        <dt>스택</dt><dd>Notion · Jira · API</dd>
+        <dt>방법론</dt><dd>Agile / Scrum</dd>
+        <dt>출시 결과</dt><dd>1개월 30 동아리</dd>
+      </dl>
+    </aside>
+  </div>
+
+  <!-- SECTION 1 — 문제 -->
+  <article class="section-article" data-anim>
+    <div class="kicker">Section 01 · Background</div>
+    <h2 class="serif">문제 — 회의실 한 곳, 동아리 50개</h2>
+    <p class="deck serif">수기 노트에 기록되던 예약은 매주 겹침 사고로 이어졌고, 노쇼가 일상이 됐다.</p>
+    <div class="body-cols">
+      <p class="dropcap">
+        2023년, 김태윤이 속한 학교에는 50여 개의 동아리가 한 곳의 공용 회의실을 공유하고 있었다. 예약은 동아리방 앞에 비치된 종이 노트에 적는 방식이었고, 그 결과 겹침 사고가 반복적으로 발생했다.
+      </p>
+      <p>
+        예약자가 약속한 시간에 나타나지 않는 노쇼도 잦았다. 동아리 회장단의 메신저 채널에는 "OO동아리, 지금 회의실 비었나요?"라는 메시지가 반복됐고, 누구도 이 문제를 자신의 과제로 가져가지 않았다.
+      </p>
+      <h3>비효율의 형태</h3>
+      <ul class="box">
+        <li>수기 예약으로 인한 겹침 사고 반복</li>
+        <li>잦은 노쇼</li>
+        <li>예약 확인 채널 분산 (메신저+노트)</li>
+        <li>회장단의 운영 부담 누적</li>
+      </ul>
+      <p>
+        김태윤은 이 문제를 "관리 도구의 부재가 아니라 가시성의 부재"로 정의했다. 사람들이 회의실을 사용하지 않는 것이 아니라, '지금 누가 쓰고 있는지'가 보이지 않는다는 것이 핵심이었다.
+      </p>
+    </div>
+  </article>
+
+  <!-- SECTION 2 — 리서치 (with INTERVIEW span-plate) -->
+  <article class="section-article" data-anim>
+    <div class="kicker">Section 02 · Research</div>
+    <h2 class="serif">리서치 — 설문지가 가설을 데이터로 바꿨다</h2>
+    <p class="deck serif">회장단 대상 구글폼 설문 한 장에서 '실시간 현황 확인'이라는 단어가 반복적으로 떠올랐다.</p>
+    <div class="body-cols">
+      <p class="dropcap">
+        리서치의 첫 도구는 코드가 아니라 구글 폼 한 장이었다. 김태윤은 회장단을 대상으로 페인포인트를 묻는 설문을 돌렸고, 응답을 정성·정량으로 함께 정리했다.
+      </p>
+      <p>
+        결과는 명확했다. 응답자들이 가장 원한 것은 '지금 회의실이 비어 있는지'를 한눈에 보는 것, 즉 실시간 현황 확인이었다. 알림이나 통계는 그 다음 순위였다.
+      </p>
+
+      <!-- SPAN PLATE: IMG_INTERVIEW spans 2 cols -->
+      <div class="span-plate-wrap">
+        <figure class="plate" data-anim-plate>
+          <div class="frame">
+            <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문 분석 현장" loading="lazy" />
+          </div>
+        </figure>
+        <aside class="side-fact">
+          <span class="label">FIG. 02 — SURVEY</span>
+          <p>구글폼 설문 응답 정리. "내가 예약했다는 사실이 다른 사람에게 보이기만 해도 사고가 줄겠다"는 의견이 반복적으로 등장.</p>
+        </aside>
+      </div>
+
+      <h3>핵심 인사이트</h3>
+      <p>
+        '실시간 현황 확인'이라는 한 줄이 다음 단계 의사결정의 헌법이 됐다. 알림·통계 같은 부가 기능은 모두 후순위로 밀려났고, 1차 스프린트의 스코프는 자연스럽게 정의됐다.
+      </p>
+      <p class="pullquote">
+        "사용자는 알림을 원한 게 아니었다. 그저 '지금 비어 있다'는 사실을 보고 싶어 했다."
+      </p>
+    </div>
+  </article>
+
+  <!-- SECTION 3 — MVP 결정 -->
+  <article class="section-article" data-anim>
+    <div class="kicker">Section 03 · MVP Decision</div>
+    <h2 class="serif">MVP 결정 — 무엇을 뺄지의 결정</h2>
+    <p class="deck serif">백엔드 2인의 가용 자원. 가장 큰 결정은 '기능을 자르는 일'이었다.</p>
+    <div class="body-cols">
+      <p class="dropcap">
+        김태윤은 처음부터 풀스택 빌드를 시도하지 않았다. 가용 자원이 백엔드 2인이라는 사실을 받아들이고, MVP에서 '무엇을 뺄지'를 먼저 정리했다.
+      </p>
+      <ul class="box">
+        <li>1차 IN — 예약 / 취소 / 실시간 뷰</li>
+        <li>1차 OUT — 알림 (이메일·LMS 연동)</li>
+        <li>1차 OUT — 통계 대시보드</li>
+        <li>1차 OUT — 회장단 권한 분리</li>
+      </ul>
+      <p>
+        이 결정은 단지 일정 문제가 아니었다. 리서치 결과 사용자가 가장 원한 것이 '실시간 가시성'이라는 단 한 가지였기 때문에, 거기에 집중하는 것이 곧 사용자 가치를 극대화하는 결정이기도 했다.
+      </p>
+
+      <div class="key-quote">
+        "MVP 스코프의 80%는 무엇을 뺄지의 결정이었다."
+        <cite>— 김태윤, 회고 노트 中</cite>
+      </div>
+
+      <h3>API 명세를 직접 쓴 PM</h3>
+      <p>
+        김태윤은 컴퓨터공학 복수 전공으로 다져온 개발 이해도를 살려, API 명세서 초안을 직접 작성했다. 백엔드 2인은 명세에 대한 합의를 한 번에 끝낼 수 있었고, 개발 중 발생하는 커뮤니케이션 비용이 눈에 띄게 줄었다.
+      </p>
+    </div>
+  </article>
+
+  <!-- SECTION 4 — 실행 (with PORTRAIT inline 1-col) -->
+  <article class="section-article" data-anim>
+    <div class="kicker">Section 04 · Execution</div>
+    <h2 class="serif">실행 — Jira, 스크럼, 그리고 직접 쓴 API 명세</h2>
+    <p class="deck serif">PM은 기획자이자 스크럼 마스터, 때로는 QA였다.</p>
+    <div class="body-cols">
+      <p class="dropcap">
+        김태윤은 Jira를 도입해 스프린트 단위로 작업을 운영했고, 매 스프린트 종료 후 회고를 강제했다. 일정 리스크는 명세 단위로 분해해 관리했고, 매 스프린트의 종료 기준을 회장단의 사용성 확인으로 못 박았다.
+      </p>
+
+      <!-- INLINE 1-COL PLATE: PORTRAIT -->
+      <figure class="plate inline-plate" data-anim-plate>
+        <div class="frame">
+          <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="PM 김태윤 작업 중" loading="lazy" />
+        </div>
+      </figure>
+      <div class="plate-caption">
+        <strong>FIG. 03</strong>스프린트 3주차 작업 중인 PM. 노션에 명세, Jira에 백로그.
+      </div>
+
+      <p>
+        그가 가장 많은 시간을 쏟은 작업은 의외로 명세서였다. API 명세, 화면 명세, 예외 케이스 명세 — 글로 정리되지 않은 의사결정은 다음 회의에서 다시 논쟁이 된다는 사실을 그는 일찍 배웠다.
+      </p>
+      <h3>커뮤니케이션의 손익</h3>
+      <p>
+        백엔드와의 소통 비용이 줄면서, 같은 시간 안에 더 많은 기능을 검증할 수 있었다. 1차 스프린트는 예약·취소·실시간 뷰만으로 출시됐고, 알림 등 부가 기능은 2차로 미뤘다.
+      </p>
+      <p class="pullquote">
+        "명세는 PM의 또 다른 코드다. 글을 줄이는 만큼 다음 회의가 늘어난다."
+      </p>
+    </div>
+  </article>
+
+  <!-- SECTION 5 — 결과 (with LECTURE full-width + metric callout) -->
+  <article class="section-article" data-anim>
+    <div class="kicker">Section 05 · Impact</div>
+    <h2 class="serif">결과 — 30개 동아리, 노쇼율 60% 감소</h2>
+    <p class="deck serif">출시 한 달, 데이터는 가설을 증명했다.</p>
+    <div class="body-cols">
+      <p class="dropcap">
+        2023년 11월 RoomSync는 학내 공개 베타로 출시됐다. 한 달 후 학내 30개 동아리가 가입했고, 노쇼율은 기존 대비 60% 감소했다.
+      </p>
+
+      <!-- FULL-WIDTH PLATE: LECTURE + metric callout -->
+      <div class="full-plate-wrap">
+        <figure class="plate" data-anim-plate>
+          <div class="frame">
+            <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="런칭 발표 현장" loading="lazy" />
+          </div>
+        </figure>
+        <div class="plate-caption">
+          <strong>FIG. 04</strong>RoomSync 출시 후 회장단 대상 결과 공유 세션.
+        </div>
+
+        <div class="metric-callout">
+          <div class="metric">
+            <span class="label">가입 동아리</span>
+            <span class="value">30</span>
+            <span class="sub">출시 1개월 시점 누적</span>
+          </div>
+          <div class="metric">
+            <span class="label">노쇼율</span>
+            <span class="value">−60%</span>
+            <span class="sub">기존 대비 감소폭</span>
+          </div>
+          <div class="metric">
+            <span class="label">출시</span>
+            <span class="value">1개월</span>
+            <span class="sub">MVP 1차 스프린트 기준</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>그 다음의 일</h3>
+      <p>
+        2차 스프린트에서는 알림과 회장단 권한 분리 기능이 추가됐다. 김태윤은 이 시기를 "데이터가 다음 결정의 근거가 되는 사이클이 처음으로 자리 잡은 순간"이라고 회고한다.
+      </p>
+      <p>
+        결과적으로 RoomSync는 한 학기의 학내 프로젝트로 시작해 동아리 운영 도구의 디폴트가 됐고, 그 과정에서 한 PM은 '문제를 정의하고, 무엇을 뺄지를 결정하고, 끝까지 출시한다'는 자신의 직업적 정체성을 처음으로 증명했다.
+      </p>
+      <p class="pullquote">
+        "사용자의 불편과 비즈니스의 목표를 정확히 잇는다 — 그게 PM의 일이다."
+      </p>
+    </div>
+  </article>
+
+  <!-- BOTTOM NAV -->
+  <nav class="feature-nav" aria-label="Feature navigation">
+    <a href="index.html">← FRONT PAGE</a>
+    <span class="center">END OF FEATURE STORY · 01</span>
+    <a href="index.html#proj-2">NEXT · PROJECT 02 →</a>
+  </nav>
+
+  <footer class="colophon">
+    <span>© 2026 THE TAEYOON TIMES · ALL RIGHTS RESERVED</span>
+    <span>PRINTED IN SEOUL · TYPE: IBM PLEX</span>
+    <span>PAGE B · END OF EDITION</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var KEY = 'tk-theme';
+  var root = document.documentElement;
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch(e){}
+  if (stored === 'alt' || stored === 'default') {
+    root.setAttribute('data-theme', stored);
+  }
+  var toggle = document.getElementById('themeToggle');
+  function paintToggle(){
+    var mode = root.getAttribute('data-theme') === 'alt' ? 'alt' : 'default';
+    toggle.querySelectorAll('.seg').forEach(function(s){
+      if (s.dataset.mode === mode) s.classList.add('active');
+      else s.classList.remove('active');
+    });
+  }
+  paintToggle();
+  toggle.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'alt' ? 'default' : 'alt';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch(e){}
+    paintToggle();
+  });
+
+  try {
+    var d = new Date();
+    var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
+    var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    var s = d.getFullYear() + '.' + pad(d.getMonth()+1) + '.' + pad(d.getDate()) + ' · ' + days[d.getDay()] + 'DAY';
+    var el = document.getElementById('todayDate');
+    if (el) el.textContent = s;
+  } catch(e){}
+
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var st = window.scrollY || document.documentElement.scrollTop;
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (st / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // MASTHEAD MASK REVEAL
+  var nameplate = document.querySelector('.masthead .nameplate');
+  if (nameplate) {
+    if (reduced) {
+      nameplate.classList.add('in-view');
+    } else {
+      requestAnimationFrame(function(){
+        setTimeout(function(){ nameplate.classList.add('in-view'); }, 120);
+      });
+    }
+  }
+
+  // TEXT-SPLIT on biggest headline
+  var splitTarget = document.querySelector('[data-split]');
+  if (splitTarget && !reduced) {
+    var text = splitTarget.textContent;
+    splitTarget.textContent = '';
+    var words = text.split(/(\s+)/);
+    var wordEls = [];
+    words.forEach(function(w){
+      if (/^\s+$/.test(w)) {
+        splitTarget.appendChild(document.createTextNode(w));
+      } else {
+        var span = document.createElement('span');
+        span.className = 'split-word';
+        span.textContent = w;
+        splitTarget.appendChild(span);
+        wordEls.push(span);
+      }
+    });
+    var splitObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          wordEls.forEach(function(s, i){
+            setTimeout(function(){ s.classList.add('in'); }, i * 90);
+          });
+          splitObs.unobserve(splitTarget);
+        }
+      });
+    }, { threshold: 0.2 });
+    splitObs.observe(splitTarget);
+  } else if (splitTarget && reduced) {
+    splitTarget.querySelectorAll && splitTarget.querySelectorAll('.split-word').forEach(function(s){ s.classList.add('in'); });
+  }
+
+  var fadeEls = document.querySelectorAll('[data-anim], [data-anim-plate]');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    fadeEls.forEach(function(el){ io.observe(el); });
+  } else {
+    fadeEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+})();
+</script>
+</body>
+</html>

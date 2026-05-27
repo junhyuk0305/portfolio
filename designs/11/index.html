@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Product Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #000000;
+    --surface: #0A0A0A;
+    --text: #FFFFFF;
+    --muted: #C4C4C8;
+    --hairline: #27272A;
+    --hairline-bright: #3F3F46;
+    --orb: rgba(120,119,198,0.15);
+    --img-filter: none;
+    --glass-bg: rgba(10,10,10,0.55);
+    --progress: #FFFFFF;
+    --ring: rgba(255,255,255,0.06);
+  }
+  [data-theme="alt"] {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --text: #0A0A0A;
+    --muted: #4B4B4B;
+    --hairline: #E5E5E5;
+    --hairline-bright: #C7C7C7;
+    --orb: rgba(120,119,198,0.08);
+    --glass-bg: rgba(255,255,255,0.55);
+    --progress: #0A0A0A;
+    --ring: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 250ms ease, color 250ms ease;
+    min-height: 100vh;
+    position: relative;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* Ambient orb */
+  .orb {
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(circle at center, var(--orb) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    transition: background 250ms ease;
+    will-change: transform;
+  }
+  @media (max-width: 768px) {
+    .orb { display: none; }
+  }
+
+  /* Spotlight */
+  .spotlight {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 600px;
+    height: 600px;
+    margin: -300px 0 0 -300px;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 120ms cubic-bezier(.2,.7,.3,1), opacity 250ms ease;
+    will-change: transform;
+    opacity: 0;
+  }
+  [data-theme="alt"] .spotlight {
+    background: radial-gradient(circle at center, rgba(0,0,0,0.06) 0%, transparent 60%);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 0;
+    background: var(--progress);
+    z-index: 100;
+    transition: width 80ms linear, background-color 250ms ease;
+  }
+
+  /* Back to gallery */
+  .back-gallery {
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-decoration: none;
+    transition: border-color 200ms ease, color 200ms ease, background-color 250ms ease;
+  }
+  .back-gallery:hover { border-color: var(--hairline-bright); color: var(--text); }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color 200ms ease, color 200ms ease, background-color 250ms ease;
+  }
+  .theme-toggle:hover { border-color: var(--hairline-bright); color: var(--text); }
+
+  /* Layout */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 180px 0 120px;
+    text-align: center;
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-ghost {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    font-family: 'Inter', sans-serif;
+    font-size: 320px;
+    font-weight: 700;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--hairline-bright);
+    text-stroke: 1px var(--hairline-bright);
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+    user-select: none;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero-index {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .hero-index .bar {
+    display: inline-block;
+    width: 28px;
+    height: 1px;
+    background: var(--hairline-bright);
+  }
+  .hero-index .num { color: var(--text); }
+  .hero h1 .accent-word {
+    position: relative;
+    display: inline-block;
+  }
+  .hero h1 .accent-word::after {
+    content: "";
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 0.08em;
+    height: 0.18em;
+    background: linear-gradient(90deg, transparent 0%, rgba(120,119,198,0.45) 20%, rgba(120,119,198,0.45) 80%, transparent 100%);
+    z-index: -1;
+    border-radius: 2px;
+  }
+  @media (max-width: 768px) {
+    .hero-ghost { font-size: 180px; }
+  }
+  .avatar-wrap {
+    width: 240px;
+    height: 240px;
+    margin: 0 auto 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 0 0 6px var(--ring);
+    position: relative;
+    background: var(--surface);
+  }
+  .avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: var(--img-filter);
+  }
+  .avatar-caption {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--glass-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+  .hero h1 {
+    font-size: 72px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+  .hero .role {
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22C55E;
+    box-shadow: 0 0 8px rgba(34,197,94,0.6);
+  }
+
+  /* Sections */
+  section.block {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 48px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .section-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Project grid */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .project-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 52px; }
+  }
+
+  .card {
+    display: block;
+    position: relative;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text);
+    text-decoration: none;
+    overflow: hidden;
+    transition: border-color 200ms ease, transform 200ms ease, background-color 250ms ease;
+  }
+  .card:hover { border-color: var(--hairline-bright); }
+  .card:hover .arrow { transform: translate(4px, -4px); }
+  .card:hover .cover img { transform: scale(1.03); }
+
+  .cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    margin-bottom: 20px;
+    background: var(--surface);
+  }
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: var(--img-filter);
+    transition: transform 800ms cubic-bezier(.2,.7,.3,1);
+  }
+  .cover-caption {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--glass-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  .arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 28px;
+    height: 28px;
+    color: var(--muted);
+    transition: transform 200ms cubic-bezier(.2,.7,.3,1), color 200ms ease;
+    z-index: 3;
+  }
+  .card:hover .arrow { color: var(--text); }
+  .card .arrow.on-cover {
+    background: var(--glass-bg);
+    border-radius: 6px;
+    padding: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .card h3 {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+  .card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 32px;
+  }
+  .card-index {
+    position: absolute;
+    bottom: 16px;
+    left: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* Contact */
+  .contact-wrap { text-align: center; }
+  .contact-wrap h2 {
+    font-size: 48px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .contact-wrap p {
+    color: var(--muted);
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+  .email-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-decoration: none;
+    transition: border-color 200ms ease;
+  }
+  .email-pill:hover { border-color: var(--hairline-bright); }
+
+  /* Footer */
+  footer {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 500ms cubic-bezier(.2,.7,.3,1), transform 500ms cubic-bezier(.2,.7,.3,1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* Hero name mask reveal */
+  .mask-reveal {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 700ms cubic-bezier(.2,.7,.3,1);
+  }
+  .mask-reveal.in { clip-path: inset(0 0 0 0); }
+
+  /* Ken Burns on images */
+  .kb img {
+    transform: scale(1.06);
+    transition: transform 1500ms cubic-bezier(.2,.7,.3,1), filter 250ms ease;
+  }
+  .kb.in img { transform: scale(1.0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .mask-reveal, .kb img, .orb, .spotlight, .cover img { transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    .mask-reveal { clip-path: inset(0 0 0 0); }
+    .kb img { transform: scale(1.0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb" id="orb"></div>
+<div class="spotlight" id="spotlight"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<a class="back-gallery" href="../../index.html">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span id="themeLabel">↑ light · dark</span>
+</button>
+
+<main class="container">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-ghost" aria-hidden="true">HELLO</div>
+    <div class="hero-index reveal"><span class="num">01</span><span class="bar"></span><span>INTRO / HELLO</span></div>
+    <div class="avatar-wrap reveal kb">
+      <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait" />
+      <span class="avatar-caption">PORTRAIT_01</span>
+    </div>
+    <h1><span class="mask-reveal" id="heroName"><span class="accent-word">김태윤</span></span></h1>
+    <p class="role reveal">서비스기획자 / PM · 경영학+컴퓨터공학 복수전공 (3.9/4.5)</p>
+    <div class="reveal" style="display:inline-block;">
+      <span class="status-pill">
+        <span class="status-dot"></span>
+        Available for work
+      </span>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="block" id="projects">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-label">// 002</div>
+        <div class="section-title">Selected Work</div>
+      </div>
+      <div class="section-label mono">2023 — 2026</div>
+    </div>
+
+    <div class="project-grid">
+      <!-- Card 1: RoomSync -->
+      <a class="card reveal" href="detail.html" data-stagger="0">
+        <div class="cover kb">
+          <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 동아리방 예약" />
+          <span class="cover-caption">TEAM_OPS</span>
+        </div>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M7 17L17 7M17 7H8M17 7V16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-meta mono">PRODUCT · 2023.07 — 11</div>
+        <h3>RoomSync</h3>
+        <p>학내 50여 개 동아리 공용 회의실 예약 관리 웹서비스. 수기 예약·겹침 사고 문제를 MVP로 1개월 만에 30개 동아리에 확산, 노쇼 60% 감축.</p>
+        <span class="card-index mono">01</span>
+      </a>
+
+      <!-- Card 2: A사 -->
+      <a class="card reveal" href="detail.html" data-stagger="1">
+        <div class="cover kb">
+          <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 커머스 인턴 UT" />
+          <span class="cover-caption">INTERVIEW</span>
+        </div>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M7 17L17 7M17 7H8M17 7V16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-meta mono">PM INTERN · 2023.01 — 06</div>
+        <h3>A사 커머스 인턴</h3>
+        <p>MAU 50만 커머스 장바구니 전환율 개선. GA4·앰플리튜드 분석 + 5명 UT로 가설 도출, A/B 테스트 B안 +12%p 후 정규 배포.</p>
+        <span class="card-index mono">02</span>
+      </a>
+
+      <!-- Card 3: 동아리 -->
+      <a class="card reveal" href="detail.html" data-stagger="2">
+        <div class="cover kb">
+          <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리" />
+          <span class="cover-caption">CLUB_LEAD</span>
+        </div>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M7 17L17 7M17 7H8M17 7V16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="card-meta mono">LEAD · 2022.03 — 12</div>
+        <h3>IT 연합 동아리 회장</h3>
+        <p>100명 규모 IT 연합 동아리 회장. 크로스오버 해커톤·"서로의 언어" 월 1회 세미나로 데모데이 배포율 40% → 85%로 끌어올림.</p>
+        <span class="card-index mono">03</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="block">
+    <div class="contact-wrap">
+      <div class="section-label reveal mono" style="margin-bottom:24px;">// 003 · CONTACT</div>
+      <h2 class="reveal">Let's build something quiet, but lasting.</h2>
+      <p class="reveal">새로운 제품 기회와 서비스기획자 / PM 포지션 모두 환영합니다.</p>
+      <div class="reveal" style="display:inline-block;">
+        <a class="email-pill" href="mailto:taeyoon@example.com">
+          <span class="status-dot"></span>
+          taeyoon@example.com
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 KIM TAEYUN · BUILT WITH RESTRAINT</footer>
+</main>
+
+<script>
+(function(){
+  // Theme
+  var root = document.documentElement;
+  var stored = null;
+  try { stored = localStorage.getItem('tk-theme'); } catch(e) {}
+  if (stored === 'alt') root.setAttribute('data-theme', 'alt');
+
+  var btn = document.getElementById('themeToggle');
+  var label = document.getElementById('themeLabel');
+  function renderLabel() {
+    var alt = root.getAttribute('data-theme') === 'alt';
+    label.textContent = alt ? '↑ dark · light' : '↑ light · dark';
+  }
+  renderLabel();
+  btn.addEventListener('click', function(){
+    var alt = root.getAttribute('data-theme') === 'alt';
+    if (alt) { root.removeAttribute('data-theme'); try{localStorage.setItem('tk-theme','default');}catch(e){} }
+    else { root.setAttribute('data-theme','alt'); try{localStorage.setItem('tk-theme','alt');}catch(e){} }
+    renderLabel();
+  });
+
+  // Reduced motion
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Spotlight follow
+  var spotlight = document.getElementById('spotlight');
+  var orb = document.getElementById('orb');
+  var sx = window.innerWidth/2, sy = window.innerHeight/2;
+  window.addEventListener('mousemove', function(e){
+    sx = e.clientX; sy = e.clientY;
+    spotlight.style.opacity = '1';
+    spotlight.style.transform = 'translate(' + sx + 'px,' + sy + 'px)';
+    if (!rm && window.innerWidth > 768) {
+      var dx = (e.clientX - window.innerWidth/2) * 0.10;
+      var dy = (e.clientY - window.innerHeight/2) * 0.10;
+      orb.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    }
+  });
+  window.addEventListener('mouseleave', function(){ spotlight.style.opacity = '0'; });
+
+  // Progress bar
+  var bar = document.getElementById('progressBar');
+  function onScroll(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // IntersectionObserver reveal + stagger + Ken Burns
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting) {
+        var el = en.target;
+        var delay = 0;
+        if (el.hasAttribute('data-stagger')) {
+          delay = parseInt(el.getAttribute('data-stagger'),10) * 80;
+        }
+        setTimeout(function(){
+          el.classList.add('in');
+        }, rm ? 0 : delay);
+        io.unobserve(el);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .kb').forEach(function(el){ io.observe(el); });
+
+  // Hero name mask reveal trigger
+  setTimeout(function(){
+    document.getElementById('heroName').classList.add('in');
+  }, rm ? 0 : 250);
+
+})();
+</script>
+
+</body>
+</html>

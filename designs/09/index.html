@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TK / Portfolio — 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface-2: #1A1A1A;
+    --border: #2A2A2A;
+    --text: #E5E5E5;
+    --muted: #888;
+    --accent-a: #8B5CF6;
+    --accent-b: #06B6D4;
+    --gradient: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+    --spot-strength-a: 0.10;
+    --spot-strength-b: 0.04;
+    --mesh-a: rgba(139, 92, 246, 0.10);
+    --mesh-b: rgba(6, 182, 212, 0.08);
+    --mesh-c: rgba(139, 92, 246, 0.04);
+    --chip-bg: rgba(139, 92, 246, 0.10);
+    --chip-bd: rgba(139, 92, 246, 0.30);
+    --mx: 50%;
+    --my: 30%;
+    --overlay: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85));
+  }
+
+  [data-theme="alt"] {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F4F4F5;
+    --border: #D4D4D4;
+    --text: #0A0A0A;
+    --muted: #4A4A4A; /* 4.5:1+ contrast on white surfaces */
+    --spot-strength-a: 0.05;
+    --spot-strength-b: 0.02;
+    --mesh-a: rgba(139, 92, 246, 0.06);
+    --mesh-b: rgba(6, 182, 212, 0.05);
+    --mesh-c: rgba(139, 92, 246, 0.02);
+    --chip-bg: rgba(139, 92, 246, 0.08);
+    --chip-bd: rgba(139, 92, 246, 0.30);
+    --overlay: linear-gradient(to bottom, transparent 45%, rgba(10,10,10,0.55));
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    transition: background 250ms ease, color 250ms ease;
+  }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--gradient);
+    z-index: 100;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+  }
+
+  /* Cursor spotlight — kept BELOW toggle/search via z-index layering */
+  .spotlight {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1; /* low: progress(100) > toggle(90) > spotlight(1) < cursor(9999) */
+    background: radial-gradient(400px circle at var(--mx) var(--my),
+      rgba(139, 92, 246, var(--spot-strength-a)),
+      rgba(6, 182, 212, var(--spot-strength-b)) 40%,
+      transparent 70%);
+    mix-blend-mode: screen;
+    transition: background 80ms linear;
+  }
+
+  /* Background radial mesh */
+  .mesh {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(600px circle at 15% 10%, var(--mesh-a), transparent 60%),
+      radial-gradient(700px circle at 90% 80%, var(--mesh-b), transparent 60%),
+      radial-gradient(500px circle at 50% 50%, var(--mesh-c), transparent 70%);
+    transition: background 250ms ease;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Top bar — relative z-index ensures toggle/search sit above spotlight */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    transition: border-color 250ms ease;
+    position: relative;
+    z-index: 90;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .gallery-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: color 200ms ease, background 200ms ease;
+  }
+  .gallery-link:hover {
+    color: var(--text);
+    background: var(--surface);
+  }
+
+  .brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .brand span { color: var(--muted); }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 90;
+  }
+
+  .cmdk {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px; /* 44px+ touch target compliance */
+    min-height: 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 220px;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background 250ms ease;
+  }
+  .cmdk:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.15);
+  }
+  .cmdk .kbd {
+    margin-left: auto;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface-2);
+  }
+
+  .theme-toggle {
+    position: relative;
+    z-index: 90; /* above spotlight, below progress(100) */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 16px; /* 44px+ touch target */
+    min-height: 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: border-color 200ms ease, background 250ms ease, color 250ms ease, box-shadow 200ms ease;
+  }
+  .theme-toggle:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 14px rgba(139, 92, 246, 0.18);
+  }
+  .theme-toggle .glyph {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--gradient);
+    display: inline-block;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    padding: 120px 0 100px;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, var(--bg) 100%);
+    pointer-events: none;
+    transition: background 250ms ease;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  .hero-name-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+
+  .hero-name {
+    font-size: 80px;
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 900ms cubic-bezier(0.7, 0, 0.2, 1);
+  }
+  .hero-name.is-revealed {
+    clip-path: inset(0 0% 0 0);
+  }
+
+  .hero-tag {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 32px;
+    max-width: 640px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    transition: background 250ms ease, border-color 250ms ease;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22C55E;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Portrait card */
+  .portrait-card {
+    position: relative;
+    width: 320px;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--surface);
+    isolation: isolate;
+  }
+  .portrait-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: var(--gradient);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .portrait-card::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(closest-side, rgba(139,92,246,0.30), transparent 70%);
+    z-index: -1;
+    filter: blur(12px);
+  }
+  .img-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.08);
+    transition: transform 1500ms cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+  .img-wrap.is-in img {
+    transform: scale(1.0);
+  }
+  .img-wrap .ov {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+    transition: background 250ms ease;
+    z-index: 1;
+  }
+  .img-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.92);
+    background: rgba(0,0,0,0.55);
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.12);
+    letter-spacing: 0.04em;
+    z-index: 2;
+  }
+  .img-caption {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* Divider line */
+  .divider {
+    position: relative;
+    height: 1px;
+    background: rgba(139, 92, 246, 0.30);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+    margin: 64px 0;
+  }
+
+  /* Section */
+  section {
+    padding: 8px 0;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 24px;
+  }
+  .section-label::before {
+    content: '// ';
+    color: var(--accent-a);
+  }
+
+  .section-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  .prose p {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 18px;
+    max-width: 760px;
+  }
+  .prose p:last-child { margin-bottom: 0; }
+
+  /* Skills inline */
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .skill-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 5px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+
+  /* Projects */
+  .projects {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .project-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background 250ms ease;
+    overflow: hidden;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1px;
+    background: var(--gradient);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .project-card:hover {
+    transform: scale(1.015);
+    box-shadow: 0 0 28px rgba(139, 92, 246, 0.30);
+    border-color: transparent;
+  }
+  .project-card:hover::before { opacity: 1; }
+
+  /* Scan line sweep */
+  .scan-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #8B5CF6, #06B6D4, transparent);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.6);
+  }
+  .project-card.is-in .scan-line {
+    animation: scan 600ms cubic-bezier(0.4, 0, 0.6, 1) 200ms 1;
+  }
+  @keyframes scan {
+    0%   { opacity: 0; transform: translateY(0); }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(100%); }
+  }
+
+  .project-cover {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .project-body {
+    position: relative;
+    padding: 26px 32px 30px;
+  }
+
+  .project-tag {
+    position: absolute;
+    top: -34px;
+    right: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #fff;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 3px 8px;
+    border-radius: 6px;
+    z-index: 3;
+  }
+
+  .project-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .project-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.005em;
+  }
+
+  .project-summary {
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 18px;
+    max-width: 720px;
+  }
+
+  .project-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    display: inline-block;
+  }
+
+  .project-metrics {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .metric-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    padding: 4px 10px;
+    background: var(--chip-bg);
+    border: 1px solid var(--chip-bd);
+    border-radius: 999px;
+    transition: background 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+
+  /* Contact */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .contact-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    transition: background 250ms ease, border-color 250ms ease;
+  }
+  .contact-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+  }
+  .contact-card .value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    word-break: break-all;
+  }
+  .contact-card .value a {
+    color: var(--text);
+    text-decoration: none;
+    background-image: var(--gradient);
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 80px;
+    padding: 28px 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    transition: border-color 250ms ease;
+  }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 500ms ease, transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Mobile */
+  @media (max-width: 880px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .portrait-card { width: 100%; max-width: 320px; }
+  }
+
+  @media (max-width: 768px) {
+    .spotlight { display: none; }
+    .container { padding: 0 20px; }
+    .hero { padding: 80px 0 60px; }
+    .hero-name { font-size: 48px; }
+    .hero-tag { font-size: 16px; }
+    .cmdk { display: none; }
+    .section-title { font-size: 24px; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .project-body { padding: 22px 20px 26px; }
+    .project-tag { top: -32px; right: 12px; }
+    .project-card:hover {
+      transform: none;
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.20);
+    }
+    footer { flex-direction: column; gap: 12px; }
+    .topbar { flex-wrap: wrap; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .hero-name, .img-wrap img, .project-card.is-in .scan-line {
+      transition: none !important;
+      animation: none !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+    .hero-name { clip-path: inset(0 0 0 0); }
+    .img-wrap img { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="mesh"></div>
+<div class="spotlight" id="spotlight"></div>
+
+<div class="container">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a class="gallery-link" href="../../index.html">← 갤러리</a>
+      <div class="brand">TK <span>/</span> Portfolio</div>
+    </div>
+    <div class="topbar-right">
+      <div class="cmdk" aria-hidden="true">
+        <span>Quick search</span>
+        <span class="kbd">K</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+        <span class="glyph"></span>
+        <span id="themeLabel">DARK · 01</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-label reveal">~/ portfolio · v1.0</div>
+        <div class="hero-name-wrap reveal">
+          <h1 class="hero-name" id="heroName">김태윤</h1>
+        </div>
+        <p class="hero-tag reveal">서비스 기획자 · 데이터로 병목을 끊어내는 PM</p>
+        <div class="reveal">
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            <span>available · 2026 신입 PM 포지션 오픈</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="portrait-card">
+          <div class="img-wrap">
+            <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 — 도서관에서 노트북으로 작업 중" />
+            <div class="ov"></div>
+            <span class="img-tag">src · portrait.tk.jpg</span>
+          </div>
+        </div>
+        <div class="img-caption">$ meta · seoul · pm · v1.0</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Profile -->
+  <section>
+    <div class="section-label reveal">profile</div>
+    <h2 class="section-title reveal">프로필</h2>
+    <div class="prose">
+      <p class="reveal">비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+      <p class="reveal">학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+      <p class="reveal">이처럼 저는 데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자입니다.</p>
+    </div>
+
+    <div class="skills reveal">
+      <span class="skill-chip">Notion</span>
+      <span class="skill-chip">Figma</span>
+      <span class="skill-chip">GA4</span>
+      <span class="skill-chip">SQL</span>
+      <span class="skill-chip">Agile · Scrum</span>
+      <span class="skill-chip">경영학 + CS 복수전공</span>
+      <span class="skill-chip">GPA 3.9 / 4.5</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Projects -->
+  <section>
+    <div class="section-label reveal">projects</div>
+    <h2 class="section-title reveal">프로젝트</h2>
+
+    <div class="projects">
+
+      <a class="project-card reveal" href="detail.html">
+        <span class="scan-line"></span>
+        <div class="project-cover">
+          <div class="img-wrap">
+            <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 토론" />
+            <div class="ov"></div>
+            <span class="img-tag">src · roomsync.team.jpg · 2023</span>
+          </div>
+        </div>
+        <div class="project-body">
+          <span class="project-tag">v1.0 · 2023</span>
+          <div class="project-meta">2023.07 — 2023.11 · 서비스 기획 · 스크럼 마스터</div>
+          <h3 class="project-title">RoomSync — 동아리방 예약 관리 웹서비스</h3>
+          <p class="project-summary">50여 개 동아리가 공용 회의실을 수기 예약하다 겹침 사고가 빈번했던 문제를 회장단 설문으로 진단하고, MVP 전략으로 예약·취소·실시간 뷰만 추려 출시한 사례입니다.</p>
+          <div class="project-metrics">
+            <span class="metric-chip">30개 동아리</span>
+            <span class="metric-chip">노쇼 −60%</span>
+            <span class="metric-chip">1개월 출시</span>
+          </div>
+          <div style="margin-top:18px;">
+            <span class="project-link">View case →</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="project-card reveal" aria-label="A사 커머스 인턴 사례 — 케이스 문서 준비 중">
+        <span class="scan-line"></span>
+        <div class="project-cover">
+          <div class="img-wrap">
+            <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 — 시장 인터뷰 현장" />
+            <div class="ov"></div>
+            <span class="img-tag">src · acom.interview.jpg · 2023</span>
+          </div>
+        </div>
+        <div class="project-body">
+          <span class="project-tag">v1.0 · 2023</span>
+          <div class="project-meta">2023.01 — 2023.06 · 커머스 PM 인턴 · A사</div>
+          <h3 class="project-title">A사 커머스 — 장바구니 전환율 +12%p</h3>
+          <p class="project-summary">MAU 50만 커머스에서 GA4·앰플리튜드로 상세→장바구니 이탈 45%를 확인하고, 5명 사용성 테스트로 하단 구매 버튼 가림 페인포인트를 짚어 A/B 테스트(투명도·높이 + 무료배송 넛지)를 기획해 B안 +12%p로 정규 배포한 사례입니다.</p>
+          <div class="project-metrics">
+            <span class="metric-chip">전환율 +12%p</span>
+            <span class="metric-chip">B안 정규 배포</span>
+            <span class="metric-chip">UT · GA4</span>
+          </div>
+          <div style="margin-top:18px;">
+            <span class="project-link">case doc · 준비 중</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card reveal" aria-label="IT 연합 동아리 회장 사례 — 케이스 문서 준비 중">
+        <span class="scan-line"></span>
+        <div class="project-cover">
+          <div class="img-wrap">
+            <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리 — 강당 발표" />
+            <div class="ov"></div>
+            <span class="img-tag">src · club.lecture.jpg · 2022</span>
+          </div>
+        </div>
+        <div class="project-body">
+          <span class="project-tag">v1.0 · 2022</span>
+          <div class="project-meta">2022.03 — 2022.12 · IT 연합 창업 동아리 회장</div>
+          <h3 class="project-title">IT 연합 동아리 — 완성률 40 → 85%</h3>
+          <p class="project-summary">100명 규모 연합 동아리에서 직무 교류 부재로 완성률이 40%에 머물던 문제를 '크로스오버 해커톤'과 '서로의 언어' 세미나(월 1회)로 끌어올린 운영 사례입니다.</p>
+          <div class="project-metrics">
+            <span class="metric-chip">완성률 40 → 85%</span>
+            <span class="metric-chip">월 1회 세미나</span>
+            <span class="metric-chip">100명 운영</span>
+          </div>
+          <div style="margin-top:18px;">
+            <span class="project-link">case doc · 준비 중</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Contact -->
+  <section>
+    <div class="section-label reveal">contact</div>
+    <h2 class="section-title reveal">연락</h2>
+
+    <div class="contact-grid">
+      <div class="contact-card reveal">
+        <div class="label">$ email</div>
+        <div class="value"><a href="mailto:taeyoon@example.com">taeyoon@example.com</a></div>
+      </div>
+      <div class="contact-card reveal">
+        <div class="label">$ availability</div>
+        <div class="value">2026 신입 PM · full-time</div>
+      </div>
+      <div class="contact-card reveal">
+        <div class="label">$ stack</div>
+        <div class="value">Notion · Figma · GA4 · SQL</div>
+      </div>
+      <div class="contact-card reveal">
+        <div class="label">$ timezone</div>
+        <div class="value">KST (UTC+9) · Seoul</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 Taeyoon Kim · built with care</div>
+    <div>portfolio.v2.0 · linear-dark</div>
+  </footer>
+
+</div>
+
+<script>
+  // ---- Reduced motion ----
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Theme toggle ----
+  const KEY = 'tk-theme';
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const lbl = document.getElementById('themeLabel');
+
+  function applyTheme(t) {
+    if (t === 'alt') {
+      root.setAttribute('data-theme', 'alt');
+      lbl.textContent = 'LIGHT · 02';
+    } else {
+      root.removeAttribute('data-theme');
+      lbl.textContent = 'DARK · 01';
+    }
+  }
+  const saved = localStorage.getItem(KEY) || 'dark';
+  applyTheme(saved);
+  btn.addEventListener('click', () => {
+    const next = (root.getAttribute('data-theme') === 'alt') ? 'dark' : 'alt';
+    localStorage.setItem(KEY, next);
+    applyTheme(next);
+  });
+
+  // ---- Cursor spotlight ----
+  const spotlight = document.getElementById('spotlight');
+  const isTouch = window.matchMedia('(hover: none)').matches || window.innerWidth <= 768;
+  if (!isTouch) {
+    window.addEventListener('mousemove', (e) => {
+      spotlight.style.setProperty('--mx', e.clientX + 'px');
+      spotlight.style.setProperty('--my', e.clientY + 'px');
+    });
+  } else {
+    spotlight.style.display = 'none';
+  }
+
+  // ---- Progress bar ----
+  const progress = document.getElementById('progress');
+  function updateProgress() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    const p = max > 0 ? (h.scrollTop / max) * 100 : 0;
+    progress.style.width = p + '%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  // ---- IntersectionObserver reveals ----
+  const heroName = document.getElementById('heroName');
+  if (REDUCED) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-in'));
+    document.querySelectorAll('.img-wrap').forEach(el => el.classList.add('is-in'));
+    document.querySelectorAll('.project-card').forEach(el => el.classList.add('is-in'));
+    if (heroName) heroName.classList.add('is-revealed');
+  } else {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        // Stagger reveal children
+        const reveals = el.querySelectorAll(':scope .reveal');
+        if (reveals.length && el.matches('section, .hero')) {
+          reveals.forEach((r, i) => {
+            setTimeout(() => r.classList.add('is-in'), i * 80);
+          });
+        }
+        if (el.classList.contains('reveal')) el.classList.add('is-in');
+        if (el.classList.contains('project-card')) el.classList.add('is-in');
+        if (el.classList.contains('img-wrap')) el.classList.add('is-in');
+        io.unobserve(el);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+    document.querySelectorAll('section, .hero, .reveal, .project-card, .img-wrap').forEach((el) => io.observe(el));
+
+    // Hero name reveal on load
+    setTimeout(() => { if (heroName) heroName.classList.add('is-revealed'); }, 300);
+  }
+</script>
+
+</body>
+</html>

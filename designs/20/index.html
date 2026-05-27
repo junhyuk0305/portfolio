@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — 서비스 기획 / PM 포트폴리오 · 3D Object Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ECECEC;
+    --text: #111111;
+    --muted: #4a4a4a;   /* WCAG 4.5:1 on #ECECEC */
+    --card: #ffffff;
+    --line: rgba(17,17,17,0.08);
+    --accent: #1D4ED8;  /* deeper blue for 4.5:1 */
+    --shadow: 0 14px 40px rgba(17,17,17,0.10);
+    --shadow-hi: 0 28px 60px rgba(17,17,17,0.18);
+  }
+  [data-theme="dark"] {
+    --bg: #0F0F0F;
+    --text: #ECECEC;
+    --muted: #b6b6b6;   /* WCAG 4.5:1 on #0F0F0F */
+    --card: #161616;
+    --line: rgba(236,236,236,0.10);
+    --accent: #93C5FD;
+    --shadow: 0 14px 40px rgba(0,0,0,0.45);
+    --shadow-hi: 0 28px 60px rgba(0,0,0,0.65);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background 300ms ease, color 300ms ease;
+    overflow-x: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Progress bar */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 1px; width: 0%;
+    background: var(--accent); z-index: 9999;
+    transition: width 80ms linear;
+  }
+
+  /* Theme toggle — 24px visible semicircle, 44px hit area */
+  .theme-toggle {
+    position: fixed; top: 14px; right: 14px; z-index: 100;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: transparent;
+    cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle::before {
+    content: '';
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1.5px solid var(--text);
+    background: linear-gradient(90deg, var(--text) 50%, var(--bg) 50%);
+    box-shadow: 0 0 0 1px var(--bg);
+    transition: background 300ms ease, border-color 300ms ease, transform 200ms ease;
+  }
+  [data-theme="dark"] .theme-toggle::before {
+    background: linear-gradient(90deg, var(--bg) 50%, var(--text) 50%);
+  }
+  .theme-toggle:hover::before { transform: scale(1.1); }
+  .theme-toggle .tip {
+    position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); white-space: nowrap; letter-spacing: 0.1em;
+    opacity: 0; pointer-events: none; transition: opacity 200ms ease;
+  }
+  .theme-toggle:hover .tip { opacity: 1; }
+
+  /* Top utility nav */
+  .util {
+    position: fixed; top: 22px; left: 22px; z-index: 100;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.12em;
+    display: flex; gap: 14px; align-items: center;
+  }
+  .util a {
+    color: var(--text); text-decoration: none; border-bottom: 1px solid transparent;
+    padding: 10px 4px; min-height: 44px; display: inline-flex; align-items: center;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .util a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Stage / hero area */
+  .stage {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 100px 24px 60px;
+    position: relative;
+  }
+  .stage-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .canvas-wrap {
+    width: 320px; height: 320px; position: relative;
+    margin-bottom: 28px;
+  }
+  #obj-canvas { width: 100%; height: 100%; cursor: grab; display: block; }
+  #obj-canvas:active { cursor: grabbing; }
+  .interact-hint {
+    position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.16em; text-transform: uppercase;
+    white-space: nowrap; opacity: 0; animation: hintFade 1200ms ease forwards 700ms;
+  }
+  .interact-hint.gone { opacity: 0; transition: opacity 400ms ease; }
+  @keyframes hintFade { to { opacity: 1; } }
+
+  .hero-row {
+    display: flex; align-items: center; gap: 22px;
+    margin-top: 18px; flex-wrap: wrap; justify-content: center;
+  }
+  .avatar {
+    width: 100px; height: 100px; border-radius: 50%; overflow: hidden;
+    border: 2px solid var(--text);
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  h1.hero-name {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: clamp(44px, 8vw, 72px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    color: var(--text);
+  }
+  h1.hero-name .word {
+    display: inline-block; opacity: 0; transform: translateY(20px);
+    transition: opacity 600ms ease, transform 600ms cubic-bezier(.2,.7,.2,1);
+  }
+  h1.hero-name.reveal .word { opacity: 1; transform: translateY(0); }
+
+  .hero-sub {
+    margin-top: 18px; max-width: 620px; text-align: center;
+    color: var(--muted); font-size: 16px;
+  }
+  .hero-meta {
+    margin-top: 22px; display: flex; gap: 18px; flex-wrap: wrap; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase;
+  }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+  .hero-meta i {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    display: inline-block; font-style: normal;
+  }
+
+  /* Section heading */
+  .section {
+    max-width: 1180px; margin: 0 auto; padding: 80px 24px;
+  }
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 36px; gap: 12px; flex-wrap: wrap;
+  }
+  .sec-title {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .sec-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase;
+  }
+
+  /* Orbital cards */
+  .orbital {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+  }
+  .card {
+    width: 100%; max-width: 360px; min-height: 320px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 0; overflow: hidden;
+    position: relative;
+    transition: transform 320ms cubic-bezier(.2,.7,.2,1), box-shadow 320ms ease, border-color 200ms ease;
+    transform-style: preserve-3d;
+    will-change: transform;
+    margin: 0 auto;
+    opacity: 0; transform: translateY(24px);
+  }
+  .card.in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 500ms ease, transform 500ms cubic-bezier(.2,.7,.2,1), box-shadow 320ms ease;
+  }
+  .card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-hi);
+    border-color: var(--accent);
+  }
+  .card-img {
+    width: 100%; aspect-ratio: 16/9; overflow: hidden; background: #ddd;
+    position: relative;
+  }
+  .card-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transform: scale(1.06);
+    transition: transform 1300ms cubic-bezier(.2,.7,.2,1);
+  }
+  .card.in .card-img img { transform: scale(1.0); }
+  .card:hover .card-img img { transform: scale(1.03); }
+  .card-cap {
+    position: absolute; bottom: 8px; left: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #fff; background: rgba(0,0,0,0.55);
+    padding: 3px 8px; border-radius: 6px; letter-spacing: 0.1em;
+  }
+  .card-body { padding: 22px 22px 24px; }
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase;
+    margin-bottom: 8px; display: flex; justify-content: space-between;
+  }
+  .card-tag span:last-child { color: var(--accent); }
+  .card h3 {
+    font-size: 20px; font-weight: 700; letter-spacing: -0.01em;
+    margin-bottom: 8px; line-height: 1.25;
+  }
+  .card p {
+    font-size: 14px; color: var(--muted); line-height: 1.55;
+  }
+  .card .arrow {
+    margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.1em; color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: color 200ms ease, transform 200ms ease;
+  }
+  .card:hover .arrow { color: var(--accent); transform: translateX(4px); }
+  .card a { text-decoration: none; color: inherit; }
+
+  /* Profile card variant */
+  .card.profile { background: var(--card); }
+  .card.profile .card-body { padding: 28px; }
+  .pf-row { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+  .pf-row .ava {
+    width: 56px; height: 56px; border-radius: 50%; overflow: hidden;
+    border: 1.5px solid var(--text); flex-shrink: 0;
+  }
+  .pf-row .ava img { width: 100%; height: 100%; object-fit: cover; }
+  .pf-row h3 { margin: 0; }
+  .pf-list { list-style: none; padding: 0; margin-top: 8px; }
+  .pf-list li {
+    font-size: 13px; color: var(--text); padding: 6px 0;
+    border-top: 1px solid var(--line); display: flex; justify-content: space-between;
+  }
+  .pf-list li:first-child { border-top: none; }
+  .pf-list li span:first-child {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase;
+  }
+
+  /* Contact */
+  .contact {
+    text-align: center; padding: 70px 24px 100px;
+    border-top: 1px solid var(--line); margin-top: 40px;
+  }
+  .contact h2 {
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px;
+  }
+  .contact p { color: var(--muted); margin-bottom: 22px; }
+  .contact a {
+    display: inline-flex; align-items: center; min-height: 44px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    letter-spacing: 0.14em; color: var(--text);
+    border-bottom: 1.5px solid var(--text);
+    padding: 8px 6px;
+    text-decoration: none;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .contact a:hover { color: var(--accent); border-color: var(--accent); }
+  footer {
+    text-align: center; padding: 24px 16px 40px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.12em;
+  }
+
+  @media (max-width: 640px) {
+    .canvas-wrap { width: 260px; height: 260px; }
+    h1.hero-name { font-size: 44px; }
+    .avatar { width: 72px; height: 72px; }
+    .util { font-size: 10px; gap: 10px; left: 14px; top: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<nav class="util mono">
+  <a href="../../index.html">← 갤러리</a>
+  <span>TK · PM PORTFOLIO / 2026</span>
+</nav>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="tip mono">STAGE / NIGHT</span>
+</button>
+
+<!-- HERO STAGE -->
+<section class="stage">
+  <div class="stage-tag mono">// 3D OBJECT SHOWCASE · v2</div>
+
+  <div class="canvas-wrap">
+    <canvas id="obj-canvas"></canvas>
+    <div class="interact-hint mono" id="hint">Click to interact</div>
+  </div>
+
+  <div class="hero-row">
+    <div class="avatar">
+      <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait" />
+    </div>
+    <h1 class="hero-name" id="heroName">
+      <span class="word">김태윤</span>
+      <span class="word" style="transition-delay: 80ms;">.</span>
+      <span class="word" style="transition-delay: 160ms;">PM</span>
+    </h1>
+  </div>
+
+  <p class="hero-sub">학내·커머스·운영 경험에서 출발해, 작게 만들고 빠르게 검증하는 서비스 기획자/PM.</p>
+
+  <div class="hero-meta">
+    <span><i></i>경영학+컴퓨터공학 복수전공</span>
+    <span><i></i>학점 3.9 / 4.5</span>
+    <span><i></i>SERVICE PLANNER · PM</span>
+  </div>
+</section>
+
+<!-- ORBITAL CARDS -->
+<section class="section" id="work">
+  <div class="sec-head">
+    <div class="sec-title">Orbit · Profile &amp; Work</div>
+    <div class="sec-label mono">[ 04 NODES ]</div>
+  </div>
+  <div class="orbital">
+
+    <!-- PROFILE CARD -->
+    <article class="card profile reveal">
+      <div class="card-body">
+        <div class="card-tag mono"><span>// PROFILE</span><span>NODE_01</span></div>
+        <div class="pf-row">
+          <div class="ava"><img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="" /></div>
+          <h3>김태윤 — 서비스 기획자 / PM</h3>
+        </div>
+        <p style="font-size:13.5px; color: var(--muted); margin-bottom: 10px;">현장 관찰 · 가설 검증 · MVP 정의 · 데이터 기반 의사결정.</p>
+        <ul class="pf-list">
+          <li><span>FOCUS</span><span>0 → 1 · 운영 개선</span></li>
+          <li><span>STACK</span><span>Notion · Figma(기본) · GA4 · SQL · Agile</span></li>
+          <li><span>EDU</span><span>경영학 + 컴퓨터공학 (3.9/4.5)</span></li>
+          <li><span>EMAIL</span><span>taeyoon@example.com</span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- PROJECT 1 RoomSync -->
+    <article class="card reveal">
+      <a href="detail.html">
+        <div class="card-img">
+          <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 동아리방 예약 팀" />
+          <span class="card-cap mono">IMG_TEAM · 2023</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag mono"><span>// PROJECT</span><span>NODE_02</span></div>
+          <h3>RoomSync — 학내 동아리방 예약 관리 웹서비스</h3>
+          <p>학내 50여 동아리 공용 회의실 예약 겹침 해결. MVP 1개월 출시, 30개 동아리 가입, 노쇼율 60% 감소.</p>
+          <div class="arrow mono">VIEW CASE →</div>
+        </div>
+      </a>
+    </article>
+
+    <!-- PROJECT 2 A사 -->
+    <article class="card reveal">
+      <a href="detail.html">
+        <div class="card-img">
+          <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 커머스 UT" />
+          <span class="card-cap mono">IMG_INTERVIEW · 2023</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag mono"><span>// PROJECT</span><span>NODE_03</span></div>
+          <h3>A사 커머스 인턴 — 장바구니 전환율 A/B</h3>
+          <p>GA4·앰플리튜드로 이탈 45% 진단, UT 5명에서 구매 버튼 가림 발견. 투명도·높이 + 무료배송 넛지 B안 +12%p, 정규 배포.</p>
+          <div class="arrow mono">VIEW CASE →</div>
+        </div>
+      </a>
+    </article>
+
+    <!-- PROJECT 3 동아리 회장 -->
+    <article class="card reveal">
+      <a href="detail.html">
+        <div class="card-img">
+          <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리 세미나" />
+          <span class="card-cap mono">IMG_LECTURE · 2022</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag mono"><span>// PROJECT</span><span>NODE_04</span></div>
+          <h3>IT 연합 동아리 회장 — 100명 운영</h3>
+          <p>완성률 40% 진단 → 월 1회 세미나·러닝메이트 구조로 재설계. 완성률 40% → 85%.</p>
+          <div class="arrow mono">VIEW CASE →</div>
+        </div>
+      </a>
+    </article>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="sec-label mono" style="margin-bottom:14px;">// END OF ORBIT</div>
+  <h2>같이 만들고 싶은 제품이 있다면.</h2>
+  <p>한 줄이라도 좋아요. 이메일이 가장 빠릅니다.</p>
+  <a href="mailto:taeyoon@example.com">taeyoon@example.com →</a>
+</section>
+
+<footer class="mono">© 2026 김태윤 · DESIGN #20 / 3D OBJECT SHOWCASE · taeyoon@example.com</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- THEME TOGGLE ---------- */
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('tk-theme');
+  if (saved === 'dark') root.setAttribute('data-theme', 'dark');
+  toggle.addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('tk-theme', next);
+    updateObjectColor();
+  });
+
+  /* ---------- PROGRESS BAR ---------- */
+  const bar = document.getElementById('progress');
+  function onScroll(){
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- HERO NAME REVEAL ---------- */
+  const heroName = document.getElementById('heroName');
+  requestAnimationFrame(() => setTimeout(() => heroName.classList.add('reveal'), 200));
+
+  /* ---------- INTERSECTION OBSERVER FOR CARDS ---------- */
+  const cards = document.querySelectorAll('.card');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          const idx = Array.from(cards).indexOf(e.target);
+          setTimeout(() => e.target.classList.add('in'), idx * 100);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    cards.forEach(c => io.observe(c));
+  } else {
+    cards.forEach(c => c.classList.add('in'));
+  }
+
+  /* ---------- CARD 3D TILT — desktop only (pointer:fine) ---------- */
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!prefersReduced && canHover) {
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const cx = e.clientX - r.left, cy = e.clientY - r.top;
+        const px = (cx / r.width) - 0.5;
+        const py = (cy / r.height) - 0.5;
+        const ry = px * 16; // ±8deg
+        const rx = -py * 16;
+        card.style.transform = `translateY(-12px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  }
+
+  /* ---------- THREE.JS OBJECT ---------- */
+  const canvas = document.getElementById('obj-canvas');
+  const hint = document.getElementById('hint');
+  let mesh, wireMesh, scene, camera, renderer, isWire = false;
+  let targetTiltX = 0, targetTiltY = 0;
+  let curTiltX = 0, curTiltY = 0;
+  let mouseTargetX = 0, mouseTargetY = 0;
+
+  function getObjectColor(){
+    const dark = root.getAttribute('data-theme') === 'dark';
+    return dark ? 0x60A5FA : 0x111111;
+  }
+  function getWireColor(){
+    const dark = root.getAttribute('data-theme') === 'dark';
+    return dark ? 0x60A5FA : 0xffffff;
+  }
+  function updateObjectColor(){
+    if (!mesh) return;
+    mesh.material.color.setHex(getObjectColor());
+    wireMesh.material.color.setHex(getWireColor());
+  }
+
+  function initThree(){
+    if (typeof THREE === 'undefined') { fallbackCSS(); return; }
+    scene = new THREE.Scene();
+    const size = canvas.clientWidth;
+    camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.z = 4;
+
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(size, size, false);
+
+    const geo = new THREE.IcosahedronGeometry(1.35, 1);
+
+    // base mesh (subtle matcap-like flat material)
+    const mat = new THREE.MeshStandardMaterial({
+      color: getObjectColor(),
+      metalness: 0.25,
+      roughness: 0.45,
+      flatShading: true,
+    });
+    mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    // wireframe overlay (hidden by default, shown when toggled)
+    const wgeo = new THREE.IcosahedronGeometry(1.36, 1);
+    const wmat = new THREE.MeshBasicMaterial({
+      color: getWireColor(),
+      wireframe: true,
+      transparent: true,
+      opacity: 0.0
+    });
+    wireMesh = new THREE.Mesh(wgeo, wmat);
+    scene.add(wireMesh);
+
+    // lights
+    const amb = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(amb);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    dir.position.set(2, 3, 4);
+    scene.add(dir);
+    const dir2 = new THREE.DirectionalLight(0x3B82F6, 0.35);
+    dir2.position.set(-3, -2, 1);
+    scene.add(dir2);
+
+    window.addEventListener('resize', () => {
+      const s = canvas.clientWidth;
+      renderer.setSize(s, s, false);
+    });
+
+    // Mouse tilt (page-level → ±15deg)
+    window.addEventListener('mousemove', (e) => {
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      mouseTargetX = ny * (15 * Math.PI/180); // tilt around X based on Y
+      mouseTargetY = nx * (15 * Math.PI/180);
+    });
+
+    // Click to toggle wireframe
+    canvas.addEventListener('click', () => {
+      isWire = !isWire;
+      if (isWire) {
+        mesh.material.opacity = 0.0;
+        mesh.material.transparent = true;
+        wireMesh.material.opacity = 1.0;
+      } else {
+        mesh.material.opacity = 1.0;
+        mesh.material.transparent = false;
+        wireMesh.material.opacity = 0.0;
+      }
+      hint.classList.add('gone');
+    });
+
+    animate();
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if (!mesh) return;
+
+    if (!prefersReduced) {
+      mesh.rotation.y += 0.005;
+      mesh.rotation.x += 0.0018;
+    }
+    // scroll-linked rotation
+    const scrollRot = window.scrollY * 0.0005;
+    // damped mouse tilt
+    curTiltX += (mouseTargetX - curTiltX) * 0.06;
+    curTiltY += (mouseTargetY - curTiltY) * 0.06;
+
+    // Apply group-level tilt by piggybacking on rotation offsets
+    mesh.rotation.x = mesh.rotation.x + (curTiltX * 0.02);
+    // Set a base rotation on Y from scroll + autorotate
+    wireMesh.rotation.copy(mesh.rotation);
+
+    // composite Y rotation including scroll
+    mesh.position.y = 0;
+    mesh.rotation.y += 0; // autorotate already applied
+    // apply scroll-linked rotation as an additional offset via rotateOnAxis
+    mesh.rotation.y = (mesh.rotation.y) + 0;
+
+    // Simpler approach: add scrollRot directly each frame to base
+    mesh.rotation.y += scrollRot * 0.0005;
+
+    // apply mouse tilt cleanly via euler additions (small)
+    mesh.rotation.z = curTiltY * 0.1;
+    wireMesh.rotation.copy(mesh.rotation);
+
+    renderer.render(scene, camera);
+  }
+
+  function fallbackCSS(){
+    canvas.style.display = 'none';
+    const wrap = canvas.parentElement;
+    const fb = document.createElement('div');
+    fb.style.cssText = `
+      width: 220px; height: 220px; margin: 50px auto;
+      background: linear-gradient(135deg, #111, #333);
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      animation: spin 8s linear infinite;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    `;
+    const sty = document.createElement('style');
+    sty.textContent = '@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(sty);
+    wrap.appendChild(fb);
+  }
+
+  // wait for canvas size
+  window.addEventListener('load', initThree);
+})();
+</script>
+
+</body>
+</html>

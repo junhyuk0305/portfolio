@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>김태윤 · Sticky Note Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Architects+Daughter&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#FAFAF7;
+    --text:#1F2937;
+    --pen:#1A1A1A;
+    --arrow:#4B5563;
+    --grid:#E5E7EB;
+    --grid-major:#D1D5DB;
+    --yellow:#FFF59D;
+    --pink:#F8BBD0;
+    --mint:#C8E6C9;
+    --sky:#B3E5FC;
+    --tape-y:rgba(255,235,59,.6);
+    --tape-p:rgba(244,143,177,.55);
+    --shadow:rgba(31,41,55,.18);
+    --note-text:#1F2937;
+    --label:#374151;
+    --hand:'Patrick Hand','Architects Daughter',cursive;
+    --hand2:'Architects Daughter','Patrick Hand',cursive;
+    --ui:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  [data-theme="alt"]{
+    --bg:#1F2937;
+    --text:#F9FAFB;
+    --pen:#F9FAFB;
+    --arrow:#9CA3AF;
+    --grid:#374151;
+    --grid-major:#4B5563;
+    --yellow:#B5A52E;
+    --pink:#8B5A78;
+    --mint:#5A8A65;
+    --sky:#4A7AA5;
+    --tape-y:rgba(181,165,46,.5);
+    --tape-p:rgba(139,90,120,.5);
+    --shadow:rgba(0,0,0,.5);
+    --note-text:#F9FAFB;
+    --label:#D1D5DB;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--ui);overflow-x:hidden;transition:background .25s ease,color .25s ease}
+  body{
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(to right,var(--grid) 1px,transparent 1px),
+      linear-gradient(to bottom,var(--grid) 1px,transparent 1px),
+      linear-gradient(to right,var(--grid-major) 1px,transparent 1px),
+      linear-gradient(to bottom,var(--grid-major) 1px,transparent 1px);
+    background-size:24px 24px,24px 24px,120px 120px,120px 120px;
+    word-break:keep-all;
+    line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+
+  /* progress */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--pen);z-index:9999;transition:width .1s linear}
+
+  /* theme toggle sticky */
+  .theme-toggle{
+    position:fixed;top:14px;right:14px;z-index:1000;
+    width:78px;height:78px;
+    background:var(--yellow);
+    color:#1F2937;
+    border:none;cursor:pointer;
+    transform:rotate(3deg);
+    box-shadow:4px 4px 0 var(--shadow);
+    font-family:var(--hand);font-size:18px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    transition:transform .25s ease,background .25s ease;
+  }
+  [data-theme="alt"] .theme-toggle{background:#F9FAFB;color:#1F2937}
+  .theme-toggle:hover{transform:rotate(-2deg) scale(1.05)}
+
+  /* back sticky */
+  .back-sticky{
+    position:fixed;top:14px;left:14px;z-index:1000;
+    background:var(--sky);color:#1F2937;
+    padding:10px 16px;min-height:44px;display:inline-flex;align-items:center;
+    font-family:var(--hand);font-size:18px;
+    transform:rotate(-3deg);
+    box-shadow:3px 3px 0 var(--shadow);
+    transition:transform .2s ease;
+  }
+  .back-sticky:hover{transform:rotate(1deg) scale(1.04)}
+
+  /* layout */
+  .board{position:relative;max-width:1240px;margin:0 auto;padding:120px 48px 80px}
+  .board-title{
+    font-family:var(--hand);font-size:38px;color:var(--pen);
+    transform:rotate(-1deg);margin:0 0 8px;letter-spacing:.5px;
+  }
+  .board-sub{
+    font-family:var(--ui);font-size:13px;color:var(--label);
+    margin:0 0 28px;letter-spacing:.5px;text-transform:uppercase;
+  }
+
+  /* sticky base */
+  .sticky{
+    position:relative;
+    background:var(--yellow);
+    color:var(--note-text);
+    padding:18px 18px 20px;
+    font-family:var(--hand);font-size:18px;line-height:1.4;
+    box-shadow:5px 6px 0 var(--shadow);
+    transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease;
+    will-change:transform;
+  }
+  .sticky.yellow{background:var(--yellow)}
+  .sticky.pink{background:var(--pink)}
+  .sticky.mint{background:var(--mint)}
+  .sticky.sky{background:var(--sky)}
+  .sticky h3{margin:0 0 6px;font-family:var(--hand);font-size:22px;font-weight:400}
+  .sticky p{margin:0 0 6px}
+  .sticky:hover{animation:wobble .6s ease}
+  @keyframes wobble{
+    0%{transform:rotate(var(--rot,0deg))}
+    25%{transform:rotate(calc(var(--rot,0deg) - 2deg)) translateY(-2px)}
+    50%{transform:rotate(calc(var(--rot,0deg) + 2deg))}
+    75%{transform:rotate(calc(var(--rot,0deg) - 1deg))}
+    100%{transform:rotate(var(--rot,0deg))}
+  }
+
+  /* taped photo */
+  .photo-frame{position:relative;display:inline-block;background:#fff;padding:10px 10px 36px;box-shadow:5px 6px 0 var(--shadow);transition:transform .3s ease}
+  [data-theme="alt"] .photo-frame{background:#111827}
+  .photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
+  .photo-frame .cap{position:absolute;left:10px;right:10px;bottom:8px;font-family:var(--hand);font-size:14px;color:var(--note-text);text-align:center}
+  .tape{position:absolute;width:70px;height:22px;top:-12px;background:var(--tape-y);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .tape.left{left:-8px;transform:rotate(-18deg)}
+  .tape.right{right:-8px;transform:rotate(16deg);background:var(--tape-p)}
+  .photo-frame:hover{transform:scale(1.02) rotate(0deg)!important}
+
+  /* HERO */
+  .hero{
+    position:relative;display:grid;grid-template-columns:minmax(280px,360px) 1fr;
+    gap:48px;align-items:start;margin:8px 0 60px;min-height:380px;
+  }
+  .hero .portrait{width:300px;transform:rotate(-2deg)}
+  .hero .portrait .img{width:100%;aspect-ratio:3/4}
+  .hero-info{position:relative;padding-top:30px}
+  .hero-name{
+    background:var(--mint);
+    padding:22px 24px;display:inline-block;
+    font-family:var(--hand);
+    box-shadow:5px 6px 0 var(--shadow);
+    transform:rotate(2deg);--rot:2deg;
+    max-width:480px;
+  }
+  .hero-name h1{margin:0 0 6px;font-size:36px;font-weight:400;line-height:1.05}
+  .hero-name .role{font-size:19px;display:block;margin-top:4px}
+  .hero-name .tags{font-family:var(--ui);font-size:13px;color:#1F2937;margin-top:12px;letter-spacing:.3px}
+
+  .intro-sticky{
+    margin-top:34px;background:var(--yellow);padding:20px 22px;
+    box-shadow:5px 6px 0 var(--shadow);transform:rotate(-2deg);--rot:-2deg;
+    max-width:520px;font-size:19px;
+  }
+  .intro-sticky strong{font-family:var(--hand)}
+  .intro-sticky .meta{font-family:var(--ui);font-size:12px;color:var(--label);margin-top:10px;letter-spacing:.4px;text-transform:uppercase}
+
+  .stamp-pin{
+    position:absolute;width:18px;height:18px;border-radius:50%;
+    background:#E53935;box-shadow:inset -3px -3px 0 rgba(0,0,0,.2),2px 3px 4px rgba(0,0,0,.25);
+    top:-9px;left:50%;
+  }
+
+  /* KANBAN */
+  .kanban-wrap{margin-top:32px}
+  .kanban-title{font-family:var(--hand);font-size:30px;color:var(--pen);margin:0 0 6px;transform:rotate(-1deg)}
+  .kanban-sub{font-family:var(--ui);font-size:13px;color:var(--label);margin:0 0 24px;letter-spacing:1px;text-transform:uppercase}
+
+  .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;position:relative}
+  .col{
+    background:rgba(255,255,255,.55);
+    border:2px dashed var(--grid-major);
+    padding:16px 14px 24px;min-height:480px;
+    position:relative;
+  }
+  [data-theme="alt"] .col{background:rgba(255,255,255,.04)}
+  .col-head{
+    font-family:var(--hand);font-size:24px;color:var(--pen);
+    margin:0 0 16px;text-align:center;letter-spacing:1px;
+    border-bottom:2px solid var(--pen);padding-bottom:6px;
+  }
+  .col-head .ch{display:inline-block;opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .4s ease}
+  .col-head.in .ch{opacity:1;transform:translateY(0)}
+  .col .count{font-family:var(--ui);font-size:11px;color:var(--label);float:right;margin-top:6px}
+
+  .proj{
+    display:block;margin:0 6px 22px;text-decoration:none;color:var(--note-text);
+    padding:14px 14px 16px;box-shadow:4px 5px 0 var(--shadow);
+    position:relative;
+  }
+  .proj .ribbon{
+    position:absolute;top:-8px;right:10px;background:var(--pen);color:var(--bg);
+    font-family:var(--ui);font-size:10px;letter-spacing:1px;padding:3px 8px;
+    transform:rotate(4deg);
+  }
+  .proj h4{margin:0 0 4px;font-family:var(--hand);font-size:22px;font-weight:400}
+  .proj .when{font-family:var(--ui);font-size:11px;color:var(--label);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+  .proj p{margin:6px 0;font-size:17px}
+  .proj .thumb{margin:8px 0 6px}
+  .proj .thumb .photo-frame{width:100%;padding:6px 6px 26px}
+  .proj .thumb .photo-frame .cap{font-size:12px;bottom:6px}
+  .proj .thumb .img{width:100%;aspect-ratio:4/3}
+  .proj .cta{
+    font-family:var(--hand);font-size:16px;margin-top:10px;display:inline-block;
+    border-bottom:2px solid var(--pen);padding-bottom:1px;
+  }
+
+  /* contact */
+  .contact-row{
+    margin-top:70px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px;align-items:center;
+    position:relative;
+  }
+  .contact-note{
+    background:var(--pink);padding:24px 26px;
+    box-shadow:6px 7px 0 var(--shadow);transform:rotate(-1deg);--rot:-1deg;
+    font-size:20px;
+  }
+  .contact-note h3{font-family:var(--hand);font-size:30px;margin:0 0 10px;font-weight:400}
+  .contact-note a{font-family:var(--ui);font-size:15px;color:#1F2937;border-bottom:1px dashed #1F2937}
+  .download-cv{
+    position:relative;justify-self:center;
+    background:var(--sky);width:200px;height:200px;
+    box-shadow:6px 8px 0 var(--shadow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:var(--hand);font-size:24px;text-align:center;cursor:grab;
+    transform:rotate(4deg);--rot:4deg;
+    user-select:none;touch-action:none;
+    transition:box-shadow .2s ease;
+  }
+  .download-cv:active{cursor:grabbing}
+  .download-cv .handle{font-family:var(--ui);font-size:10px;letter-spacing:1px;color:#1F2937;margin-top:8px;opacity:.7}
+  .download-cv .pin{position:absolute;top:-10px;left:50%;width:20px;height:20px;border-radius:50%;background:#E53935;box-shadow:inset -3px -3px 0 rgba(0,0,0,.2),2px 3px 4px rgba(0,0,0,.25);transform:translateX(-50%)}
+  .download-cv.dragging{box-shadow:10px 14px 0 var(--shadow);z-index:50}
+
+  /* SVG arrows overlay */
+  .arrows-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:1}
+  .arrow-path{
+    fill:none;stroke:var(--arrow);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:1000;stroke-dashoffset:1000;
+    transition:stroke-dashoffset .7s ease;
+  }
+  .arrow-path.in{stroke-dashoffset:0}
+
+  /* reveal */
+  .reveal{opacity:0;transform:scale(.4) rotate(-15deg);transition:opacity .5s ease,transform .5s cubic-bezier(.34,1.56,.64,1)}
+  .reveal.in{opacity:1;transform:scale(1) rotate(var(--rot,0deg))}
+
+  /* footer */
+  .foot{margin-top:80px;text-align:center;font-family:var(--hand);font-size:18px;color:var(--label);transform:rotate(-1deg)}
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr;gap:24px}
+    .hero .portrait{width:260px}
+    .kanban{grid-template-columns:1fr;gap:32px}
+    .contact-row{grid-template-columns:1fr;gap:28px}
+    .arrows-svg{display:none}
+    .board{padding:130px 24px 60px}
+    .hero-name h1{font-size:30px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal,.reveal.in,.theme-toggle,.sticky{transition:none;animation:none!important;transform:rotate(var(--rot,0deg))!important;opacity:1!important}
+    .reveal{opacity:1;transform:rotate(var(--rot,0deg))}
+    .arrow-path{stroke-dashoffset:0!important;transition:none}
+    .col-head .ch{opacity:1;transform:none;transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<a class="back-sticky" href="../../index.html" aria-label="갤러리로 돌아가기">← GALLERY</a>
+<button class="theme-toggle" id="themeToggle" aria-label="라이트/다크 토글">Day /<br/>Night</button>
+
+<main class="board">
+
+  <h2 class="board-title">My Workspace</h2>
+  <p class="board-sub">서비스기획자 · PM Portfolio · 2026</p>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <svg class="arrows-svg" id="arrowsHero" viewBox="0 0 1280 420" preserveAspectRatio="none" aria-hidden="true">
+      <path class="arrow-path" d="M340,180 C420,140 460,180 500,160" />
+      <path class="arrow-path" d="M510,160 L498,150 M510,160 L498,168" />
+    </svg>
+
+    <div class="portrait reveal" style="--rot:-2deg">
+      <div class="photo-frame" style="transform:rotate(-2deg)">
+        <span class="tape left"></span>
+        <span class="tape right"></span>
+        <div class="img" style="background:#ddd">
+          <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 포트레이트" style="width:100%;height:100%;object-fit:cover" />
+        </div>
+        <div class="cap">📌 김태윤 · 작업실 · 2024</div>
+      </div>
+    </div>
+
+    <div class="hero-info">
+      <div class="hero-name reveal" style="--rot:2deg">
+        <span class="stamp-pin"></span>
+        <h1>김태윤</h1>
+        <span class="role">서비스기획자 / PM</span>
+        <div class="tags">경영학 + 컴퓨터공학 복수전공 · GPA 3.9 / 4.5</div>
+      </div>
+
+      <div class="intro-sticky sticky yellow reveal" style="--rot:-2deg">
+        <strong>"사용자의 불편을 데이터와 흐름으로 풀어내는 PM."</strong>
+        <p>학내 동아리 서비스, 커머스 A/B 테스트, 100명 규모 동아리 운영을 거치며 <em>리서치 → 가설 → 실험 → 지표</em>의 한 사이클을 직접 돌렸습니다.</p>
+        <div class="meta">Notion · Figma(기본) · GA4 · SQL · Agile</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KANBAN -->
+  <section class="kanban-wrap" id="kanbanSection">
+    <h2 class="kanban-title">Projects Board</h2>
+    <p class="kanban-sub">INBOX → DOING → SHIPPED</p>
+
+    <div class="kanban" id="kanban">
+
+      <svg class="arrows-svg" id="arrowsKanban" viewBox="0 0 1280 520" preserveAspectRatio="none" aria-hidden="true">
+        <path class="arrow-path" d="M390,120 C440,90 470,110 500,120" />
+        <path class="arrow-path" d="M500,120 L488,112 M500,120 L488,128" />
+        <path class="arrow-path" d="M820,120 C860,100 890,120 920,120" />
+        <path class="arrow-path" d="M920,120 L908,112 M920,120 L908,128" />
+      </svg>
+
+      <!-- INBOX -->
+      <div class="col">
+        <h3 class="col-head" data-split>INBOX <span class="count">1</span></h3>
+
+        <a class="proj sticky mint reveal" href="detail.html" style="--rot:-2deg;transform:rotate(-2deg)">
+          <span class="ribbon">CASE 01</span>
+          <h4>RoomSync</h4>
+          <div class="when">2023.07 – 2023.11 · 학내 프로젝트</div>
+          <div class="thumb">
+            <div class="photo-frame" style="transform:rotate(1deg)">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img" style="background:#ccc">
+                <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 회의" style="width:100%;height:100%;object-fit:cover" />
+              </div>
+              <div class="cap">📌 RoomSync 팀 · 2023</div>
+            </div>
+          </div>
+          <p>학내 동아리방 예약 관리 웹서비스. 50여 동아리의 수기 예약·겹침 문제를 해결.</p>
+          <p>회장단 구글폼 설문에서 발견한 <strong>"실시간 현황"</strong> 니즈 기반 MVP.</p>
+          <span class="cta">📎 케이스 열기 →</span>
+        </a>
+      </div>
+
+      <!-- DOING -->
+      <div class="col">
+        <h3 class="col-head" data-split>DOING <span class="count">1</span></h3>
+
+        <a class="proj sticky pink reveal" href="detail.html#a사" style="--rot:2deg;transform:rotate(2deg)">
+          <span class="ribbon">INTERN</span>
+          <h4>A사 커머스 인턴</h4>
+          <div class="when">2023.01 – 2023.06 · MAU 50만</div>
+          <div class="thumb">
+            <div class="photo-frame" style="transform:rotate(-1deg)">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img" style="background:#ccc">
+                <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 사용성 테스트" style="width:100%;height:100%;object-fit:cover" />
+              </div>
+              <div class="cap">📌 A사 UT · 2023</div>
+            </div>
+          </div>
+          <p>GA4로 결제 단계 <strong>이탈 45%</strong> 발견 → 5명 사용성 테스트.</p>
+          <p>투명도 · 높이 + 무료배송 넛지 A/B → <strong>B안 +12%p</strong>, 정규 배포.</p>
+          <span class="cta">📎 자세히 →</span>
+        </a>
+      </div>
+
+      <!-- SHIPPED -->
+      <div class="col">
+        <h3 class="col-head" data-split>SHIPPED <span class="count">1</span></h3>
+
+        <a class="proj sticky sky reveal" href="detail.html#동아리" style="--rot:-2deg;transform:rotate(-2deg)">
+          <span class="ribbon">LEAD</span>
+          <h4>IT 연합 동아리 회장</h4>
+          <div class="when">2022.03 – 2022.12 · 100명</div>
+          <div class="thumb">
+            <div class="photo-frame" style="transform:rotate(2deg)">
+              <span class="tape left"></span>
+              <span class="tape right"></span>
+              <div class="img" style="background:#ccc">
+                <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="동아리 세미나" style="width:100%;height:100%;object-fit:cover" />
+              </div>
+              <div class="cap">📌 월간 세미나 · 2022</div>
+            </div>
+          </div>
+          <p>100명 동아리, 프로젝트 <strong>완성률 40%</strong>의 운영 문제.</p>
+          <p>월 1회 세미나 정례화 + 페어 매칭 → <strong>완성률 40% → 85%</strong>.</p>
+          <span class="cta">📎 회고 →</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-row">
+    <svg class="arrows-svg" viewBox="0 0 1280 220" preserveAspectRatio="none" aria-hidden="true">
+      <path class="arrow-path" d="M520,110 C600,80 680,130 760,100" />
+      <path class="arrow-path" d="M760,100 L748,98 M760,100 L750,110" />
+    </svg>
+
+    <div class="contact-note sticky pink reveal" style="--rot:-1deg">
+      <h3>Let's talk ☎</h3>
+      <p>새로운 팀, 새로운 가설, 새로운 보드.<br/>같이 채워나갈 분을 찾고 있어요.</p>
+      <p><a href="mailto:taeyoon@example.com">taeyoon@example.com</a></p>
+    </div>
+
+    <button class="download-cv reveal" id="dragCV" type="button" aria-label="이력서 다운로드 스티커 (드래그 가능)">
+      <span class="pin" aria-hidden="true"></span>
+      DOWNLOAD<br/>CV
+      <span class="handle">DRAG ME ↘</span>
+    </button>
+  </section>
+
+  <div class="foot reveal" style="--rot:-1deg">— 작업 중인 보드 · 자유롭게 끌어다 보세요 —</div>
+
+</main>
+
+<script>
+(function(){
+  // theme
+  var root=document.documentElement;
+  var stored=null;try{stored=localStorage.getItem('tk-theme')}catch(e){}
+  if(stored==='alt')root.setAttribute('data-theme','alt');
+  var tg=document.getElementById('themeToggle');
+  tg.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme')==='alt'?null:'alt';
+    if(cur)root.setAttribute('data-theme','alt');else root.removeAttribute('data-theme');
+    try{localStorage.setItem('tk-theme',cur||'light')}catch(e){}
+  });
+
+  // progress
+  var pb=document.getElementById('progress');
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?Math.min(1,window.scrollY/h):0;
+    pb.style.width=(p*100)+'%';
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  // split column headers
+  document.querySelectorAll('[data-split]').forEach(function(el){
+    var raw=el.innerHTML;
+    var idx=raw.indexOf('<span');
+    var text=idx>-1?raw.slice(0,idx):raw;
+    var rest=idx>-1?raw.slice(idx):'';
+    var html='';
+    for(var i=0;i<text.length;i++){
+      var c=text.charAt(i);
+      html+=c===' '?'<span class="ch">&nbsp;</span>':'<span class="ch">'+c+'</span>';
+    }
+    el.innerHTML=html+rest;
+  });
+
+  // IntersectionObserver reveals
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){
+    document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('in')});
+    document.querySelectorAll('.arrow-path').forEach(function(e){e.classList.add('in')});
+    document.querySelectorAll('.col-head').forEach(function(e){e.classList.add('in')});
+  }else{
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          en.target.classList.add('in');
+          // chars stagger
+          if(en.target.matches('.col-head')){
+            var chs=en.target.querySelectorAll('.ch');
+            chs.forEach(function(c,i){c.style.transitionDelay=(i*60)+'ms'});
+          }
+          // arrows stagger
+          if(en.target.tagName==='svg'||en.target.classList.contains('arrows-svg')){
+            var paths=en.target.querySelectorAll('.arrow-path');
+            paths.forEach(function(p,i){setTimeout(function(){p.classList.add('in')},i*120)});
+          }
+          io.unobserve(en.target);
+        }
+      });
+    },{threshold:.18});
+    document.querySelectorAll('.reveal,.col-head,.arrows-svg').forEach(function(e){io.observe(e)});
+  }
+
+  // drag the CV sticker
+  var cv=document.getElementById('dragCV');
+  if(cv){
+    var dx=0,dy=0,sx=0,sy=0,drag=false,offX=0,offY=0;
+    function onDown(e){
+      drag=true;cv.classList.add('dragging');
+      var p=e.touches?e.touches[0]:e;
+      sx=p.clientX;sy=p.clientY;
+      var t=getComputedStyle(cv).transform;
+      // keep existing offset
+      offX=dx;offY=dy;
+      e.preventDefault();
+    }
+    function onMove(e){
+      if(!drag)return;
+      var p=e.touches?e.touches[0]:e;
+      dx=offX+(p.clientX-sx);
+      dy=offY+(p.clientY-sy);
+      cv.style.transform='translate('+dx+'px,'+dy+'px) rotate(4deg)';
+    }
+    function onUp(){drag=false;cv.classList.remove('dragging')}
+    cv.addEventListener('mousedown',onDown);
+    cv.addEventListener('touchstart',onDown,{passive:false});
+    window.addEventListener('mousemove',onMove);
+    window.addEventListener('touchmove',onMove,{passive:false});
+    window.addEventListener('mouseup',onUp);
+    window.addEventListener('touchend',onUp);
+    cv.addEventListener('click',function(e){if(Math.abs(dx)+Math.abs(dy)<6){/* tap, no action */}});
+  }
+})();
+</script>
+</body>
+</html>

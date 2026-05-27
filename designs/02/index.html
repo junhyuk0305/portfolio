@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Essays on Product</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --text: #111111;
+    --muted: #6B6B6B;
+    --rule: #DDDDDD;
+    --serif: 'Source Serif 4', 'Tiempos', 'Noto Serif KR', serif;
+    --sans: 'Inter', 'Pretendard', sans-serif;
+  }
+  [data-theme="alt"] {
+    --bg: #111111;
+    --text: #F5F5F5;
+    --muted: #888888;
+    --rule: #333333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.7;
+    font-weight: 300;
+    transition: background 250ms ease, color 250ms ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  body {
+    padding: 110px 32px 120px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  ::selection { background: var(--text); color: var(--bg); }
+
+  /* Progress bar */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--text);
+    z-index: 100;
+    transition: width 80ms linear, background 250ms ease;
+  }
+
+  /* Back to gallery */
+  .backlink {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .backlink:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  /* Theme toggle */
+  .toggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 250ms ease, border-color 250ms ease;
+    cursor: pointer;
+    background: transparent;
+    letter-spacing: 0.01em;
+  }
+  .toggle:hover { color: var(--text); }
+  .toggle .sep { color: var(--rule); margin: 0 6px; font-style: normal; }
+  .toggle .active { color: var(--text); }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 64px;
+    line-height: 1.1;
+    color: var(--muted);
+    letter-spacing: -0.01em;
+    margin-bottom: 28px;
+    overflow: hidden;
+    -webkit-clip-path: inset(0 0 0 100%);
+            clip-path: inset(0 0 0 100%);
+  }
+  .hero h1 .char {
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 600ms ease-out;
+    white-space: pre;
+  }
+  .hero .mask-reveal {
+    -webkit-clip-path: inset(0 0 0 0);
+            clip-path: inset(0 0 0 0);
+    transition: clip-path 1000ms cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  .hero .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 540px;
+    margin: 0 auto;
+    font-weight: 400;
+  }
+
+  /* Figure */
+  figure {
+    margin: 56px auto;
+    text-align: center;
+  }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: scale(1.04);
+    transition: transform 1400ms ease-out;
+  }
+  figure.in img { transform: scale(1.0); }
+  figure.portrait img {
+    width: 340px;
+    height: 440px;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+  figure.portrait-small img {
+    width: 240px;
+    height: 300px;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+  figure.wide img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  figcaption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 14px;
+    letter-spacing: 0.01em;
+  }
+
+  /* Section break */
+  .break {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 72px 0;
+    color: var(--muted);
+  }
+  .break .rule {
+    flex: 0 1 120px;
+    height: 1px;
+    background: var(--rule);
+    transition: background 250ms ease;
+  }
+  .break .star {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  /* Essay paragraphs */
+  p.essay {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--text);
+    margin-bottom: 24px;
+    font-weight: 300;
+  }
+  p.essay + p.essay { margin-top: 0; }
+
+  /* Project entries */
+  .project {
+    margin-bottom: 8px;
+  }
+  .project p {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--text);
+    font-weight: 300;
+  }
+  .project .lead {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-style: normal;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms ease;
+  }
+  .project .lead:hover { border-bottom-color: var(--text); }
+  .project .meta {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* Pull quote */
+  blockquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 32px;
+    line-height: 1.4;
+    color: var(--text);
+    padding-left: 28px;
+    position: relative;
+    margin: 72px 0;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  blockquote::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0;
+    width: 1px;
+    height: 0%;
+    background: var(--text);
+    transition: height 400ms ease-out, background 250ms ease;
+  }
+  blockquote.in::before { height: 100%; }
+  blockquote .qtext {
+    opacity: 0;
+    transition: opacity 500ms ease-out 400ms;
+  }
+  blockquote.in .qtext { opacity: 1; }
+
+  /* Contact */
+  .contact {
+    text-align: center;
+    margin-top: 96px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--muted);
+    font-size: 18px;
+  }
+  .contact a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .contact a:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  /* Fade in */
+  .fade {
+    opacity: 1;
+    transition: opacity 700ms ease-out;
+    transform: translateY(0);
+  }
+  .fade-ready {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .fade.in { opacity: 1; transform: translateY(0); }
+
+  /* Section spacing */
+  section { margin-bottom: 8px; }
+
+  @media (max-width: 640px) {
+    html, body { font-size: 16px; }
+    body { padding: 90px 22px 80px; }
+    .hero h1 { font-size: 40px; }
+    .hero .lede { font-size: 16px; }
+    p.essay, .project p { font-size: 16px; }
+    blockquote { font-size: 22px; padding-left: 20px; }
+    figure.portrait img { width: 100%; max-width: 260px; height: auto; aspect-ratio: 13/17; }
+    figure.portrait-small img { width: 100%; max-width: 220px; height: auto; aspect-ratio: 4/5; }
+    .toggle, .backlink { top: 14px; font-size: 13px; padding: 10px 12px; }
+    .toggle { right: 14px; }
+    .backlink { left: 14px; }
+    .contact { font-size: 16px; }
+  }
+  @media (max-width: 380px) {
+    body { padding: 110px 16px 72px; }
+    .hero h1 { font-size: 34px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+    .fade { opacity: 1; }
+    .hero h1 { -webkit-clip-path: none; clip-path: none; }
+    .hero h1 .char { opacity: 1; }
+    blockquote::before { height: 100%; }
+    blockquote .qtext { opacity: 1; }
+    figure img { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<a class="backlink" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<a class="toggle" id="themeToggle" role="button" aria-label="Toggle theme" tabindex="0">
+  <span id="lightLabel" class="active">morning</span><span class="sep">·</span><span id="darkLabel">evening</span>
+</a>
+
+<header class="hero">
+  <h1 id="heroName" aria-label="김태윤">김태윤</h1>
+  <p class="lede fade">비즈니스의 목적과 개발의 언어를 동시에 듣는, 서비스 기획자.</p>
+</header>
+
+<figure class="portrait fade">
+  <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 초상" />
+  <figcaption>— 김태윤, 2023</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section>
+  <p class="essay fade">저는 비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+  <p class="essay fade">학내 동아리방 예약 서비스 <em>RoomSync</em> 기획 당시, 회장단 구글폼 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤, 백엔드 2명·시간 부족이라는 제약 안에서 예약·취소·실시간 뷰만 남기고 알림은 2차로 미루는 MVP 결정을 내렸습니다. 그 결과 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다.</p>
+  <p class="essay fade">또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다. 이처럼 저는 데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자입니다.</p>
+</section>
+
+<blockquote class="fade">
+  <span class="qtext">데이터로 가설을 세우고, 현장의 목소리로 그것을 천천히 무너뜨린다.</span>
+</blockquote>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section class="project fade">
+  <p>
+    <a class="lead" href="detail.html">RoomSync.</a>
+    <span class="meta"> 서비스 기획 리드, 2023.07–2023.11.</span>
+    학내 50여 동아리가 종이 장부와 단톡으로 공용 회의실을 잡다 겹침이 잦았던 예약 흐름을, 한 화면의 실시간 뷰로 묶어낸 학내 프로덕트. 회장단 구글폼 설문에서 확인된 '실시간 현황 확인' 니즈만 남겨 예약·취소·실시간 뷰의 MVP로 좁혔고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었다.
+  </p>
+</section>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 작업 풍경" />
+  <figcaption>— RoomSync 스크럼, 2023</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section class="project fade">
+  <p>
+    <span class="lead">A사 커머스 인턴십.</span>
+    <span class="meta"> 프로덕트 인턴, 2023.01–2023.06.</span>
+    MAU 50만 커머스의 상세→장바구니 45% 이탈 구간을 GA4·앰플리튜드로 해부하고, 5명 사용성 테스트로 '하단 구매 버튼이 가려지는' 원인을 좁혔다. 투명도·높이 조정과 무료배송 넛지를 묶은 B안 A/B 테스트가 장바구니 전환율을 12%p 끌어올렸고, 그대로 정규 배포에 올랐다.
+  </p>
+</section>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="사용자 인터뷰 장면" />
+  <figcaption>— 사용성 인터뷰, A사, 2023</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section class="project fade">
+  <p>
+    <span class="lead">IT 연합 동아리 회장.</span>
+    <span class="meta"> 운영 리드, 2022.03–2022.12.</span>
+    100명 규모 연합 동아리의 프로젝트 완성률 40%를 끌어올리기 위해, 월 1회 크로스오버 해커톤과 '서로의 언어' 세미나를 운영했다. 그 결과 데모데이 배포율이 40%에서 85%로 올랐고, 코드보다 먼저 사람을 정렬하는 일이 더 큰 변수임을 배웠다.
+  </p>
+</section>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="동아리 강연 장면" />
+  <figcaption>— 연합 동아리 데모데이, 2022</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<p class="contact fade">
+  <em>경영학 · 컴퓨터공학 복수전공 · GPA 3.9/4.5</em><br/>
+  Notion · Figma · GA4 · SQL · Agile<br/><br/>
+  <a href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+</p>
+
+<script>
+(function(){
+  // Theme
+  var root = document.documentElement;
+  var toggle = document.getElementById('themeToggle');
+  var lightLabel = document.getElementById('lightLabel');
+  var darkLabel = document.getElementById('darkLabel');
+  function applyTheme(t){
+    if (t === 'alt') {
+      root.setAttribute('data-theme','alt');
+      lightLabel.classList.remove('active');
+      darkLabel.classList.add('active');
+    } else {
+      root.removeAttribute('data-theme');
+      darkLabel.classList.remove('active');
+      lightLabel.classList.add('active');
+    }
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('tk-theme'); } catch(e){}
+  applyTheme(saved === 'alt' ? 'alt' : 'light');
+  toggle.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'alt' ? 'light' : 'alt';
+    applyTheme(next);
+    try { localStorage.setItem('tk-theme', next); } catch(e){}
+  });
+
+  // Progress bar
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    var pct = max > 0 ? (scrolled/max)*100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Reduced motion
+  var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hero split + mask
+  var hero = document.getElementById('heroName');
+  var text = hero.textContent;
+  hero.textContent = '';
+  var chars = [];
+  for (var i = 0; i < text.length; i++) {
+    var s = document.createElement('span');
+    s.className = 'char';
+    s.textContent = text[i];
+    hero.appendChild(s);
+    chars.push(s);
+  }
+  setTimeout(function(){
+    hero.classList.add('mask-reveal');
+    chars.forEach(function(c, i){
+      setTimeout(function(){ c.style.opacity = '1'; }, i * 60);
+    });
+  }, 200);
+
+  // Mark only below-fold fades as fade-ready so above-fold content stays visible
+  document.querySelectorAll('.fade').forEach(function(el){ var r = el.getBoundingClientRect(); if (r.top > window.innerHeight * 0.85) el.classList.add('fade-ready'); });
+
+  // Intersection observer for fades
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade, figure, blockquote').forEach(function(el){
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.fade, figure, blockquote').forEach(function(el){
+      el.classList.add('in');
+    });
+  }
+
+  // Safety: ensure hero reveals even if earlier code failed
+  setTimeout(function(){ if(hero) hero.classList.add('mask-reveal'); chars.forEach(function(c){ c.style.opacity='1'; }); }, 2000);
+})();
+</script>
+</body>
+</html>

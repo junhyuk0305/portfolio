@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 디자인 갤러리 (25종)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --bg-elev: #FFFFFF;
+    --bg-soft: #F1F1ED;
+    --ink: #111111;
+    --ink-soft: #444;
+    --muted: #888;
+    --line: #E5E5E0;
+    --line-soft: #EFEFEA;
+    --accent: #2563EB;
+    --accent-soft: rgba(37,99,235,0.08);
+  }
+  [data-theme="alt"] {
+    --bg: #0B0B0B;
+    --bg-elev: #141414;
+    --bg-soft: #1A1A1A;
+    --ink: #F5F5F5;
+    --ink-soft: #BDBDBD;
+    --muted: #888;
+    --line: #232323;
+    --line-soft: #1c1c1c;
+    --accent: #06B6D4;
+    --accent-soft: rgba(6,182,212,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; transition: background 250ms ease, color 250ms ease; }
+  body { min-height: 100vh; padding: 64px 32px 96px; }
+
+  /* progress bar */
+  .progress { position: fixed; top: 0; left: 0; height: 2px; background: var(--accent); width: 0%; z-index: 100; transition: width 80ms linear; }
+
+  /* theme toggle */
+  .theme-toggle { position: fixed; top: 24px; right: 32px; z-index: 90; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--ink); cursor: pointer; transition: all 200ms ease; }
+  .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .theme-toggle .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink); transition: background 250ms ease; }
+  [data-theme="alt"] .theme-toggle .dot { background: var(--accent); }
+
+  .wrap { max-width: 1280px; margin: 0 auto; }
+
+  /* header */
+  header.top { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 32px; border-bottom: 1px solid var(--line); margin-bottom: 48px; flex-wrap: wrap; gap: 16px; }
+  header.top .brand { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  header.top .meta { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.1em; }
+
+  /* hero */
+  .hero { padding: 32px 0 80px; display: block; }
+  .hero-text { max-width: 900px; }
+  .hero-text .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 28px; display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; }
+  .hero-text h1 { font-size: clamp(28px, 6.4vw, 80px); font-weight: 500; line-height: 1.1; letter-spacing: -0.035em; margin-bottom: 32px; font-family: 'Inter', sans-serif; word-break: keep-all; }
+  .hero-text h1 .hl { position: relative; display: inline-block; padding-bottom: 0.08em; white-space: nowrap; }
+  .hero-text h1 .hl::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0.02em; height: 0.12em; background: var(--accent); border-radius: 2px; opacity: 0.9; }
+  .hero-text p { font-size: 18px; color: var(--ink-soft); max-width: 640px; line-height: 1.65; }
+  .hero-text .legend { margin-top: 28px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); display: flex; gap: 20px; flex-wrap: wrap; letter-spacing: 0.08em; }
+  .hero-text .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .hero-text .legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .hero-text .legend .on i { background: var(--accent); }
+  .hero-text .legend .off i { background: var(--line); border: 1px solid var(--muted); }
+
+  /* gallery */
+  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase; margin: 80px 0 24px; display: flex; justify-content: space-between; align-items: baseline; }
+  .section-label .count { color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+
+  .card { position: relative; display: block; padding: 22px; background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; text-decoration: none; color: inherit; transition: transform 220ms cubic-bezier(.2,.7,.3,1), border-color 220ms ease, background 220ms ease, box-shadow 220ms ease; min-height: 220px; overflow: hidden; opacity: 0; transform: translateY(28px); }
+  .card.in { opacity: 1; transform: translateY(0); }
+  .card.on:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 24px 40px -28px var(--accent-soft); }
+  .card.off { opacity: 0.55; cursor: not-allowed; }
+  .card.off.in { opacity: 0.55; }
+
+  .card .num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.14em; }
+  .card .title { font-size: 18px; font-weight: 600; margin-top: 10px; line-height: 1.3; letter-spacing: -0.01em; color: var(--ink); }
+  .card .mood { font-size: 12px; color: var(--ink-soft); margin-top: 6px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
+  .card .swatch { position: absolute; bottom: 22px; left: 22px; display: flex; gap: 4px; }
+  .card .swatch i { width: 14px; height: 14px; border-radius: 3px; display: block; border: 1px solid rgba(0,0,0,0.05); }
+  .card .status { position: absolute; bottom: 22px; right: 22px; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.1em; transition: all 200ms ease; }
+  .card.on .status { background: var(--accent-soft); color: var(--accent); }
+  .card.off .status { background: var(--bg-soft); color: var(--muted); border: 1px solid var(--line); }
+  .card .arrow { position: absolute; top: 22px; right: 22px; opacity: 0; transition: opacity 200ms, transform 200ms; }
+  .card.on:hover .arrow { opacity: 1; transform: translate(2px, -2px); }
+  .card.on:hover .status { background: var(--accent); color: #fff; }
+
+  footer { margin-top: 96px; padding-top: 28px; border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; letter-spacing: 0.08em; }
+
+  @media (max-width: 840px) {
+    body { padding: 16px 16px 64px; }
+    .theme-toggle { top: 14px; right: 14px; padding: 6px 12px; font-size: 10px; }
+    .hero { padding: 24px 0 48px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+    .card { padding: 16px; min-height: 170px; }
+    .card .swatch, .card .status { bottom: 16px; }
+    .card .swatch { left: 16px; }
+    .card .status { right: 16px; }
+    .card .num, .card .arrow { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="dot"></span>
+  <span id="themeLabel">LIGHT · 01</span>
+</button>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">PORTFOLIO DESIGN GALLERY</div>
+    <div class="meta">v3.0 · 2026.06</div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">25 DESIGNS · 1 PERSON</span>
+      <h1>같은 이력서를<br><span class="hl">25개의 다른 포트폴리오로</span></h1>
+      <p>같은 사람, 같은 본문, 같은 데이터. 25개의 디자인 언어로 풀어낸 포트폴리오 모음입니다. 각 카드는 메인과 상세 두 페이지로 이어지고, 우측 상단의 토글로 라이트와 다크 팔레트를 즉시 바꿀 수 있습니다.</p>
+      <div class="legend">
+        <span class="on"><i></i>활성 25종</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-label">
+    <span>DESIGNS</span>
+    <span class="count">25 / 25 OPEN</span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <span>DATA · person.md  /  SPEC · design.md (v3)</span>
+    <span>HTML · CSS · JS</span>
+    <span>© 2026 김태윤</span>
+  </footer>
+</div>
+
+<script>
+  // Theme toggle with localStorage
+  const html = document.documentElement;
+  const saved = localStorage.getItem('tk-theme');
+  if (saved === 'alt') html.dataset.theme = 'alt';
+  const toggle = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const updateLabel = () => { label.textContent = (html.dataset.theme === 'alt') ? 'DARK · 02' : 'LIGHT · 01'; };
+  updateLabel();
+  toggle.addEventListener('click', () => {
+    const next = (html.dataset.theme === 'alt') ? 'light' : 'alt';
+    html.dataset.theme = next;
+    localStorage.setItem('tk-theme', next);
+    updateLabel();
+  });
+
+  // Progress bar
+  const prog = document.getElementById('progress');
+  const onScroll = () => {
+    const h = document.documentElement;
+    const sc = h.scrollTop;
+    const max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max > 0 ? (sc / max * 100) : 0) + '%';
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Designs data
+  const designs = [
+    { n: '01', title: 'Whitespace Cathedral', mood: '미니멀 · 신뢰감', swatch: ['#FAFAFA','#1A1A1A','#2563EB'], on: true },
+    { n: '02', title: 'Mono Serif Whisper', mood: '사색 · 정제', swatch: ['#FFFFFF','#111111','#DDDDDD'], on: true },
+    { n: '03', title: 'Neutral Stone', mood: '따뜻 · 정돈', swatch: ['#F5F1EB','#2A2622','#A88B6E'], on: true },
+    { n: '04', title: 'Bauhaus Grid', mood: '구조 · 모더니즘', swatch: ['#F0F0F0','#000000','#E63946'], on: true },
+    { n: '05', title: 'NYT Magazine Split', mood: '저널리스틱', swatch: ['#FCFCFC','#0E0E0E','#C8102E'], on: true },
+    { n: '06', title: 'Vogue Italia Spread', mood: '럭셔리 패션', swatch: ['#FAF7F2','#1A1614','#C9A961'], on: true },
+    { n: '07', title: 'Brutalist Newspaper', mood: '정보 밀도', swatch: ['#F4F1E8','#1A1A1A','#B91C1C'], on: true },
+    { n: '08', title: 'Whisper Editorial', mood: '시적 · 갤러리', swatch: ['#FFFFFF','#1F1F1F','#000000'], on: true },
+    { n: '09', title: 'Linear Dark Tech', mood: '정밀 · 엔지니어링', swatch: ['#0A0A0A','#8B5CF6','#06B6D4'], on: true },
+    { n: '10', title: 'Cyber Terminal', mood: '레트로 해커', swatch: ['#000000','#00FF94','#FF00C8'], on: true },
+    { n: '11', title: 'Vercel Pro Spotlight', mood: '프리미엄 다크', swatch: ['#000000','#FFFFFF','#27272A'], on: true },
+    { n: '12', title: 'Web Brutalism Raw', mood: '90s 거칠음', swatch: ['#FFFF00','#000000','#FF0000'], on: true },
+    { n: '13', title: 'Anti-Design Collage', mood: '펑크 콜라주', swatch: ['#FF0099','#00FFCC','#FFFF00'], on: true },
+    { n: '14', title: 'Concrete Modernism', mood: '산업 · 묵직', swatch: ['#2A2A28','#F2F2F0','#FF5800'], on: true },
+    { n: '15', title: 'Notion-Pop Bright', mood: '친근 · 협업', swatch: ['#FEE2E2','#D1FAE5','#DBEAFE'], on: true },
+    { n: '16', title: 'Gradient Mesh Joy', mood: '활기 · 컬러풀', swatch: ['#FF6B9D','#7B61FF','#4ECDC4'], on: true },
+    { n: '17', title: 'Maison Couture', mood: '럭셔리 · 시크', swatch: ['#0F0E0C','#EBE3D5','#C9A961'], on: true },
+    { n: '18', title: 'Heritage Auction', mood: '권위 · 클래식', swatch: ['#F5EFE5','#1A1A1A','#4A2C2A'], on: true },
+    { n: '19', title: 'Scroll Cinema', mood: '몰입 · 영화적', swatch: ['#0A0A0A','#FEF3C7','#064E3B'], on: true },
+    { n: '20', title: '3D Object Showcase', mood: '인터랙티브', swatch: ['#ECECEC','#111111','#3B82F6'], on: true },
+    { n: '21', title: 'Risograph Duotone', mood: '인쇄 · 텍스처', swatch: ['#F4EFE3','#FF3366','#2D3F6F'], on: true },
+    { n: '22', title: 'Sticky Workspace', mood: '협업 · 칸반', swatch: ['#FFF59D','#F8BBD0','#B3E5FC'], on: true },
+    { n: '23', title: 'Y2K Chrome Glow', mood: '홀로 · 메탈', swatch: ['#0F0F1A','#FF66CC','#66FFCC'], on: true },
+    { n: '24', title: 'Sketch Notebook', mood: '손맛 · 그리드', swatch: ['#FAF8F2','#1E3A8A','#FFE066'], on: true },
+    { n: '25', title: 'LIFE Photo Spread', mood: '1970s 포토에세이', swatch: ['#F2EDE3','#8B0000','#1A1A1A'], on: true }
+  ];
+
+  const grid = document.getElementById('grid');
+  designs.forEach(d => {
+    const tag = d.on ? 'a' : 'div';
+    const el = document.createElement(tag);
+    el.className = 'card ' + (d.on ? 'on' : 'off');
+    if (d.on) el.href = `designs/${d.n}/index.html`;
+    el.innerHTML = `
+      <div class="num">DESIGN #${d.n}</div>
+      <div class="title">${d.title}</div>
+      <div class="mood">${d.mood}</div>
+      <div class="swatch">${d.swatch.map(c => `<i style="background:${c}"></i>`).join('')}</div>
+      <div class="status">${d.on ? 'OPEN →' : 'SOON'}</div>
+      <svg class="arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--accent)"><path d="M4 12L12 4M12 4H6M12 4V10"/></svg>
+    `;
+    grid.appendChild(el);
+  });
+
+  // Scroll-triggered fade-in for cards (staggered)
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    document.querySelectorAll('.card').forEach(c => c.classList.add('in'));
+  } else {
+    const cards = [...document.querySelectorAll('.card')];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = cards.indexOf(e.target);
+          setTimeout(() => e.target.classList.add('in'), Math.min(idx, 12) * 40);
+          io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+    cards.forEach(c => io.observe(c));
+  }
+</script>
+</body>
+</html>

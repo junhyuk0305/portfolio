@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 · 서비스 기획자 / PM 포트폴리오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --surface-soft:#FCFCFD;
+    --surface-softer:#FAFAFA;
+    --text:#1F2937;
+    --text-strong:#111827;
+    --text-soft:#374151;
+    --muted:#6B7280;
+    --red:#FEE2E2;       --red-br:#FCA5A5;      --red-tx:#991B1B;
+    --amber:#FEF3C7;     --amber-br:#FCD34D;    --amber-tx:#92400E;
+    --mint:#D1FAE5;      --mint-br:#6EE7B7;     --mint-tx:#065F46;
+    --sky:#DBEAFE;       --sky-br:#93C5FD;      --sky-tx:#1E40AF;
+    --lavender:#EDE9FE;  --lavender-br:#C4B5FD; --lavender-tx:#5B21B6;
+    --line:#E5E7EB;
+    --line-strong:#D1D5DB;
+    --cta-bg:#111827;
+    --cta-fg:#FFFFFF;
+    --tile-overlay:rgba(255,255,255,0.55);
+    --tile-overlay-strong:rgba(255,255,255,0.9);
+    --tag-bg:rgba(255,255,255,0.65);
+    --tag-br:rgba(255,255,255,0.9);
+    --shadow:0 10px 24px rgba(31,41,55,0.08);
+    --shadow-soft:0 6px 16px rgba(0,0,0,0.06);
+  }
+  [data-theme="alt"]{
+    --bg:#0F0F12;
+    --surface:#17171C;
+    --surface-soft:#1B1B22;
+    --surface-softer:#1F1F26;
+    --text:#E5E7EB;
+    --text-strong:#F3F4F6;
+    --text-soft:#D1D5DB;
+    --muted:#9CA3AF;
+    --red:#4B1B1B;       --red-br:#7F2D2D;      --red-tx:#FECACA;
+    --amber:#5B4515;     --amber-br:#8A6A20;    --amber-tx:#FDE68A;
+    --mint:#163E32;      --mint-br:#24604E;     --mint-tx:#A7F3D0;
+    --sky:#1E3354;       --sky-br:#2F5288;      --sky-tx:#BFDBFE;
+    --lavender:#3E2F58;  --lavender-br:#5E468A; --lavender-tx:#DDD6FE;
+    --line:#2A2A33;
+    --line-strong:#3A3A45;
+    --cta-bg:#F3F4F6;
+    --cta-fg:#111827;
+    --tile-overlay:rgba(255,255,255,0.06);
+    --tile-overlay-strong:rgba(255,255,255,0.12);
+    --tag-bg:rgba(255,255,255,0.08);
+    --tag-br:rgba(255,255,255,0.14);
+    --shadow:0 10px 28px rgba(0,0,0,0.45);
+    --shadow-soft:0 6px 16px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+  html,body{
+    background:var(--bg);color:var(--text);
+    font-family:'DM Sans','Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;
+    font-size:16px;line-height:1.6;
+    transition:background-color 250ms ease, color 250ms ease;
+  }
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:960px;margin:0 auto;padding:48px 24px 96px;}
+
+  /* PROGRESS BAR */
+  .progress{
+    position:fixed;top:0;left:0;height:2px;width:0%;
+    background:linear-gradient(90deg,
+      var(--red-br) 0%, var(--amber-br) 25%, var(--mint-br) 50%,
+      var(--sky-br) 75%, var(--lavender-br) 100%);
+    z-index:200;transition:width 80ms linear;
+  }
+
+  /* THEME TOGGLE */
+  .theme-toggle{
+    position:fixed;top:14px;right:14px;z-index:150;
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;min-width:44px;
+    padding:10px 18px;border-radius:999px;
+    background:var(--sky);color:var(--sky-tx);
+    border:1px solid var(--sky-br);
+    font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;
+    letter-spacing:.05em;
+    box-shadow:var(--shadow-soft);
+    cursor:pointer;
+    transition:background-color 250ms ease, color 250ms ease, border-color 250ms ease, transform 200ms cubic-bezier(.34,1.56,.64,1);
+  }
+  .theme-toggle:hover{transform:translateY(-2px);}
+  .theme-toggle .tt-emoji{font-size:14px;line-height:1;}
+
+  /* HERO */
+  .hero{
+    display:grid;
+    grid-template-columns:1.4fr 1fr;
+    gap:32px;
+    align-items:start;
+    padding:24px 0 40px;
+  }
+  .hero-left{position:relative;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;color:var(--muted);
+    border:1px solid var(--line);
+    background:var(--surface-softer);
+    padding:6px 12px;border-radius:999px;
+    margin-bottom:18px;
+    transition:background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+  h1.name{
+    font-family:'DM Serif Display',serif;
+    font-size:56px;
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    margin-bottom:14px;
+    color:var(--text-strong);
+    transition:color 250ms ease;
+  }
+  .name .ko{display:block;font-family:'DM Sans',sans-serif;font-weight:700;font-size:22px;color:var(--muted);margin-bottom:6px;letter-spacing:0;}
+  .name .reveal-line{
+    display:block;
+    -webkit-clip-path:inset(100% 0 0 0);
+            clip-path:inset(100% 0 0 0);
+    transition:clip-path 700ms cubic-bezier(.7,0,.3,1), -webkit-clip-path 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .name .reveal-line.in{
+    -webkit-clip-path:inset(0 0 0 0);
+            clip-path:inset(0 0 0 0);
+  }
+  .intro{
+    font-size:16px;color:var(--text-soft);max-width:520px;margin-bottom:24px;
+    transition:color 250ms ease;
+  }
+  .cta{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--cta-bg);color:var(--cta-fg);
+    padding:12px 22px;border-radius:999px;
+    font-weight:600;font-size:15px;
+    transition:transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms ease, background-color 250ms ease, color 250ms ease;
+  }
+  .cta:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(17,24,39,0.18);}
+  .cta .arr{transition:transform 200ms ease;}
+  .cta:hover .arr{transform:translateX(3px);}
+
+  /* HERO RIGHT — portrait + sticker */
+  .hero-right{
+    position:relative;
+    display:flex;justify-content:center;
+  }
+  .portrait-frame{
+    position:relative;
+    width:240px;height:300px;
+    border-radius:24px;overflow:hidden;
+    border:1px solid var(--sky-br);
+    background:var(--sky);
+    box-shadow:var(--shadow-soft);
+    transition:background-color 250ms ease, border-color 250ms ease;
+  }
+  .portrait-frame img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    transform:scale(1.06);
+    transition:transform 1200ms cubic-bezier(.2,.7,.2,1);
+  }
+  .portrait-frame.kb-in img{transform:scale(1.0);}
+  .portrait-frame:hover{transform:translateY(-3px) scale(1.02);}
+  .portrait-frame{transition:transform 220ms cubic-bezier(.34,1.56,.64,1), background-color 250ms ease, border-color 250ms ease, box-shadow 220ms ease;}
+  .hero-sticker{
+    position:absolute;top:-14px;right:-10px;
+    font-size:64px;line-height:1;
+    user-select:none;
+    filter:drop-shadow(0 4px 10px rgba(0,0,0,0.18));
+  }
+
+  /* INFO CARD (moved under portrait on desktop, inline on mobile) */
+  .info-card{
+    grid-column:1 / -1;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px;
+    background:var(--surface-soft);
+    margin-top:8px;
+    transition:background-color 250ms ease, border-color 250ms ease;
+  }
+  .kv{display:grid;grid-template-columns:repeat(5,1fr);gap:0;font-size:14px;}
+  .kv .col{padding:0 14px;}
+  .kv .col + .col{border-left:1px solid var(--line);}
+  .kv dt{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .kv dd{color:var(--text);font-weight:500;}
+
+  /* SECTIONS */
+  .section{margin-top:56px;}
+  .section-title{
+    font-family:'DM Sans',sans-serif;
+    font-size:22px;font-weight:600;
+    margin-bottom:16px;
+    display:flex;align-items:center;gap:10px;
+    letter-spacing:-0.01em;
+    color:var(--text-strong);
+    transition:color 250ms ease;
+  }
+  .section-title .e{font-size:22px;}
+  .section-sub{color:var(--muted);font-size:14px;margin-bottom:18px;transition:color 250ms ease;}
+
+  /* About card */
+  .card{
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:24px 26px;
+    background:var(--surface);
+    transition:transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms ease, background-color 250ms ease, border-color 250ms ease;
+  }
+  .about-grid{
+    display:grid;grid-template-columns:1fr 180px;gap:22px;align-items:start;
+  }
+  .about p{color:var(--text-soft);transition:color 250ms ease;}
+  .about p + p{margin-top:14px;}
+  .about-thumb{
+    width:160px;height:100px;border-radius:12px;overflow:hidden;
+    border:1px solid var(--mint-br);
+    justify-self:end;
+    box-shadow:var(--shadow-soft);
+    transition:transform 220ms cubic-bezier(.34,1.56,.64,1), border-color 250ms ease;
+  }
+  .about-thumb img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    transform:scale(1.06);
+    transition:transform 1200ms cubic-bezier(.2,.7,.2,1);
+  }
+  .about-thumb.kb-in img{transform:scale(1.0);}
+  .about-thumb:hover{transform:translateY(-2px) scale(1.02);}
+  .about-cap{
+    grid-column:1 / -1;
+    font-size:12px;color:var(--muted);margin-top:-6px;text-align:right;
+  }
+
+  /* Toolkit */
+  .toolkit{display:flex;flex-wrap:wrap;gap:10px;}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;border-radius:999px;
+    font-size:14px;font-weight:500;
+    border:1px solid transparent;
+    transition:background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+  .pill.red{background:var(--red);border-color:var(--red-br);color:var(--red-tx);}
+  .pill.amber{background:var(--amber);border-color:var(--amber-br);color:var(--amber-tx);}
+  .pill.mint{background:var(--mint);border-color:var(--mint-br);color:var(--mint-tx);}
+  .pill.sky{background:var(--sky);border-color:var(--sky-br);color:var(--sky-tx);}
+  .pill.lav{background:var(--lavender);border-color:var(--lavender-br);color:var(--lavender-tx);}
+
+  /* Projects */
+  .projects{display:flex;flex-direction:column;gap:18px;}
+  .proj{
+    display:block;
+    border-radius:16px;
+    border:1px solid transparent;
+    overflow:hidden;
+    transition:transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms ease, background-color 250ms ease, border-color 250ms ease;
+    color:inherit;
+  }
+  .proj:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+  .proj.t-amber{background:var(--amber);border-color:var(--amber-br);}
+  .proj.t-mint{background:var(--mint);border-color:var(--mint-br);}
+  .proj.t-lav{background:var(--lavender);border-color:var(--lavender-br);}
+
+  .proj-cover{
+    position:relative;
+    aspect-ratio:16/9;width:100%;overflow:hidden;
+    border-bottom:1px solid rgba(255,255,255,0.4);
+    background:var(--surface-softer);
+  }
+  .proj-cover img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    transform:scale(1.06);
+    transition:transform 1200ms cubic-bezier(.2,.7,.2,1);
+  }
+  .proj-cover.kb-in img{transform:scale(1.0);}
+  .proj-cover-cap{
+    position:absolute;left:12px;bottom:10px;
+    font-size:12px;font-weight:500;color:#1F2937;
+    background:rgba(255,255,255,0.85);
+    border:1px solid rgba(255,255,255,0.95);
+    padding:4px 10px;border-radius:999px;
+    backdrop-filter:blur(4px);
+  }
+
+  .proj-body{
+    display:grid;
+    grid-template-columns:64px 1fr auto;
+    gap:18px;
+    align-items:center;
+    padding:20px 22px;
+  }
+  .proj .icon{
+    font-size:32px;line-height:1;
+    width:56px;height:56px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--tile-overlay);
+    border:1px solid var(--tile-overlay-strong);
+    border-radius:14px;
+    transition:transform 300ms cubic-bezier(.34,1.56,.64,1), background-color 250ms ease, border-color 250ms ease;
+  }
+  .proj:hover .icon{transform:rotate(8deg);}
+  .proj .body h3{font-size:17px;font-weight:600;margin-bottom:4px;letter-spacing:-0.01em;color:var(--text-strong);}
+  .proj .body .meta{font-size:13px;color:var(--text-soft);margin-bottom:8px;}
+  .proj .body .outcome{font-size:14px;color:var(--text);margin-bottom:10px;}
+  .proj .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{
+    font-size:12px;padding:4px 10px;border-radius:999px;
+    background:var(--tag-bg);
+    border:1px solid var(--tag-br);
+    color:var(--text);font-weight:500;
+  }
+  .proj .arrow{
+    font-size:20px;color:var(--text);opacity:0.6;
+    transition:transform 200ms ease, opacity 200ms ease;
+  }
+  .proj:hover .arrow{transform:translateX(4px);opacity:1;}
+
+  [data-theme="alt"] .proj-cover-cap{
+    background:rgba(20,20,26,0.85);color:#E5E7EB;border-color:rgba(255,255,255,0.18);
+  }
+  [data-theme="alt"] .proj .body h3{color:#F3F4F6;}
+  [data-theme="alt"] .proj .body .meta{color:#CBD5E1;}
+  [data-theme="alt"] .proj .body .outcome{color:#E5E7EB;}
+  [data-theme="alt"] .proj .tag{color:#E5E7EB;}
+  [data-theme="alt"] .proj .arrow{color:#E5E7EB;}
+  [data-theme="alt"] .proj.t-amber .body h3,
+  [data-theme="alt"] .proj.t-mint .body h3,
+  [data-theme="alt"] .proj.t-lav .body h3{color:#F3F4F6;}
+
+  /* Contact */
+  .contact{
+    display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .contact .left .label{color:var(--muted);font-size:13px;margin-bottom:4px;}
+  .contact .left .email{font-size:18px;font-weight:600;letter-spacing:-0.01em;}
+  .contact .note{color:var(--muted);font-size:14px;max-width:380px;}
+
+  footer{
+    margin-top:64px;color:var(--muted);font-size:13px;text-align:center;
+  }
+
+  /* REVEAL ANIMATIONS */
+  .reveal-up{opacity:0;transform:translateY(24px);transition:opacity 500ms cubic-bezier(.2,.7,.2,1), transform 500ms cubic-bezier(.2,.7,.2,1);}
+  .reveal-up.in{opacity:1;transform:translateY(0);}
+
+  /* EMOJI BOUNCE */
+  .emoji-pop{display:inline-block;transform:scale(0) rotate(-10deg);opacity:0;}
+  .emoji-pop.in{
+    animation:emojiPop 600ms cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes emojiPop{
+    0%  {transform:scale(0)   rotate(-10deg); opacity:0;}
+    60% {transform:scale(1.2) rotate(4deg);   opacity:1;}
+    100%{transform:scale(1)   rotate(0deg);   opacity:1;}
+  }
+
+  /* Mobile */
+  @media (max-width:760px){
+    .wrap{padding:32px 18px 72px;}
+    .hero{grid-template-columns:1fr;gap:22px;}
+    h1.name{font-size:42px;}
+    .portrait-frame{width:100%;max-width:320px;height:auto;aspect-ratio:4/5;}
+    .hero-sticker{font-size:54px;}
+    .about-grid{grid-template-columns:1fr;}
+    .about-thumb{justify-self:start;width:100%;max-width:260px;height:140px;}
+    .kv{grid-template-columns:repeat(2,1fr);gap:14px 0;}
+    .kv .col{padding:8px 14px;}
+    .kv .col + .col{border-left:none;}
+    .kv .col:nth-child(2n){border-left:1px solid var(--line);}
+    .proj-body{grid-template-columns:48px 1fr;}
+    .proj .icon{width:48px;height:48px;font-size:28px;}
+    .proj .arrow{display:none;}
+    .theme-toggle{top:10px;right:10px;padding:10px 14px;font-size:11px;min-height:44px;}
+  }
+
+  /* Gallery back link */
+  .gallery-back{
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;
+    padding:10px 16px;border-radius:999px;
+    background:var(--surface-soft);color:var(--text);
+    border:1px solid var(--line);
+    font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;
+    margin-bottom:18px;
+    transition:transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms ease, background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+  }
+  .gallery-back:hover{transform:translateY(-2px);box-shadow:var(--shadow-soft);}
+  .gallery-back .arr{transition:transform 200ms ease;}
+  .gallery-back:hover .arr{transform:translateX(-3px);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+    .reveal-up{opacity:1;transform:none;}
+    .name .reveal-line{-webkit-clip-path:none;clip-path:none;}
+    .emoji-pop{opacity:1;transform:none;}
+    .portrait-frame img,.about-thumb img,.proj-cover img{transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="테마 전환">
+  <span class="tt-emoji" id="ttEmoji">🌙</span>
+  <span id="ttLabel">다크모드로</span>
+</button>
+
+<main class="wrap">
+
+  <a class="gallery-back" href="../../index.html"><span class="arr">←</span> 갤러리</a>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="eyebrow reveal-up"><span class="emoji-pop">✨</span> 서비스 기획자 / PM 포트폴리오</div>
+      <h1 class="name">
+        <span class="ko reveal-line">김태윤 · Taeyoon Kim</span>
+        <span class="reveal-line">Product, with care.</span>
+      </h1>
+      <p class="intro reveal-up">
+        비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자입니다. 가설 수립부터 API 명세, 스프린트 관리까지 풀사이클로 움직입니다.
+      </p>
+      <a class="cta reveal-up" href="mailto:taeyoon@example.com">
+        지금 채용 중인 팀과 대화하기 <span class="arr">→</span>
+      </a>
+    </div>
+
+    <div class="hero-right reveal-up">
+      <div class="portrait-frame kb-watch" data-kb>
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 포트레이트" />
+      </div>
+      <span class="hero-sticker emoji-pop" aria-hidden="true">🧭</span>
+    </div>
+
+    <aside class="info-card reveal-up" aria-label="간단 정보">
+      <dl class="kv">
+        <div class="col"><dt>이름</dt><dd>김태윤</dd></div>
+        <div class="col"><dt>전공</dt><dd>경영 + 컴공</dd></div>
+        <div class="col"><dt>학점</dt><dd>3.9 / 4.5</dd></div>
+        <div class="col"><dt>직무</dt><dd>서비스 기획 / PM</dd></div>
+        <div class="col"><dt>이메일</dt><dd style="font-size:13px;">taeyoon@example.com</dd></div>
+      </dl>
+    </aside>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section">
+    <h2 class="section-title reveal-up"><span class="e emoji-pop">📝</span> About</h2>
+    <p class="section-sub reveal-up">한 문단으로 정리한 저의 일하는 방식</p>
+    <div class="card about reveal-up">
+      <div class="about-grid">
+        <div>
+          <p>비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+          <p style="margin-top:14px;">학내 동아리방 예약 서비스 <strong>'RoomSync'</strong> 기획 당시, 회장단 설문으로 ‘실시간 현황 확인’이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+          <p style="margin-top:14px;">이처럼 저는 <strong>데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는</strong> 기획자입니다.</p>
+        </div>
+        <div class="about-thumb kb-watch" data-kb>
+          <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="팀 협업 사진" />
+        </div>
+        <div class="about-cap">👥 RoomSync 팀과 함께 · 2023</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLKIT -->
+  <section class="section">
+    <h2 class="section-title reveal-up"><span class="e emoji-pop">🛠️</span> Toolkit</h2>
+    <p class="section-sub reveal-up">자주 쓰는 도구와 방법론</p>
+    <div class="toolkit">
+      <span class="pill red reveal-up"><span class="emoji-pop">📓</span> Notion</span>
+      <span class="pill amber reveal-up"><span class="emoji-pop">🎨</span> Figma (기본)</span>
+      <span class="pill mint reveal-up"><span class="emoji-pop">📊</span> GA4</span>
+      <span class="pill sky reveal-up"><span class="emoji-pop">🗄</span> SQL</span>
+      <span class="pill lav reveal-up"><span class="emoji-pop">🏃</span> Agile · 스크럼 리드</span>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section">
+    <h2 class="section-title reveal-up"><span class="e emoji-pop">📂</span> Projects</h2>
+    <p class="section-sub reveal-up">총 3개의 프로젝트 · 카드를 누르면 케이스 스터디로 이동합니다</p>
+    <div class="projects">
+
+      <a class="proj t-amber reveal-up" href="detail.html" data-row="0">
+        <div class="proj-cover kb-watch" data-kb>
+          <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 회의" />
+          <span class="proj-cover-cap">📅 RoomSync 팀 회의 · 2023.09</span>
+        </div>
+        <div class="proj-body">
+          <div class="icon emoji-pop" aria-hidden="true">📅</div>
+          <div class="body">
+            <h3>RoomSync — 동아리방 예약 서비스</h3>
+            <div class="meta">2023.07 – 2023.11 · 기획 리드 / 스크럼 마스터</div>
+            <div class="outcome">출시 1개월 만에 <strong>30개 동아리</strong> 가입, <strong>노쇼 −60%</strong> 달성</div>
+            <div class="tags">
+              <span class="tag">MVP 전략</span>
+              <span class="tag">API 명세</span>
+              <span class="tag">Jira</span>
+            </div>
+          </div>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <a class="proj t-mint reveal-up" href="detail.html" data-row="0">
+        <div class="proj-cover kb-watch" data-kb>
+          <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 인터뷰 현장" />
+          <span class="proj-cover-cap">🛒 사용성 테스트 인터뷰 · 2023.04</span>
+        </div>
+        <div class="proj-body">
+          <div class="icon emoji-pop" aria-hidden="true">🛒</div>
+          <div class="body">
+            <h3>A사 커머스 인턴 — 장바구니 전환 개선</h3>
+            <div class="meta">2023.01 – 2023.06 · MAU 50만 · PM 인턴</div>
+            <div class="outcome">GA4·UT로 이탈 진단 → A/B 테스트 B안 채택, <strong>전환율 +12%p</strong></div>
+            <div class="tags">
+              <span class="tag">GA4</span>
+              <span class="tag">A/B 테스트</span>
+              <span class="tag">사용성 테스트</span>
+            </div>
+          </div>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+
+      <a class="proj t-lav reveal-up" href="detail.html" data-row="0">
+        <div class="proj-cover kb-watch" data-kb>
+          <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리 세미나" />
+          <span class="proj-cover-cap">🤝 월 1회 세미나 · 2022</span>
+        </div>
+        <div class="proj-body">
+          <div class="icon emoji-pop" aria-hidden="true">🤝</div>
+          <div class="body">
+            <h3>IT 연합 동아리 회장 — 프로젝트 완성률 개선</h3>
+            <div class="meta">2022.03 – 2022.12 · 100명 규모 리더십</div>
+            <div class="outcome">월 1회 세미나·운영 프로세스 정비, 프로젝트 완성률 <strong>40% → 85%</strong></div>
+            <div class="tags">
+              <span class="tag">리더십</span>
+              <span class="tag">프로세스 설계</span>
+              <span class="tag">세미나 운영</span>
+            </div>
+          </div>
+          <span class="arrow">→</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section">
+    <h2 class="section-title reveal-up"><span class="e emoji-pop">✉️</span> Contact</h2>
+    <p class="section-sub reveal-up">함께 이야기 나누고 싶다면 언제든지요</p>
+    <div class="card contact reveal-up">
+      <div class="left">
+        <div class="label">📮 Email</div>
+        <a class="email" href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+      </div>
+      <p class="note">커피챗·채용·협업 모두 환영합니다. 24시간 내에 회신드릴게요. ☕️</p>
+    </div>
+  </section>
+
+  <footer>© 2026 Taeyoon Kim · Made with Notion-pop vibes ✨</footer>
+</main>
+
+<script>
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- THEME TOGGLE ---- */
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const ttEmoji = document.getElementById('ttEmoji');
+  const ttLabel = document.getElementById('ttLabel');
+  function applyTheme(t){
+    if(t === 'alt'){
+      root.setAttribute('data-theme','alt');
+      ttEmoji.textContent = '☀';
+      ttLabel.textContent = '라이트모드로';
+      toggle.setAttribute('aria-label','라이트모드로 전환');
+    } else {
+      root.removeAttribute('data-theme');
+      ttEmoji.textContent = '🌙';
+      ttLabel.textContent = '다크모드로';
+      toggle.setAttribute('aria-label','다크모드로 전환');
+    }
+  }
+  const saved = localStorage.getItem('tk-theme') || 'light';
+  applyTheme(saved);
+  toggle.addEventListener('click', () => {
+    const next = (root.getAttribute('data-theme') === 'alt') ? 'light' : 'alt';
+    localStorage.setItem('tk-theme', next);
+    applyTheme(next);
+  });
+
+  /* ---- PROGRESS BAR ---- */
+  const bar = document.getElementById('progress');
+  function onScroll(){
+    const h = document.documentElement;
+    const total = h.scrollHeight - h.clientHeight;
+    const pct = total > 0 ? (h.scrollTop / total) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  if(reduced){
+    document.querySelectorAll('.reveal-up,.emoji-pop,.reveal-line,.kb-watch').forEach(el => el.classList.add('in','kb-in'));
+    return;
+  }
+
+  /* ---- HERO NAME MASK REVEAL ---- */
+  setTimeout(() => {
+    document.querySelectorAll('.name .reveal-line').forEach((el, i) => {
+      setTimeout(() => el.classList.add('in'), i * 120);
+    });
+  }, 80);
+
+  /* ---- GLOBAL EMOJI BOUNCE (staggered 100ms) ---- */
+  const emojis = Array.from(document.querySelectorAll('.emoji-pop'));
+  emojis.forEach((el, i) => {
+    setTimeout(() => el.classList.add('in'), 200 + i * 100);
+  });
+
+  /* ---- INTERSECTION FADE-UP ---- */
+  const io = new IntersectionObserver((entries) => {
+    // Row-stagger: group by data-row + offsetTop bucket
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const el = e.target;
+        const delay = parseInt(el.dataset.row || 0, 10) * 80;
+        setTimeout(() => el.classList.add('in'), delay);
+        io.unobserve(el);
+      }
+    });
+  }, {threshold:0.14, rootMargin:'0px 0px -40px 0px'});
+
+  // Group projects in same row for 80ms stagger
+  let rowIndex = 0;
+  document.querySelectorAll('.projects .proj').forEach((c, i) => {
+    c.dataset.row = i; // single-column layout = each card own row
+  });
+
+  document.querySelectorAll('.reveal-up').forEach(el => io.observe(el));
+
+  /* ---- KEN BURNS on viewport entry ---- */
+  const kbIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        e.target.classList.add('kb-in');
+        kbIO.unobserve(e.target);
+      }
+    });
+  }, {threshold:0.2});
+  document.querySelectorAll('.kb-watch').forEach(el => kbIO.observe(el));
+})();
+</script>
+</body>
+</html>

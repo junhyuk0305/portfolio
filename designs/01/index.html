@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Product Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; }
+  :lang(ko), body { word-break: keep-all; overflow-wrap: anywhere; }
+
+  :root {
+    --bg: #FAFAFA;
+    --ink: #1A1A1A;
+    --muted: #6B6B6B;
+    --rule: #E5E5E5;
+    --accent: #2563EB;
+    --hover: #F4F4F4;
+  }
+
+  [data-theme="alt"] {
+    --bg: #0F0F0F;
+    --ink: #F5F5F2;
+    --muted: #888888;
+    --rule: #232323;
+    --accent: #60A5FA;
+    --hover: #1A1A1A;
+  }
+
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 100;
+    transition: width 80ms linear, background-color 250ms ease;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 90;
+    min-width: 44px;
+    min-height: 44px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  }
+  .theme-toggle:hover { border-color: var(--ink); }
+
+  /* Gallery back link */
+  .gallery-back {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  }
+  .gallery-back:hover { border-color: var(--ink); color: var(--accent); }
+
+  /* 12-column grid container */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+    max-width: 1280px;
+    padding: 0 56px;
+    margin: 0 auto;
+  }
+
+  /* Top nav (hairline) */
+  .topbar {
+    border-bottom: 1px solid var(--rule);
+    padding: 20px 0;
+    transition: border-color 250ms ease;
+  }
+  .topbar .grid { align-items: baseline; }
+  .topbar .brand {
+    grid-column: 1 / span 6;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .topbar .meta {
+    grid-column: 7 / span 6;
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Section label (12px uppercase mono) */
+  .label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .label .num { color: var(--ink); margin-right: 8px; transition: color 250ms ease; }
+  .label .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+  .label.in .char { opacity: 1; transform: translateY(0); }
+
+  /* Sections */
+  section {
+    padding: 160px 0;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  section.hero { padding: 200px 0 220px; border-bottom: 1px solid var(--rule); }
+
+  /* HERO */
+  .hero .label-wrap { grid-column: 1 / span 12; margin-bottom: 64px; }
+  .hero .name-block { grid-column: 1 / span 8; }
+  .hero h1 {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 96px;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    margin: 0 0 40px 0;
+    color: var(--ink);
+  }
+  .hero .name-mask {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 800ms cubic-bezier(.7,.0,.3,1);
+  }
+  .hero .name-mask.in {
+    clip-path: inset(0 0 0 0);
+  }
+  .hero .intro {
+    grid-column: 1 / span 7;
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--ink);
+    font-weight: 400;
+    margin-top: 8px;
+    letter-spacing: -0.005em;
+  }
+  .hero .portrait {
+    grid-column: 10 / span 3;
+    grid-row: 2;
+    align-self: start;
+  }
+  .caret {
+    display: inline-block;
+    width: 10px;
+    height: 22px;
+    background: var(--accent);
+    margin-left: 6px;
+    transform: translateY(3px);
+    animation: blink 1s steps(1) infinite;
+    transition: background-color 250ms ease;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Figure (image w/ caption) */
+  figure.fig {
+    margin: 0;
+    display: block;
+  }
+  figure.fig .frame {
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 250ms ease;
+  }
+  figure.fig img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.06);
+    transition: transform 1200ms cubic-bezier(.22,.61,.36,1);
+  }
+  figure.fig.in img { transform: scale(1.0); }
+  figure.fig figcaption {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .portrait .frame {
+    aspect-ratio: 320 / 400;
+  }
+
+  /* PROFILE */
+  .profile .label-wrap { grid-column: 1 / span 3; }
+  .profile .body { grid-column: 5 / span 7; }
+  .profile p {
+    margin: 0 0 24px 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .profile p:last-child { margin-bottom: 0; }
+  .profile .facts {
+    margin-top: 48px;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+    transition: border-color 250ms ease;
+  }
+  .profile .facts .k {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .profile .facts .v { font-size: 15px; color: var(--ink); }
+
+  /* PROJECTS */
+  .projects .label-wrap { grid-column: 1 / span 3; }
+  .projects .header-meta {
+    grid-column: 9 / span 4;
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .projects .list { grid-column: 1 / span 12; margin-top: 72px; border-top: 1px solid var(--rule); transition: border-color 250ms ease; }
+  .project-row {
+    display: grid;
+    grid-template-columns: 96px 1fr 6fr 4fr 0.6fr;
+    column-gap: 24px;
+    align-items: center;
+    padding: 28px 16px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--rule);
+    transition: background-color 200ms ease, border-color 250ms ease;
+    color: var(--ink);
+  }
+  .project-row:hover { background-color: var(--hover); }
+  .project-row .thumb {
+    width: 96px;
+    height: 96px;
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    transition: border-color 250ms ease;
+  }
+  .project-row .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 800ms ease;
+  }
+  .project-row:hover .thumb img { transform: scale(1.04); }
+  .project-row .year {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .project-row .title {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .project-row .outcome {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .project-row .arrow {
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 200ms ease, transform 200ms ease;
+  }
+  .project-row:hover .arrow { color: var(--accent); transform: translateX(4px); }
+
+  /* CONTACT */
+  .contact .label-wrap { grid-column: 1 / span 3; }
+  .contact .body { grid-column: 5 / span 7; }
+  .contact h2 {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin: 0 0 48px 0;
+  }
+  .contact .email {
+    font-size: 22px;
+    color: var(--accent);
+    display: inline-block;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 4px;
+    transition: color 250ms ease, border-color 250ms ease;
+  }
+  .contact .meta-list {
+    margin-top: 56px;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px 24px;
+    transition: border-color 250ms ease;
+  }
+  .contact .meta-list .k {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .contact .meta-list .v { font-size: 15px; color: var(--ink); }
+
+  /* Footer */
+  footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  footer .grid { align-items: baseline; }
+  footer .left {
+    grid-column: 1 / span 6;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  footer .right {
+    grid-column: 7 / span 6;
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Motion — generic reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 500ms ease-out, transform 500ms ease-out;
+    will-change: opacity, transform;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .label .char, figure.fig img, .hero .name-mask, .caret {
+      transition: none !important;
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: inset(0 0 0 0) !important;
+    }
+  }
+
+  /* Responsive — mobile single column, type scale -2 notches */
+  @media (max-width: 880px) {
+    .grid { padding: 0 24px; column-gap: 16px; }
+    section { padding: 96px 0; }
+    section.hero { padding: 120px 0 140px; }
+
+    .theme-toggle { top: 14px; right: 14px; padding: 10px 12px; font-size: 10px; min-width: 44px; min-height: 44px; }
+    .gallery-back { top: 14px; left: 14px; padding: 10px 10px; font-size: 10px; min-height: 44px; }
+    body { font-size: 15px; }
+    .profile p { font-size: 15px; }
+
+    .topbar .brand, .topbar .meta { grid-column: 1 / span 12; text-align: left; }
+    .topbar .meta { margin-top: 6px; }
+
+    .hero .label-wrap, .hero .name-block, .hero .intro, .hero .portrait { grid-column: 1 / span 12; grid-row: auto; }
+    .hero h1 { font-size: 56px; }
+    .hero .intro { font-size: 17px; }
+    .hero .portrait { margin-top: 48px; max-width: 280px; }
+
+    .profile .label-wrap, .profile .body { grid-column: 1 / span 12; }
+    .profile .label-wrap { margin-bottom: 32px; }
+    .profile p { font-size: 15px; }
+    .profile .facts { grid-template-columns: 1fr; }
+
+    .projects .label-wrap, .projects .header-meta { grid-column: 1 / span 12; text-align: left; }
+    .projects .header-meta { margin-top: 6px; }
+    .projects .list { margin-top: 40px; }
+    .project-row {
+      grid-template-columns: 64px 1fr;
+      grid-template-rows: auto auto auto auto;
+      gap: 6px 16px;
+      padding: 20px 8px;
+      align-items: start;
+    }
+    .project-row .thumb { width: 64px; height: 64px; grid-row: 1 / span 4; }
+    .project-row .year { grid-column: 2; }
+    .project-row .title { grid-column: 2; font-size: 18px; }
+    .project-row .outcome { grid-column: 2; font-size: 13px; }
+    .project-row .arrow { grid-column: 2; text-align: left; }
+
+    .contact .label-wrap, .contact .body { grid-column: 1 / span 12; }
+    .contact .label-wrap { margin-bottom: 32px; }
+    .contact h2 { font-size: 30px; margin-bottom: 32px; }
+    .contact .email { font-size: 17px; }
+    .contact .meta-list { grid-template-columns: 1fr; }
+
+    footer .left, footer .right { grid-column: 1 / span 12; text-align: left; }
+    footer .right { margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<a class="gallery-back" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">LIGHT · 01</button>
+
+<header class="topbar">
+  <div class="grid">
+    <div class="brand">김태윤 — Portfolio / 2026</div>
+    <div class="meta">PM · Service Planner</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">00</span> / Index</div>
+    </div>
+    <div class="name-block">
+      <h1><span class="name-mask" id="heroName">김태윤</span><span class="caret" aria-hidden="true"></span></h1>
+    </div>
+    <p class="intro">
+      비즈니스의 목적과 개발의 언어를 동시에 이해하며, 프로덕트의 병목을 끊어내는 서비스 기획자입니다.
+    </p>
+    <div class="portrait">
+      <figure class="fig reveal">
+        <div class="frame"><img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="도서관에서 작업 중인 김태윤" /></div>
+        <figcaption>FIG. 01 — 작업 중</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 01 PROFILE -->
+<section class="profile reveal" id="profile">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">01</span> / Profile</div>
+    </div>
+    <div class="body">
+      <p class="reveal">
+        비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.
+      </p>
+      <p class="reveal">
+        학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.
+      </p>
+      <p class="reveal">
+        이처럼 저는 데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자입니다. 사용자의 불편과 비즈니스의 목표를 정확히 잇는 PM이 되겠습니다.
+      </p>
+
+      <div class="facts reveal">
+        <div>
+          <div class="k">전공</div>
+          <div class="v">경영학과 / 컴퓨터공학 복수전공 (3.9/4.5)</div>
+        </div>
+        <div>
+          <div class="k">희망 직무</div>
+          <div class="v">서비스 기획자 / PM</div>
+        </div>
+        <div>
+          <div class="k">툴</div>
+          <div class="v">Notion · Figma · GA4 · SQL</div>
+        </div>
+        <div>
+          <div class="k">방법론</div>
+          <div class="v">Agile Scrum 리드</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 PROJECTS -->
+<section class="projects reveal" id="projects">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">02</span> / Projects</div>
+    </div>
+    <div class="header-meta">003 selected works</div>
+
+    <div class="list">
+      <a class="project-row reveal" href="detail.html" aria-label="RoomSync 상세 보기">
+        <figure class="fig thumb" style="margin:0">
+          <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="도서관 팀 토론" />
+        </figure>
+        <div class="year">2023</div>
+        <div class="title">RoomSync — 동아리방 예약 관리 웹서비스</div>
+        <div class="outcome">학내 30개 동아리 가입 · 노쇼율 60% 감소</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="project-row reveal" href="detail.html" aria-label="커머스 인턴십 상세 보기">
+        <figure class="fig thumb" style="margin:0">
+          <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="시장 인터뷰" />
+        </figure>
+        <div class="year">2023</div>
+        <div class="title">커머스 스타트업 'A사' 서비스 기획 인턴</div>
+        <div class="outcome">장바구니 전환율 +12%p · B안 정규 배포</div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="project-row reveal" href="detail.html" aria-label="연합 동아리 회장 상세 보기">
+        <figure class="fig thumb" style="margin:0">
+          <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="대형 강당 발표" />
+        </figure>
+        <div class="year">2022</div>
+        <div class="title">IT 연합 창업 동아리 회장 (리더십)</div>
+        <div class="outcome">데모데이 배포율 40% → 85%</div>
+        <div class="arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 03 CONTACT -->
+<section class="contact reveal" id="contact">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">03</span> / Contact</div>
+    </div>
+    <div class="body">
+      <h2 class="reveal">함께 만들 프로덕트를<br>이야기하고 싶습니다.</h2>
+      <a class="email reveal" href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+
+      <div class="meta-list reveal">
+        <div>
+          <div class="k">Role</div>
+          <div class="v">Product Manager</div>
+        </div>
+        <div>
+          <div class="k">Location</div>
+          <div class="v">Seoul, Republic of Korea</div>
+        </div>
+        <div>
+          <div class="k">Available</div>
+          <div class="v">2026 신입 / 인턴십</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="grid">
+    <div class="left">© 2026 Taeyoon Kim. All rights reserved.</div>
+    <div class="right">Designed with care · Whitespace Cathedral</div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Theme toggle
+    var toggle = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    var saved = null;
+    try { saved = localStorage.getItem('tk-theme'); } catch (e) {}
+    var current = saved === 'alt' ? 'alt' : 'light';
+    applyTheme(current);
+
+    function applyTheme(t) {
+      if (t === 'alt') {
+        root.setAttribute('data-theme', 'alt');
+        toggle.textContent = 'DARK · 02';
+      } else {
+        root.removeAttribute('data-theme');
+        toggle.textContent = 'LIGHT · 01';
+      }
+    }
+
+    toggle.addEventListener('click', function () {
+      current = (current === 'alt') ? 'light' : 'alt';
+      applyTheme(current);
+      try { localStorage.setItem('tk-theme', current); } catch (e) {}
+    });
+
+    // Progress bar
+    var bar = document.getElementById('progress');
+    function onScroll() {
+      var h = document.documentElement;
+      var scrolled = (h.scrollTop) / Math.max(1, (h.scrollHeight - h.clientHeight));
+      bar.style.width = (scrolled * 100) + '%';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Text split for section labels
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var splits = document.querySelectorAll('.label.split');
+    splits.forEach(function (el) {
+      var text = el.textContent;
+      el.textContent = '';
+      var idx = 0;
+      Array.prototype.forEach.call(text, function (ch) {
+        var s = document.createElement('span');
+        s.className = 'char';
+        s.textContent = ch === ' ' ? ' ' : ch;
+        s.style.transitionDelay = (idx * 50) + 'ms';
+        el.appendChild(s);
+        idx++;
+      });
+    });
+
+    // IntersectionObserver reveal
+    var els = document.querySelectorAll('.reveal, .label.split, figure.fig');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in'); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function (el) { io.observe(el); });
+    }
+
+    // Hero mask reveal on load
+    window.addEventListener('load', function () {
+      var name = document.getElementById('heroName');
+      if (name) {
+        setTimeout(function () { name.classList.add('in'); }, 150);
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

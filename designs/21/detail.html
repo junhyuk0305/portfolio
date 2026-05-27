@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CASE 01 — RoomSync · 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EFE3;
+    --ink-1:#E07856;
+    --ink-2:#2D3F6F;
+    --text:#1A1A1A;
+    --ease-rise:cubic-bezier(.34,1.2,.6,1);
+  }
+  [data-theme="alt"]{
+    --paper:#1A1A1A;
+    --ink-1:#E89B7F;
+    --ink-2:#80A0E0;
+    --text:#F4EFE3;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;overflow-x:hidden;}
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:16px;
+    line-height:1.65;
+    word-break:keep-all;
+    transition:background .25s ease,color .25s ease;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:50;
+    opacity:.05;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  [data-theme="alt"] .grain{mix-blend-mode:screen;opacity:.08;}
+
+  .progress{
+    position:fixed;top:0;left:0;height:1px;width:0%;
+    background:var(--ink-1);z-index:100;transition:width .08s linear;
+  }
+
+  .toggle{
+    position:fixed;top:24px;right:24px;z-index:90;
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;
+    font-size:12px;letter-spacing:.14em;
+    padding:10px 16px;min-height:44px;min-width:44px;
+    background:var(--paper);color:var(--ink-2);
+    border:2px solid var(--ink-2);
+    transform:rotate(-2deg);
+    box-shadow:4px 4px 0 var(--ink-1);
+    cursor:pointer;
+    transition:transform .2s ease,box-shadow .2s ease,background .25s ease,color .25s ease,border-color .25s ease;
+    text-transform:uppercase;
+  }
+  .toggle:hover{transform:rotate(-2deg) translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink-1);}
+  .toggle:active{transform:rotate(-2deg) translate(2px,2px);box-shadow:2px 2px 0 var(--ink-1);}
+
+  .back{
+    display:inline-block;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:14px;letter-spacing:.05em;
+    color:var(--ink-2);text-decoration:none;
+    padding:8px 0;min-height:44px;line-height:28px;
+    border-bottom:1px dashed var(--ink-2);
+  }
+  .back:hover{color:var(--ink-1);}
+
+  .wrap{max-width:960px;margin:0 auto;padding:0 32px;position:relative;z-index:1;}
+
+  header.top{padding:80px 0 24px;}
+  .meta-line{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-2);margin-bottom:8px;
+  }
+
+  /* RISO */
+  .riso{position:relative;display:inline-block;line-height:0;isolation:isolate;}
+  .riso .img-wrap{position:relative;overflow:hidden;background:var(--paper);}
+  .riso img{display:block;width:100%;height:100%;object-fit:cover;}
+  .riso .layer{display:none;}
+  [data-theme="alt"] .riso .layer{display:none;}
+  .riso .ghost{display:none;}
+  [data-theme="alt"] .riso .ghost{display:none;}
+  .riso .imgGrain{display:none;}
+  @keyframes pulse{0%,100%{opacity:.14;}50%{opacity:.22;}}
+
+  /* HERO PLATE */
+  .hero-plate{
+    position:relative;margin-top:24px;
+  }
+  .hero-plate .riso,.hero-plate .img-wrap{width:100%;height:clamp(280px,42vw,440px);display:block;}
+  .hero-plate .img-wrap{height:clamp(280px,42vw,440px);}
+  .hero-plate .cap{
+    font-family:'Caveat',cursive;color:var(--ink-2);font-size:16px;display:block;margin-top:10px;
+  }
+
+  .case-head{padding:48px 0 16px;}
+  .case-head .label{
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;
+    font-size:13px;letter-spacing:.22em;color:var(--ink-1);text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  .case-head h1{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:clamp(48px,7vw,84px);line-height:.98;letter-spacing:-.02em;margin:0;
+    color:var(--text);
+  }
+  .case-head h1 .word{display:inline-block;opacity:0;transform:translateY(24px) rotate(-1deg);transition:opacity .6s var(--ease-rise),transform .6s var(--ease-rise);}
+  .case-head h1.in .word{opacity:1;transform:translateY(0) rotate(0);}
+  .case-head .sub{
+    font-family:'Caveat',cursive;color:var(--ink-1);font-size:28px;display:inline-block;
+    transform:rotate(-2deg);margin-top:14px;
+  }
+  .case-head .meta{
+    margin-top:18px;display:flex;flex-wrap:wrap;gap:18px;
+    font-size:14px;color:var(--ink-2);font-family:'IBM Plex Sans',sans-serif;letter-spacing:.05em;
+  }
+  .case-head .meta span strong{color:var(--text);font-weight:600;}
+
+  /* KEY METRIC BLOCK */
+  .keyblock{
+    margin:48px 0;padding:36px 32px;
+    background:var(--paper);
+    border:2px solid var(--ink-2);
+    box-shadow:6px 6px 0 var(--ink-1);
+    transform:rotate(-.6deg);
+    display:flex;align-items:baseline;gap:28px;flex-wrap:wrap;
+  }
+  .keyblock .num{
+    font-family:'Fraunces',serif;font-weight:700;
+    font-size:clamp(48px,8vw,84px);line-height:1;letter-spacing:-.02em;
+    color:var(--ink-1);
+  }
+  .keyblock .lbl{
+    font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:14px;
+    letter-spacing:.18em;color:var(--ink-2);text-transform:uppercase;display:block;margin-bottom:4px;
+  }
+  .keyblock .desc{font-family:'Caveat',cursive;color:var(--ink-2);font-size:22px;line-height:1.2;}
+  .keyblock .sep{
+    width:1px;height:64px;background:var(--ink-2);opacity:.4;
+  }
+
+  /* DIVIDER */
+  .divider{margin:56px 0;height:24px;width:100%;overflow:visible;}
+  .divider path{
+    fill:none;stroke:var(--ink-2);stroke-width:2;stroke-linecap:round;
+    stroke-dasharray:1200;stroke-dashoffset:1200;
+    transition:stroke-dashoffset .9s var(--ease-rise);
+  }
+  .divider.in path{stroke-dashoffset:0;}
+
+  /* SECTION */
+  .section-label{
+    font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ink-1);margin-bottom:10px;
+  }
+  .section h2{
+    font-family:'Fraunces',serif;font-weight:600;
+    font-size:clamp(28px,4vw,44px);
+    margin:0 0 24px;letter-spacing:-.01em;line-height:1.1;color:var(--text);
+  }
+  .section p{font-size:16px;margin:0 0 14px;max-width:680px;}
+  .section .accent{
+    font-family:'Caveat',cursive;color:var(--ink-1);font-size:22px;line-height:1.3;
+  }
+
+  /* ASYMMETRIC 2-COL */
+  .twocol{display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:start;}
+  .twocol.flip{grid-template-columns:1fr 1.4fr;}
+  .twocol .img-block .cap{font-family:'Caveat',cursive;color:var(--ink-2);font-size:16px;display:block;margin-top:8px;}
+
+  /* RESULT IMG with overlay */
+  .result-img{position:relative;}
+  .result-img .overlay{
+    position:absolute;left:18px;bottom:18px;right:18px;
+    background:var(--paper);border:2px solid var(--ink-2);
+    box-shadow:4px 4px 0 var(--ink-1);
+    padding:14px 18px;transform:rotate(-1.2deg);
+    font-family:'Fraunces',serif;font-weight:600;font-size:18px;color:var(--text);
+    letter-spacing:-.005em;
+    z-index:3;
+  }
+  .result-img .overlay em{font-style:normal;color:var(--ink-1);font-family:'Caveat',cursive;font-size:22px;}
+
+  /* LIST */
+  ul.bullets{padding-left:0;list-style:none;margin:0 0 16px;}
+  ul.bullets li{
+    position:relative;padding-left:26px;margin-bottom:10px;font-size:16px;line-height:1.6;
+  }
+  ul.bullets li::before{
+    content:"";position:absolute;left:0;top:10px;width:14px;height:6px;
+    background:var(--ink-1);transform:rotate(-3deg);
+  }
+
+  /* PROCESS NUMBERED CARDS */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;}
+  .step{
+    border:2px solid var(--ink-2);padding:18px;background:var(--paper);
+    box-shadow:4px 4px 0 var(--ink-1);
+    transform:rotate(-.4deg);
+  }
+  .step:nth-child(2){transform:rotate(.6deg);}
+  .step:nth-child(3){transform:rotate(-.7deg);}
+  .step .n{font-family:'Fraunces',serif;font-weight:700;color:var(--ink-1);font-size:18px;letter-spacing:.1em;display:block;margin-bottom:6px;}
+  .step h4{font-family:'Fraunces',serif;font-weight:600;font-size:18px;margin:0 0 6px;color:var(--text);}
+  .step p{font-size:14px;margin:0;color:var(--text);}
+
+  .reveal{opacity:0;transform:translateY(24px) rotate(-1deg);transition:opacity .5s var(--ease-rise),transform .5s var(--ease-rise);}
+  .reveal.in{opacity:1;transform:translateY(0) rotate(0);}
+
+  /* small inline img on 실행 */
+  .img-sm{width:200px;height:240px;float:right;margin:0 0 16px 28px;transform:rotate(2deg);}
+  .img-sm .img-wrap{width:200px;height:240px;}
+
+  /* NEXT */
+  .nextlink{
+    display:inline-block;margin-top:24px;
+    font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--ink-2);
+    text-decoration:none;letter-spacing:.08em;text-transform:uppercase;
+    border-bottom:1px dashed var(--ink-2);padding-bottom:2px;min-height:44px;line-height:42px;
+  }
+  .nextlink:hover{color:var(--ink-1);border-color:var(--ink-1);}
+
+  footer{
+    border-top:1px dashed var(--ink-2);margin-top:80px;
+    padding:24px 0 60px;font-size:13px;color:var(--ink-2);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+
+  @keyframes paperIn{
+    0%{opacity:0;transform:translateY(20px) rotate(-1.5deg);}
+    60%{opacity:1;transform:translateY(0) rotate(.4deg);}
+    100%{opacity:1;transform:translateY(0) rotate(0);}
+  }
+  .page-in > *{animation:paperIn .7s var(--ease-rise) both;}
+  .page-in > *:nth-child(1){animation-delay:.05s;}
+  .page-in > *:nth-child(2){animation-delay:.15s;}
+  .page-in > *:nth-child(3){animation-delay:.25s;}
+  .page-in > *:nth-child(4){animation-delay:.35s;}
+
+  @media (max-width:760px){
+    body{font-size:15px;}
+    .wrap{padding:0 22px;}
+    header.top{padding:64px 0 16px;}
+    .toggle{top:14px;right:14px;font-size:11px;padding:8px 12px;}
+    .case-head h1{font-size:44px;}
+    .twocol,.twocol.flip{grid-template-columns:1fr;gap:24px;}
+    .steps{grid-template-columns:1fr;}
+    .img-sm{float:none;width:100%;height:240px;margin:0 0 18px 0;transform:none;}
+    .img-sm .img-wrap{width:100%;height:240px;}
+    .keyblock{padding:24px 20px;gap:14px;}
+    .keyblock .sep{display:none;}
+    .result-img .overlay{font-size:15px;padding:12px 14px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;}
+    .reveal,.case-head h1 .word,.divider path{opacity:1!important;transform:none!important;stroke-dashoffset:0!important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<button class="toggle" id="themeToggle" aria-label="테마 전환">PAPER / DARK</button>
+
+<div class="wrap">
+
+  <header class="top page-in">
+    <a href="../../index.html" class="back">← 갤러리</a>
+    <div class="meta-line" style="margin-top:24px;">CASE STUDY · 01 · RISO EDITION</div>
+  </header>
+
+  <section class="case-head page-in">
+    <div class="label">CASE 01 — ROOMSYNC</div>
+    <h1 id="caseH1">
+      <span class="word">학내</span> <span class="word">동아리방</span><br/>
+      <span class="word">예약</span> <span class="word">관리</span> <span class="word">웹서비스</span>
+    </h1>
+    <span class="sub">— 겹침 사고를 끊어내다</span>
+    <div class="meta">
+      <span>기간 · <strong>2023.07 — 2023.11</strong></span>
+      <span>역할 · <strong>PM / 서비스 기획</strong></span>
+      <span>팀 · <strong>BE 2명 · PM 1명</strong></span>
+      <span>도구 · <strong>Jira · Notion · Figma · 구글폼</strong></span>
+    </div>
+  </section>
+
+  <section class="hero-plate page-in">
+    <div class="riso">
+      <div class="img-wrap">
+        <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync team plate"/>
+        <div class="ghost"></div>
+        <div class="layer"></div>
+        <div class="imgGrain"></div>
+      </div>
+    </div>
+    <span class="cap">— RoomSync 팀, 2023 가을</span>
+  </section>
+
+  <section class="keyblock reveal" aria-label="핵심 지표">
+    <div>
+      <span class="lbl">RESULT</span>
+      <span class="num">30</span>
+    </div>
+    <div class="desc">개 동아리<br/>출시 1개월</div>
+    <div class="sep" aria-hidden="true"></div>
+    <div>
+      <span class="lbl">NO-SHOW</span>
+      <span class="num">−60%</span>
+    </div>
+    <div class="desc">노쇼 감소</div>
+  </section>
+
+  <svg class="divider reveal" viewBox="0 0 960 24" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 12 Q 60 2, 120 12 T 240 12 T 360 12 T 480 12 T 600 12 T 720 12 T 840 12 T 960 12"/>
+  </svg>
+
+  <!-- 문제 -->
+  <section class="section reveal" id="problem">
+    <div class="section-label">SECTION · 01 · PROBLEM</div>
+    <h2>문제</h2>
+    <p>
+      학내 50여 동아리가 공용 회의실을 수기 장부와 단톡방으로 예약해 왔습니다.
+      같은 시간에 두세 팀이 들어오는 겹침 사고가 매주 반복되고, 노쇼는 다음 팀 활동을 끊어버렸습니다.
+    </p>
+    <p class="accent">"누가, 언제, 어디에 있는지 아무도 정확히 모른다."</p>
+  </section>
+
+  <svg class="divider reveal" viewBox="0 0 960 24" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 12 Q 60 22, 120 12 T 240 12 T 360 12 T 480 12 T 600 12 T 720 12 T 840 12 T 960 12"/>
+  </svg>
+
+  <!-- 리서치 -->
+  <section class="section reveal" id="research">
+    <div class="section-label">SECTION · 02 · RESEARCH</div>
+    <h2>리서치</h2>
+    <div class="twocol">
+      <div>
+        <p>
+          회장단을 대상으로 구글폼 설문을 돌려 페인포인트를 정렬했습니다.
+          가장 강한 시그널은 <strong>'실시간으로 누가 어디를 쓰는지 보고 싶다'</strong>는 니즈였고,
+          기존 장부·단톡 방식의 비동기성이 겹침과 노쇼의 근원이었습니다.
+        </p>
+        <ul class="bullets">
+          <li>회장단 설문으로 니즈 우선순위 도출</li>
+          <li>장부·단톡 기록과 사고 사례 교차 확인</li>
+          <li>'실시간 현황 확인'을 최우선 가치로 확정</li>
+        </ul>
+      </div>
+      <div class="img-block">
+        <div class="riso" style="display:block;">
+          <div class="img-wrap" style="width:100%;height:280px;">
+            <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="인터뷰 / 설문 리뷰"/>
+            <div class="ghost"></div>
+            <div class="layer"></div>
+            <div class="imgGrain"></div>
+          </div>
+        </div>
+        <span class="cap">— 회장단 설문 리뷰</span>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider reveal" viewBox="0 0 960 24" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 12 Q 60 4, 120 14 T 240 12 T 360 14 T 480 10 T 600 14 T 720 10 T 840 14 T 960 12"/>
+  </svg>
+
+  <!-- MVP 결정 -->
+  <section class="section reveal" id="mvp">
+    <div class="section-label">SECTION · 03 · MVP DECISION</div>
+    <h2>MVP 결정</h2>
+    <p>
+      백엔드 2명·한 학기 일정이라는 제약 안에서 무엇을 빼고 무엇을 남길지가 핵심이었습니다.
+      '실시간 현황 확인'이라는 단 하나의 가치를 1차 범위로 정하고, 알림은 2차로 미뤘습니다.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <span class="n">01</span>
+        <h4>예약 · 취소</h4>
+        <p>회의실/시간 슬롯을 선택해 등록하고 본인이 취소 가능.</p>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <h4>실시간 뷰</h4>
+        <p>전체 회의실의 현재/오늘 점유 상태를 한 화면에서 확인.</p>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <h4>알림 (2차)</h4>
+        <p>리마인드·노쇼 경고는 다음 스프린트로 분리, MVP에서 제외.</p>
+      </div>
+    </div>
+    <p style="margin-top:22px;" class="accent">— 빼는 결정이 만드는 결정보다 어려웠다.</p>
+  </section>
+
+  <svg class="divider reveal" viewBox="0 0 960 24" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 12 Q 60 2, 120 12 T 240 12 T 360 12 T 480 12 T 600 12 T 720 12 T 840 12 T 960 12"/>
+  </svg>
+
+  <!-- 실행 -->
+  <section class="section reveal" id="execution">
+    <div class="section-label">SECTION · 04 · EXECUTION</div>
+    <h2>실행</h2>
+    <div class="riso img-sm">
+      <div class="img-wrap">
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="PM working"/>
+        <div class="ghost"></div>
+        <div class="layer"></div>
+        <div class="imgGrain"></div>
+      </div>
+    </div>
+    <p>
+      백엔드와의 커뮤니케이션 비용을 줄이기 위해 API 명세 초안을 직접 작성해 전달했습니다.
+      엔드포인트, 요청/응답 스키마, 에러 케이스를 미리 합의하니 구현 단계에서 되돌아오는 질문이 줄었습니다.
+    </p>
+    <p>
+      Jira로 백로그를 쪼개고 1주 스프린트 단위로 데모를 돌렸습니다. 회장단 두세 명을 매주 리뷰에 초대해
+      그 자리에서 우선순위를 갱신했습니다.
+    </p>
+    <ul class="bullets">
+      <li>API 명세 초안 직접 작성 → 합의 시간 단축</li>
+      <li>Jira · 스크럼 · 주 1회 데모로 피드백 루프 단축</li>
+      <li>회장단 상시 리뷰로 범위 변경을 빠르게 흡수</li>
+    </ul>
+    <div style="clear:both;"></div>
+  </section>
+
+  <svg class="divider reveal" viewBox="0 0 960 24" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 12 Q 60 22, 120 12 T 240 12 T 360 12 T 480 12 T 600 12 T 720 12 T 840 12 T 960 12"/>
+  </svg>
+
+  <!-- 결과 -->
+  <section class="section reveal" id="result">
+    <div class="section-label">SECTION · 05 · RESULT</div>
+    <h2>결과</h2>
+    <div class="twocol flip">
+      <div class="img-block">
+        <div class="riso result-img" style="display:block;">
+          <div class="img-wrap" style="width:100%;height:340px;">
+            <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="결과 / 사용 현장"/>
+            <div class="ghost"></div>
+            <div class="layer"></div>
+            <div class="imgGrain"></div>
+          </div>
+          <div class="overlay">30 동아리 · <em>−60%</em> 노쇼</div>
+        </div>
+        <span class="cap" style="font-family:'Caveat',cursive;color:var(--ink-2);font-size:16px;display:block;margin-top:8px;">— 출시 1개월 시점</span>
+      </div>
+      <div>
+        <p>
+          출시 1개월 만에 학내 <strong>30개 동아리</strong>가 도입했고, 노쇼는 <strong>60% 감소</strong>했습니다.
+          '회의실 단톡 알림'이 사라진 자리에 실시간 뷰가 들어왔습니다.
+        </p>
+        <p class="accent">"끊어진 흐름이 다시 이어졌다."</p>
+        <p>
+          다음 분기에 알림·리마인드·관리자 통계 모듈을 2차로 붙이며 운영을 회장단에 이관했습니다.
+          PM이 빠진 뒤에도 유지되는 구조를 만드는 것이 마지막 책임이었습니다.
+        </p>
+      </div>
+    </div>
+    <a href="index.html" class="nextlink">← 포트폴리오 인덱스로</a>
+  </section>
+
+  <footer>
+    <span>© 2026 김태윤 · CASE 01 RoomSync</span>
+    <span style="font-family:'Caveat',cursive;font-size:18px;color:var(--ink-1);">v3 · misregistered with love</span>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    const KEY='tk-theme';
+    const btn=document.getElementById('themeToggle');
+    const saved=localStorage.getItem(KEY);
+    if(saved==='alt') document.documentElement.setAttribute('data-theme','alt');
+    btn.addEventListener('click',()=>{
+      const cur=document.documentElement.getAttribute('data-theme');
+      if(cur==='alt'){document.documentElement.removeAttribute('data-theme');localStorage.setItem(KEY,'paper');}
+      else{document.documentElement.setAttribute('data-theme','alt');localStorage.setItem(KEY,'alt');}
+    });
+  })();
+
+  (function(){
+    const p=document.getElementById('progress');
+    const onScroll=()=>{
+      const h=document.documentElement;
+      const pct=(h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+      p.style.width=Math.max(0,Math.min(100,pct))+'%';
+    };
+    document.addEventListener('scroll',onScroll,{passive:true});
+    onScroll();
+  })();
+
+  (function(){
+    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){
+      document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+      const h=document.getElementById('caseH1');if(h)h.classList.add('in');
+      return;
+    }
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+      });
+    },{threshold:.18,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    const h=document.getElementById('caseH1');
+    if(h){
+      const words=h.querySelectorAll('.word');
+      words.forEach((w,i)=>w.style.transitionDelay=(i*60)+'ms');
+      requestAnimationFrame(()=>{setTimeout(()=>h.classList.add('in'),100);});
+    }
+  })();
+</script>
+
+</body>
+</html>

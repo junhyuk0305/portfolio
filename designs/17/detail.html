@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — Chapitre 01 · Maison Taeyoon Kim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,200;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0E0C;
+    --bg-deep: #0a0907;
+    --text: rgba(235, 227, 213, 0.8);
+    --text-strong: #EBE3D5;
+    --gold: #C9A961;
+    --gold-soft: rgba(201, 169, 97, 0.18);
+    --plate-tone: radial-gradient(ellipse at 40% 50%, #1d1a15 0%, #0a0907 85%);
+    --image-filter: none;
+    --image-overlay: linear-gradient(180deg, rgba(15,14,12,0) 40%, rgba(15,14,12,0.7) 100%);
+  }
+  [data-theme="alt"] {
+    --bg: #F5EFE5;
+    --bg-deep: #ECE3D2;
+    --text: rgba(26, 22, 20, 0.78);
+    --text-strong: #1A1614;
+    --gold: #8B6914;
+    --gold-soft: rgba(139, 105, 20, 0.22);
+    --plate-tone: radial-gradient(ellipse at 40% 50%, #ECE3D2 0%, #DFD2BA 85%);
+    --image-filter: none;
+    --image-overlay: linear-gradient(180deg, rgba(245,239,229,0) 40%, rgba(245,239,229,0.78) 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text-strong); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+    transition: background 300ms ease, color 300ms ease;
+  }
+  a { color: inherit; text-decoration: none; cursor: none; }
+
+  /* Scroll progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--gold);
+    z-index: 10000;
+    transition: background 300ms ease;
+  }
+
+  /* Custom cursor */
+  .cursor-ring {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, border-color 300ms ease;
+    z-index: 9999;
+    opacity: 0;
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: #C9A961; /* invariant brand gold */
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .cursor-ring.active { width: 44px; height: 44px; }
+
+  /* Fixed wordmark left */
+  .wordmark {
+    position: fixed;
+    top: 50%;
+    left: 32px;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    z-index: 100;
+    transition: color 300ms ease;
+  }
+  .est-label {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    z-index: 100;
+    font-variant: small-caps;
+    transition: color 300ms ease;
+  }
+
+  /* Theme toggle — 32px gap below EST. label, 44px touch target */
+  .theme-toggle {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: transparent;
+    cursor: none;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: border-color 300ms ease, transform 300ms ease;
+  }
+  .theme-toggle:hover { transform: rotate(15deg); }
+  .theme-toggle .dot-a,
+  .theme-toggle .dot-b {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transition: background 300ms ease, border-color 300ms ease;
+  }
+  .theme-toggle .dot-a { background: var(--gold); }
+  .theme-toggle .dot-b { background: transparent; border: 1px solid var(--gold); }
+  .theme-toggle-tip {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 300ms ease, transform 300ms ease, color 300ms ease;
+    pointer-events: none;
+  }
+  .theme-toggle:hover .theme-toggle-tip { opacity: 1; transform: translateY(0); }
+
+  /* Retour link — moved to top-left BUT right of the wordmark column */
+  .retour {
+    position: fixed;
+    top: 32px;
+    left: 80px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    z-index: 110;
+    font-variant: small-caps;
+    padding: 12px 8px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.3s ease, color 300ms ease;
+  }
+  .retour:hover { opacity: 0.6; }
+
+  /* Back to gallery link */
+  .gallery-back {
+    position: fixed;
+    top: 32px;
+    left: 220px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    z-index: 110;
+    padding: 12px 8px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.3s ease, color 300ms ease;
+  }
+  .gallery-back:hover { opacity: 0.6; }
+
+  /* Hero plate */
+  .hero-plate {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    margin-top: 80px;
+    overflow: hidden;
+    background: var(--plate-tone);
+  }
+  .hero-plate .plate-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-filter);
+    transition: filter 300ms ease, transform 1800ms cubic-bezier(.2,.6,.2,1);
+    transform: scale(1.1);
+  }
+  .hero-plate.in-view .plate-img { transform: scale(1); }
+  .hero-plate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--image-overlay);
+    transition: background 300ms ease;
+    z-index: 1;
+  }
+  .hero-caption {
+    position: absolute;
+    bottom: 56px;
+    right: 60px;
+    text-align: right;
+    z-index: 2;
+  }
+  .hero-title {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 96px;
+    color: var(--text-strong);
+    line-height: 1;
+    margin-bottom: 18px;
+    transition: color 300ms ease;
+  }
+  .hero-title .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  .hero-title .letter.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero-sub {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    transition: color 300ms ease;
+  }
+  .hero-index {
+    position: absolute;
+    top: 36px;
+    left: 60px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    z-index: 2;
+    transition: color 300ms ease;
+  }
+  .hero-italic-caption {
+    position: absolute;
+    bottom: 24px;
+    left: 60px;
+    z-index: 2;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    transition: color 300ms ease;
+  }
+
+  .rule {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    margin: 120px auto;
+    transition: background 300ms ease;
+  }
+
+  /* Section markers — mask reveal */
+  .marker-wrap { text-align: center; margin-bottom: 64px; }
+  .marker {
+    display: inline-block;
+    text-align: center;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    position: relative;
+    padding-bottom: 14px;
+    transition: color 300ms ease;
+  }
+  .marker .marker-text {
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 500ms ease 380ms;
+  }
+  .marker::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: translateX(-50%);
+    transition: width 400ms cubic-bezier(.7,.1,.3,1), background 300ms ease;
+  }
+  .marker.in-view .marker-text { opacity: 1; }
+  .marker.in-view::after { width: 60px; }
+
+  /* Reveal-on-scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms ease, transform 700ms ease;
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Main page wrapper for comfortable side gutters */
+  main.page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 64px;
+  }
+  main.page > section {
+    padding: 24px 0;
+  }
+
+  .narrow {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 24px;
+    text-align: justify;
+    color: var(--text);
+    transition: color 300ms ease;
+  }
+  .narrow p { margin-bottom: 24px; }
+  .narrow em {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    color: var(--text-strong);
+  }
+  .narrow ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .narrow ul li {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--gold-soft);
+    display: flex;
+    gap: 24px;
+    transition: border-color 300ms ease;
+  }
+  .narrow ul li:last-child { border-bottom: none; }
+  .narrow ul li .k {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    min-width: 88px;
+    padding-top: 4px;
+    transition: color 300ms ease;
+  }
+  .narrow ul li .v {
+    flex: 1;
+    color: var(--text);
+    transition: color 300ms ease;
+  }
+
+  /* Italic plates inside narrative */
+  .italic-plate {
+    margin: 0 auto;
+    padding: 8px;
+    border: 1px solid var(--gold);
+    position: relative;
+    transition: border-color 300ms ease;
+  }
+  .italic-plate.size-md { width: 360px; }
+  .italic-plate.size-sm { width: 280px; }
+  .italic-plate-inner {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    overflow: hidden;
+  }
+  .italic-plate.size-sm .italic-plate-inner { height: 320px; }
+  .italic-plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-filter);
+    transition: filter 300ms ease, transform 1800ms cubic-bezier(.2,.6,.2,1);
+    transform: scale(1.1);
+  }
+  .italic-plate::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    background: var(--image-overlay);
+    transition: background 300ms ease;
+    pointer-events: none;
+  }
+  .italic-plate.in-view img { transform: scale(1); }
+  .italic-plate-caption {
+    text-align: center;
+    margin-top: 14px;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--gold);
+    letter-spacing: 0.06em;
+    transition: color 300ms ease;
+  }
+
+  /* Pull-quote */
+  .pull-quote {
+    text-align: center;
+    padding: 32px 24px;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 32px;
+    color: var(--text-strong);
+    line-height: 1.4;
+    max-width: 760px;
+    margin: 0 auto;
+    transition: color 300ms ease;
+  }
+  .pull-quote .ornament {
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 28px auto;
+    transition: background 300ms ease;
+  }
+  .pull-quote-credit {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    margin-top: 24px;
+    transition: color 300ms ease;
+  }
+
+  /* Result metrics */
+  .metrics {
+    max-width: 720px;
+    margin: 48px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    text-align: center;
+  }
+  .metric .num {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 56px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 14px;
+    transition: color 300ms ease;
+  }
+  .metric .lbl {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--text);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    transition: color 300ms ease;
+  }
+
+  .back-link {
+    text-align: center;
+    padding: 0 24px;
+  }
+  .back-link a {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    transition: opacity 0.3s ease, color 300ms ease, border-color 300ms ease;
+    display: inline-block;
+    padding: 16px 0;
+    border-top: 1px solid var(--gold-soft);
+    border-bottom: 1px solid var(--gold-soft);
+  }
+  .back-link a:hover { opacity: 0.6; }
+
+  footer {
+    text-align: center;
+    padding: 80px 24px 60px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    opacity: 0.7;
+    transition: color 300ms ease;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+    .marker .marker-text { opacity: 1; }
+    .marker::after { width: 60px; }
+    .italic-plate img, .hero-plate .plate-img { transform: scale(1); }
+  }
+
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    a { cursor: pointer; }
+    .cursor-ring, .cursor-dot { display: none; }
+    .wordmark {
+      position: static;
+      writing-mode: horizontal-tb;
+      transform: none;
+      text-align: center;
+      padding: 24px 0 0;
+      display: block;
+    }
+    .est-label {
+      position: static;
+      display: block;
+      text-align: center;
+      padding-top: 8px;
+    }
+    .theme-toggle {
+      position: static;
+      margin: 16px auto 0;
+    }
+    .theme-toggle-tip { display: none; }
+    .retour {
+      position: static;
+      display: block;
+      text-align: center;
+      padding-top: 12px;
+    }
+    .gallery-back {
+      position: static;
+      display: block;
+      text-align: center;
+      padding-top: 12px;
+      padding-bottom: 4px;
+    }
+    main.page { padding: 0 24px; }
+    main.page > section { padding: 12px 0; }
+    .hero-plate { height: 320px; margin-top: 24px; }
+    .hero-title { font-size: 56px; }
+    .hero-caption { bottom: 28px; right: 24px; }
+    .hero-index { top: 20px; left: 24px; }
+    .hero-italic-caption { left: 24px; bottom: 16px; font-size: 12px; }
+    .rule { margin: 80px auto; }
+    .pull-quote { font-size: 22px; }
+    .metrics { grid-template-columns: 1fr; gap: 36px; }
+    .metric .num { font-size: 44px; }
+    .italic-plate.size-md, .italic-plate.size-sm { width: calc(100% - 32px); }
+    .italic-plate-inner { height: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<div class="wordmark">TAEYOON&nbsp;&nbsp;KIM</div>
+<div class="est-label">EST. 2025 &middot; SEOUL, KR</div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="dot-a"></span>
+  <span class="dot-b"></span>
+  <span class="theme-toggle-tip" id="themeTip">MIDNIGHT</span>
+</button>
+
+<a href="index.html" class="retour">← Retour</a>
+<a href="../../index.html" class="gallery-back">← 갤러리</a>
+
+<section class="hero-plate" id="heroPlate">
+  <img class="plate-img" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync atelier session" />
+  <div class="hero-index">Chapitre 01</div>
+  <div class="hero-caption">
+    <h1 class="hero-title" id="heroTitle">RoomSync</h1>
+    <div class="hero-sub">Chapitre 01 &middot; 2023</div>
+  </div>
+  <div class="hero-italic-caption">RoomSync · ATELIER SESSION · 2023</div>
+</section>
+
+<main class="page">
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">Prologue — 문제정의</span></div></div>
+  <div class="narrow reveal">
+    <p>50여 개 동아리가 단 몇 개의 공용 회의실을 수기 시트로 예약해 왔습니다. 시트는 항상 시간차로 갱신되었고, 두 팀이 같은 시간에 같은 방을 잡는 겹침 사고가 매주 반복되었습니다.</p>
+    <p>'먼저 도착한 팀이 이긴다'는 비공식 규칙은 늦게 도착한 팀의 미팅을 통째로 무산시켰고, 회장단의 갈등 조율 시간은 점점 길어졌습니다. 공용 자원이지만 누구도 통제하지 못하는 공간 — 이것이 RoomSync가 짚은 첫 번째 균열입니다.</p>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">Étude — 리서치</span></div></div>
+  <div class="narrow reveal">
+    <p>50여 개 동아리 회장단을 대상으로 설문을 진행해 정성·정량 응답을 수집했습니다. 응답은 한 곳을 가리켰습니다 — '예약 자체보다 지금 비어 있는지 즉시 확인하고 싶다.'</p>
+    <p>아래는 설문에서 추출한 인사이트의 골격입니다.</p>
+    <ul>
+      <li><span class="k">N° 01</span><span class="v">'실시간 현황 확인'이 회장단의 최우선 니즈로 수렴</span></li>
+      <li><span class="k">N° 02</span><span class="v">예약 화면보다 캘린더형 뷰를 선호 — 직관성 우선</span></li>
+      <li><span class="k">N° 03</span><span class="v">노쇼는 '예약했다는 사실의 망각'에서 발생 — 알림은 후순위 보완재</span></li>
+      <li><span class="k">N° 04</span><span class="v">회장단은 통계 대시보드를 원하지 않음 — 분쟁 시 로그만 있으면 충분</span></li>
+    </ul>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="italic-plate size-sm" id="plateInterview">
+    <div class="italic-plate-inner">
+      <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="Interview field notes" />
+    </div>
+  </div>
+  <div class="italic-plate-caption">Voix du terrain.</div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">Décision — MVP 전략</span></div></div>
+  <div class="narrow reveal">
+    <p>제한된 자원과 한 달이라는 짧은 출시 윈도우 안에서, '무엇을 빼야 핵심이 더 빛나는가'를 결정해야 했습니다.</p>
+    <p>저는 알림·통계·권한 관리 기능을 2차 릴리스로 미루고, MVP를 <em>예약 · 취소 · 실시간 뷰</em> 세 가지로만 단단히 묶었습니다. 핵심 사용자 흐름을 한 화면 안에 다 보이게 만드는 것 — 그것만이 첫 출시의 약속이었습니다.</p>
+    <p>회장단과 정기 데모 리뷰를 약속드려, '빠지는 기능'에 대한 불안을 협업의 신뢰로 바꿔낸 것도 이 단계의 또 다른 성과였습니다.</p>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">Exécution — 실행</span></div></div>
+  <div class="narrow reveal">
+    <p>API 명세 초안을 기획자가 직접 작성해 개발팀에 전달했습니다. 엔드포인트 · 요청/응답 스키마 · 예외 케이스까지 미리 정렬해 두니, 개발과의 재확인 핑퐁이 눈에 띄게 줄었습니다.</p>
+    <p>Jira에 백로그를 세팅하고 스크럼 마스터 역할을 겸하며, 짧은 주기의 스프린트와 매일의 스탠드업을 운영했습니다. 변경 요청은 'Definition of Done' 체크리스트로 차단해 스코프 크리프 없이 일정 안에 출시했습니다.</p>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="italic-plate size-md" id="platePortrait">
+    <div class="italic-plate-inner">
+      <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="Le briefing matinal" />
+    </div>
+  </div>
+  <div class="italic-plate-caption">Le briefing matinal.</div>
+</section>
+
+<div class="rule"></div>
+
+<section class="pull-quote reveal">
+  <span class="ornament"></span>
+  &ldquo;30 동아리 · −60% 노쇼&rdquo;
+  <div class="pull-quote-credit">Épilogue · RoomSync 2023</div>
+  <span class="ornament"></span>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">Épilogue — 결과</span></div></div>
+  <div class="narrow reveal">
+    <p>출시 첫 달, 학내 30개 동아리가 자발적으로 가입했습니다. 회장단 슬랙에서 입소문이 번지며 가입은 자체 마케팅 없이 이루어졌고, 같은 기간 겹침 사고는 사라졌으며 노쇼율은 직전 학기 대비 60% 감소했습니다.</p>
+    <p>2차 릴리스에서 Web Push 알림과 권한 관리가 합류하면서, RoomSync는 '학내 도구'에서 '회장단이 신뢰하는 운영 인프라'로 자리잡았습니다.</p>
+  </div>
+
+  <div class="metrics reveal">
+    <div class="metric">
+      <div class="num">30</div>
+      <div class="lbl">Clubs Onboarded</div>
+    </div>
+    <div class="metric">
+      <div class="num">−60<span style="font-size:32px">%</span></div>
+      <div class="lbl">No-show Rate</div>
+    </div>
+    <div class="metric">
+      <div class="num">1<span style="font-size:32px">M</span></div>
+      <div class="lbl">MVP Delivery</div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section class="back-link reveal">
+  <a href="index.html">Retour à l'index</a>
+</section>
+
+</main>
+
+<footer>MMXXV &middot; Maison Taeyoon Kim &middot; Chapitre 01</footer>
+
+<script>
+  // Theme toggle
+  (function() {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const tip = document.getElementById('themeTip');
+    const saved = localStorage.getItem('tk-theme');
+    if (saved === 'alt') root.setAttribute('data-theme', 'alt');
+    const updateTip = () => {
+      tip.textContent = root.getAttribute('data-theme') === 'alt' ? 'DAYLIGHT' : 'MIDNIGHT';
+    };
+    updateTip();
+    btn.addEventListener('click', () => {
+      const cur = root.getAttribute('data-theme');
+      const next = cur === 'alt' ? 'dark' : 'alt';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('tk-theme', next);
+      updateTip();
+      runHeroReveal();
+    });
+  })();
+
+  // Letter-by-letter reveal for hero title
+  let heroLetters = [];
+  function runHeroReveal() {
+    heroLetters.forEach((l) => l.classList.remove('revealed'));
+    heroLetters.forEach((l, i) => {
+      setTimeout(() => l.classList.add('revealed'), i * 80 + 200);
+    });
+  }
+  (function() {
+    const el = document.getElementById('heroTitle');
+    const text = el.textContent;
+    el.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+      const span = document.createElement('span');
+      span.className = 'letter';
+      span.textContent = text[i] === ' ' ? ' ' : text[i];
+      el.appendChild(span);
+      heroLetters.push(span);
+    }
+    window.addEventListener('load', runHeroReveal);
+  })();
+
+  // Scroll progress
+  (function() {
+    const bar = document.getElementById('progressBar');
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + '%';
+    };
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // Intersection reveal
+  (function() {
+    const targets = document.querySelectorAll('.reveal, .marker, .italic-plate, .hero-plate');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    targets.forEach((t) => io.observe(t));
+  })();
+
+  // Custom cursor
+  (function() {
+    if (window.matchMedia('(max-width: 768px), (pointer: coarse)').matches) return;
+    const ring = document.getElementById('cursorRing');
+    const dot = document.getElementById('cursorDot');
+    let rx = 0, ry = 0, tx = 0, ty = 0;
+    document.addEventListener('mousemove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.left = tx + 'px';
+      dot.style.top = ty + 'px';
+      ring.style.opacity = '1';
+      dot.style.opacity = '1';
+    });
+    function animate() {
+      rx += (tx - rx) * 0.18;
+      ry += (ty - ry) * 0.18;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animate);
+    }
+    animate();
+    const bindHover = (el) => {
+      el.addEventListener('mouseenter', () => ring.classList.add('active'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('active'));
+    };
+    document.querySelectorAll('a, button').forEach(bindHover);
+    document.addEventListener('mouseleave', () => {
+      ring.style.opacity = '0';
+      dot.style.opacity = '0';
+    });
+  })();
+</script>
+
+</body>
+</html>

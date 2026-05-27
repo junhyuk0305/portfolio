@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Maison Couture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,200;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F0E0C;
+    --bg-deep: #0a0907;
+    --text: rgba(235, 227, 213, 0.8);
+    --text-strong: #EBE3D5;
+    --gold: #C9A961;
+    --gold-soft: rgba(201, 169, 97, 0.18);
+    --rule-bg: linear-gradient(180deg, rgba(15,14,12,0.1) 0%, rgba(15,14,12,0.85) 100%);
+    --plate-tone: radial-gradient(ellipse at 30% 40%, #1a1814 0%, #0a0907 80%);
+    --image-filter: none;
+    --image-overlay: linear-gradient(180deg, rgba(15,14,12,0) 40%, rgba(15,14,12,0.7) 100%);
+  }
+  [data-theme="alt"] {
+    --bg: #F5EFE5;
+    --bg-deep: #ECE3D2;
+    --text: rgba(26, 22, 20, 0.78);
+    --text-strong: #1A1614;
+    --gold: #8B6914;
+    --gold-soft: rgba(139, 105, 20, 0.22);
+    --plate-tone: radial-gradient(ellipse at 30% 40%, #ECE3D2 0%, #DFD2BA 80%);
+    --image-filter: none;
+    --image-overlay: linear-gradient(180deg, rgba(245,239,229,0) 40%, rgba(245,239,229,0.78) 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--text-strong); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    overflow-x: hidden;
+    cursor: none;
+    transition: background 300ms ease, color 300ms ease;
+  }
+  a { color: inherit; text-decoration: none; cursor: none; }
+
+  /* Scroll progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--gold);
+    z-index: 10000;
+    transition: background 300ms ease;
+  }
+
+  /* Custom cursor */
+  .cursor-ring {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease, border-color 300ms ease;
+    z-index: 9999;
+    opacity: 0;
+  }
+  .cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: #C9A961; /* invariant brand gold */
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .cursor-ring.active { width: 44px; height: 44px; }
+
+  /* Fixed wordmark left */
+  .wordmark {
+    position: fixed;
+    top: 50%;
+    left: 32px;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    z-index: 100;
+    font-weight: 400;
+    transition: color 300ms ease;
+  }
+
+  /* Back to gallery link */
+  .gallery-back {
+    position: fixed;
+    top: 32px;
+    left: 80px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    z-index: 110;
+    padding: 12px 8px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.3s ease, color 300ms ease;
+  }
+  .gallery-back:hover { opacity: 0.6; }
+
+  /* Top-right label */
+  .est-label {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    z-index: 100;
+    font-variant: small-caps;
+    transition: color 300ms ease;
+  }
+
+  /* Theme toggle — 32px gap below EST. label (label at top:32px, ~16px line height → toggle at top:80px gives clear separation, plus 44px hit area) */
+  .theme-toggle {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: transparent;
+    cursor: none;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: border-color 300ms ease, transform 300ms ease;
+  }
+  .theme-toggle:hover { transform: rotate(15deg); }
+  .theme-toggle .dot-a,
+  .theme-toggle .dot-b {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transition: background 300ms ease, border-color 300ms ease;
+  }
+  .theme-toggle .dot-a { background: var(--gold); }
+  .theme-toggle .dot-b { background: transparent; border: 1px solid var(--gold); }
+  .theme-toggle-tip {
+    position: absolute;
+    top: 38px;
+    right: 0;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 300ms ease, transform 300ms ease, color 300ms ease;
+    pointer-events: none;
+  }
+  .theme-toggle:hover .theme-toggle-tip { opacity: 1; transform: translateY(0); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 240px 24px;
+    text-align: center;
+  }
+  .hero-name {
+    font-family: 'Bodoni Moda', serif;
+    font-weight: 200;
+    font-style: italic;
+    font-size: 140px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--text-strong);
+    margin-bottom: 48px;
+    transition: color 300ms ease;
+  }
+  .hero-name .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+  .hero-name .letter.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero-tagline {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    opacity: 0;
+    animation: fadeUp 1.6s ease 1.4s forwards;
+    transition: color 300ms ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Gold rule */
+  .rule {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+    margin: 120px auto;
+    transition: background 300ms ease;
+  }
+
+  /* Section markers — mask reveal */
+  .marker {
+    text-align: center;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    margin-bottom: 80px;
+    position: relative;
+    display: inline-block;
+    width: auto;
+    transition: color 300ms ease;
+  }
+  .marker-wrap { text-align: center; margin-bottom: 80px; }
+  .marker {
+    margin-bottom: 0;
+    padding-bottom: 14px;
+  }
+  .marker .marker-text {
+    display: inline-block;
+    opacity: 0;
+    transition: opacity 500ms ease 380ms;
+  }
+  .marker::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: translateX(-50%);
+    transition: width 400ms cubic-bezier(.7,.1,.3,1), background 300ms ease;
+  }
+  .marker.in-view .marker-text { opacity: 1; }
+  .marker.in-view::after { width: 60px; }
+
+  /* Reveal-on-scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms ease, transform 700ms ease;
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Profile narrow column */
+  .narrow {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 24px;
+    text-align: justify;
+    color: var(--text);
+    transition: color 300ms ease;
+  }
+  .narrow p { margin-bottom: 24px; }
+  .narrow p:last-child { margin-bottom: 0; }
+
+  /* Portrait above profile */
+  .portrait-wrap {
+    width: 240px;
+    margin: 0 auto 72px;
+    padding: 8px;
+    border: 1px solid var(--gold);
+    position: relative;
+  }
+  .portrait {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+  }
+  .portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-filter);
+    transition: filter 300ms ease, transform 1800ms cubic-bezier(.2,.6,.2,1);
+    transform: scale(1.1);
+  }
+  .portrait::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--image-overlay);
+    transition: background 300ms ease;
+    pointer-events: none;
+  }
+  .portrait.in-view img { transform: scale(1); }
+  .portrait-caption {
+    text-align: center;
+    margin-top: 14px;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    transition: color 300ms ease;
+  }
+
+  .meta-row {
+    max-width: 520px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 32px;
+  }
+  .meta-row .label {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    margin-bottom: 6px;
+    transition: color 300ms ease;
+  }
+  .meta-row .value {
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    transition: color 300ms ease;
+  }
+
+  /* Projects */
+  .projects { padding: 0 80px; }
+  .plate {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    display: block;
+    margin-bottom: 80px;
+    background: var(--plate-tone);
+  }
+  .plate:last-child { margin-bottom: 0; }
+  .plate-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--image-filter);
+    transition: filter 300ms ease, transform 1800ms cubic-bezier(.2,.6,.2,1);
+    transform: scale(1.1);
+  }
+  .plate.in-view .plate-img { transform: scale(1); }
+  .plate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--image-overlay);
+    transition: background 300ms ease, opacity 0.4s ease;
+    z-index: 1;
+  }
+  .plate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 14, 12, 0);
+    transition: background 0.3s ease;
+    z-index: 1;
+  }
+  [data-theme="alt"] .plate::after { background: rgba(26, 22, 20, 0); }
+  .plate:hover::after { background: rgba(15, 14, 12, 0.35); }
+  [data-theme="alt"] .plate:hover::after { background: rgba(26, 22, 20, 0.22); }
+
+  .plate-caption {
+    position: absolute;
+    bottom: 36px;
+    right: 40px;
+    text-align: right;
+    z-index: 2;
+  }
+  .plate-title {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 48px;
+    color: var(--text-strong);
+    line-height: 1;
+    margin-bottom: 14px;
+    transition: color 300ms ease;
+  }
+  .plate-sub {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    transition: color 300ms ease;
+  }
+  .plate-index {
+    position: absolute;
+    top: 32px;
+    left: 36px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    z-index: 2;
+    transition: color 300ms ease;
+  }
+  .plate-flag {
+    position: absolute;
+    bottom: 44px;
+    right: 40px;
+    z-index: 2;
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--gold);
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 700ms ease 200ms, transform 800ms cubic-bezier(.2,.6,.2,1) 200ms, color 300ms ease;
+  }
+  .plate.in-view .plate-flag { opacity: 1; transform: translateX(0); }
+  /* Move main caption up when flag also exists, so they don't collide */
+  .plate-caption.with-flag { bottom: 76px; }
+
+  /* Contact */
+  .contact {
+    text-align: center;
+    padding: 0 24px;
+  }
+  .contact-email {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 36px;
+    color: var(--text-strong);
+    margin-bottom: 28px;
+    display: inline-block;
+    transition: color 300ms ease;
+  }
+  .contact-line {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--text);
+    max-width: 480px;
+    margin: 0 auto;
+    transition: color 300ms ease;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 120px 24px 60px;
+    font-family: 'Bodoni Moda', serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-variant: small-caps;
+    opacity: 0.7;
+    transition: color 300ms ease;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+    .marker .marker-text { opacity: 1; }
+    .marker::after { width: 60px; }
+    .plate-img, .portrait img { transform: scale(1); }
+    .plate-flag { opacity: 1; transform: none; }
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    a { cursor: pointer; }
+    .cursor-ring, .cursor-dot { display: none; }
+    .wordmark {
+      position: static;
+      writing-mode: horizontal-tb;
+      transform: none;
+      text-align: center;
+      padding: 24px 0 0;
+      display: block;
+    }
+    .est-label {
+      position: static;
+      display: block;
+      text-align: center;
+      padding-top: 8px;
+    }
+    .theme-toggle {
+      position: static;
+      margin: 16px auto 0;
+    }
+    .theme-toggle-tip { display: none; }
+    .gallery-back {
+      position: static;
+      display: block;
+      text-align: center;
+      padding-top: 16px;
+      padding-bottom: 4px;
+    }
+    .hero { padding: 120px 16px; min-height: auto; }
+    .hero-name { font-size: 80px; margin-bottom: 32px; }
+    .projects { padding: 0 16px; }
+    .plate { height: 320px; margin-bottom: 48px; }
+    .plate-title { font-size: 28px; }
+    .rule { margin: 80px auto; }
+    .contact-email { font-size: 22px; }
+    .meta-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<a href="../../index.html" class="gallery-back">← 갤러리</a>
+<div class="wordmark">TAEYOON&nbsp;&nbsp;KIM</div>
+<div class="est-label">EST. 2025 &middot; SEOUL, KR</div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="dot-a"></span>
+  <span class="dot-b"></span>
+  <span class="theme-toggle-tip" id="themeTip">MIDNIGHT</span>
+</button>
+
+<section class="hero">
+  <h1 class="hero-name" id="heroName">김태윤</h1>
+  <div class="hero-tagline">Service Planner &middot; Product Manager</div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">01 — Profile</span></div></div>
+
+  <div class="portrait-wrap reveal">
+    <div class="portrait">
+      <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="Portrait" />
+    </div>
+    <div class="portrait-caption">Le portrait — 2025.</div>
+  </div>
+
+  <div class="narrow reveal">
+    <p>비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+    <p>학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+    <p>이처럼 저는 데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자입니다.</p>
+  </div>
+
+  <div class="meta-row reveal">
+    <div>
+      <div class="label">Études</div>
+      <div class="value">경영학 · 컴퓨터공학 복수전공 (3.9/4.5)</div>
+    </div>
+    <div>
+      <div class="label">Métier</div>
+      <div class="value">서비스 기획자 · PM</div>
+    </div>
+    <div>
+      <div class="label">Outils</div>
+      <div class="value">Notion · Figma · GA4 · SQL · Agile</div>
+    </div>
+    <div>
+      <div class="label">Atelier</div>
+      <div class="value">Seoul, R.O.K.</div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">02 — Projects</span></div></div>
+  <div class="projects">
+
+    <a href="detail.html" class="plate reveal">
+      <img class="plate-img" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync" />
+      <div class="plate-index">N° 01</div>
+      <div class="plate-caption with-flag">
+        <div class="plate-title">RoomSync</div>
+        <div class="plate-sub">2023.07–2023.11 &middot; 30 Clubs &middot; No-show −60%</div>
+      </div>
+      <div class="plate-flag">l'atelier collectif.</div>
+    </a>
+
+    <a href="detail.html" class="plate reveal">
+      <img class="plate-img" src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 커머스 인턴" />
+      <div class="plate-index">N° 02</div>
+      <div class="plate-caption with-flag">
+        <div class="plate-title">A사 커머스 인턴</div>
+        <div class="plate-sub">2023.01–2023.06 &middot; Cart CVR +12%p</div>
+      </div>
+      <div class="plate-flag">la voix du client.</div>
+    </a>
+
+    <a href="detail.html" class="plate reveal">
+      <img class="plate-img" src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리 회장" />
+      <div class="plate-index">N° 03</div>
+      <div class="plate-caption with-flag">
+        <div class="plate-title">IT 연합 동아리 회장</div>
+        <div class="plate-sub">2022.03–2022.12 &middot; Demo Day 40 → 85%</div>
+      </div>
+      <div class="plate-flag">le grand récit.</div>
+    </a>
+
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section>
+  <div class="marker-wrap"><div class="marker"><span class="marker-text">03 — Contact</span></div></div>
+  <div class="contact reveal">
+    <a href="mailto:taeyoon@example.com" class="contact-email">taeyoon@example.com</a>
+    <div class="contact-line">조용히 오래 남는 프로덕트를 함께 짓고 싶습니다. 한 줄의 메일이 시작이 됩니다.</div>
+  </div>
+</section>
+
+<footer>MMXXV &middot; Maison Taeyoon Kim &middot; Seoul Atelier</footer>
+
+<script>
+  // Theme toggle
+  (function() {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const tip = document.getElementById('themeTip');
+    const saved = localStorage.getItem('tk-theme');
+    if (saved === 'alt') root.setAttribute('data-theme', 'alt');
+    const updateTip = () => {
+      tip.textContent = root.getAttribute('data-theme') === 'alt' ? 'DAYLIGHT' : 'MIDNIGHT';
+    };
+    updateTip();
+    btn.addEventListener('click', () => {
+      const cur = root.getAttribute('data-theme');
+      const next = cur === 'alt' ? 'dark' : 'alt';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('tk-theme', next);
+      updateTip();
+      // re-run hero reveal on theme switch
+      runHeroReveal();
+    });
+  })();
+
+  // Letter-by-letter reveal
+  let heroLetters = [];
+  function runHeroReveal() {
+    heroLetters.forEach((l) => l.classList.remove('revealed'));
+    heroLetters.forEach((l, i) => {
+      setTimeout(() => l.classList.add('revealed'), i * 80 + 120);
+    });
+  }
+  (function() {
+    const el = document.getElementById('heroName');
+    const text = el.textContent;
+    el.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+      const span = document.createElement('span');
+      span.className = 'letter';
+      span.textContent = text[i] === ' ' ? ' ' : text[i];
+      el.appendChild(span);
+      heroLetters.push(span);
+    }
+    window.addEventListener('load', runHeroReveal);
+  })();
+
+  // Scroll progress
+  (function() {
+    const bar = document.getElementById('progressBar');
+    const onScroll = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + '%';
+    };
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+
+  // Intersection reveal
+  (function() {
+    const targets = document.querySelectorAll('.reveal, .marker, .portrait, .plate');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    targets.forEach((t) => io.observe(t));
+  })();
+
+  // Custom cursor
+  (function() {
+    if (window.matchMedia('(max-width: 768px), (pointer: coarse)').matches) return;
+    const ring = document.getElementById('cursorRing');
+    const dot = document.getElementById('cursorDot');
+    let rx = 0, ry = 0, tx = 0, ty = 0;
+    document.addEventListener('mousemove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.left = tx + 'px';
+      dot.style.top = ty + 'px';
+      ring.style.opacity = '1';
+      dot.style.opacity = '1';
+    });
+    function animate() {
+      rx += (tx - rx) * 0.18;
+      ry += (ty - ry) * 0.18;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animate);
+    }
+    animate();
+    const bindHover = (el) => {
+      el.addEventListener('mouseenter', () => ring.classList.add('active'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('active'));
+    };
+    document.querySelectorAll('a, button').forEach(bindHover);
+    document.addEventListener('mouseleave', () => {
+      ring.style.opacity = '0';
+      dot.style.opacity = '0';
+    });
+  })();
+</script>
+
+</body>
+</html>

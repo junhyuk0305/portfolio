@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kim Taeyoon — Whisper Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #6A6A6A;
+    --accent: #000000;
+    --hairline: rgba(0,0,0,0.22);
+    --img-filter: none;
+    --img-hover: none;
+    --transition-theme: 400ms ease;
+  }
+  [data-theme="alt"] {
+    --bg: #0F0F0F;
+    --text: #F2F2F2;
+    --muted: #A6A6A6;
+    --accent: #FFFFFF;
+    --hairline: rgba(255,255,255,0.24);
+    --img-filter: none;
+    --img-hover: none;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    font-weight: 300;
+    transition: background var(--transition-theme), color var(--transition-theme);
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--text); color: var(--bg); }
+
+  h1, h2, h3 {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* Top progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--text);
+    z-index: 1000;
+    transition: width 80ms linear, background var(--transition-theme);
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 24px; right: 32px;
+    z-index: 1100;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    padding: 10px 18px;
+    border-radius: 999px;
+    transition: opacity 300ms ease, color var(--transition-theme), background var(--transition-theme), border-color var(--transition-theme);
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(6px);
+  }
+  .theme-toggle:hover { opacity: 0.85; }
+  .theme-toggle .sep { color: var(--muted); margin: 0 6px; }
+  .theme-toggle .active { color: var(--text); font-weight: 500; }
+  .theme-toggle .inactive { color: var(--muted); }
+
+  /* Top nav minimal */
+  .top-bar {
+    position: fixed;
+    top: 24px; left: 32px;
+    z-index: 1100;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    padding: 10px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--transition-theme), background var(--transition-theme), border-color var(--transition-theme);
+    backdrop-filter: blur(6px);
+  }
+  .top-bar:hover { color: var(--muted); }
+  .top-bar .arrow {
+    display: inline-block;
+    transition: transform 300ms ease;
+  }
+  .top-bar:hover .arrow { transform: translateX(-3px); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 720px;
+    overflow: hidden;
+  }
+  .hero-img-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+  .hero-img-wrap.revealed {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1200ms cubic-bezier(.7,0,.3,1);
+  }
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--img-filter);
+    transition: filter 1500ms ease, transform 8000ms ease;
+  }
+  .hero-img-wrap.revealed .hero-img {
+    filter: var(--img-hover);
+    transform: scale(1.02);
+  }
+  .hero-overlay {
+    position: absolute;
+    left: 56px;
+    bottom: 56px;
+    color: #FFFFFF;
+    z-index: 2;
+    mix-blend-mode: difference;
+  }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #DDDDDD;
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 700ms ease 1400ms, transform 700ms ease 1400ms;
+  }
+  .hero-img-wrap.revealed ~ .hero-overlay .hero-eyebrow {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .hero-name {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #FFFFFF;
+    display: flex;
+    gap: 0.12em;
+    flex-wrap: wrap;
+  }
+  .hero-name .word {
+    display: inline-block;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: transform 800ms cubic-bezier(.7,0,.3,1), opacity 800ms ease;
+  }
+  .hero-img-wrap.revealed ~ .hero-overlay .hero-name .word {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .hero-caption {
+    position: absolute;
+    right: 56px;
+    bottom: 56px;
+    z-index: 2;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: #DDDDDD;
+    mix-blend-mode: difference;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 700ms ease 1600ms;
+  }
+  .hero-img-wrap.revealed ~ .hero-caption {
+    opacity: 1;
+  }
+
+  /* Section container */
+  .section {
+    padding: 160px 80px;
+  }
+  .section-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 56px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    transition: color var(--transition-theme);
+  }
+
+  /* PROFILE */
+  .profile-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .profile-title {
+    font-size: 48px;
+    line-height: 1.15;
+    margin-bottom: 40px;
+    letter-spacing: -0.015em;
+  }
+  .profile-portrait {
+    float: right;
+    width: 280px;
+    height: 350px;
+    margin: 8px 0 24px 40px;
+    overflow: hidden;
+    shape-outside: inset(0);
+    shape-margin: 16px;
+  }
+  .profile-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--img-filter);
+    transition: filter 1200ms ease, transform 1200ms ease;
+  }
+  .profile-portrait:hover img {
+    filter: var(--img-hover);
+    transform: scale(1.03);
+  }
+  .profile-text p {
+    margin-bottom: 1.4em;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.85;
+    transition: color var(--transition-theme);
+  }
+  .profile-text p.lead {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 22px;
+    line-height: 1.6;
+    margin-bottom: 1.8em;
+    color: var(--text);
+  }
+  .profile-meta {
+    clear: both;
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--hairline);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    transition: border-color var(--transition-theme);
+  }
+  .profile-meta .label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .profile-meta .value {
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: color var(--transition-theme);
+  }
+
+  /* PROJECTS */
+  .projects-header {
+    max-width: 1280px;
+    margin: 0 auto 96px;
+  }
+  .projects-intro {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 36px;
+    line-height: 1.3;
+    max-width: 720px;
+    color: var(--text);
+    margin-top: 16px;
+  }
+
+  .project-module {
+    max-width: 1280px;
+    margin: 0 auto 160px;
+    display: grid;
+    grid-template-columns: 65% 1fr;
+    gap: 80px;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .project-module.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .project-module:last-child { margin-bottom: 0; }
+  .project-module.flip {
+    grid-template-columns: 1fr 65%;
+  }
+  .project-module.flip .project-img-col { order: 2; }
+  .project-module.flip .project-text-col { order: 1; }
+
+  .project-img-col {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    position: relative;
+  }
+  .project-img-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--img-filter);
+    transition: filter 1500ms ease, transform 2400ms ease;
+  }
+  .project-module.in-view .project-img-col img {
+    filter: var(--img-hover);
+  }
+  .project-img-col:hover img {
+    transform: scale(1.04);
+  }
+  .img-caption {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    transition: color var(--transition-theme);
+  }
+
+  .project-text-col {
+    padding: 24px 0;
+  }
+  .project-number {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    margin-bottom: 24px;
+    transition: color var(--transition-theme);
+  }
+  .project-title {
+    font-size: 56px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .project-title a {
+    color: var(--text);
+    text-decoration: none;
+    background-image: linear-gradient(var(--text), var(--text));
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 500ms ease, color var(--transition-theme);
+    padding-bottom: 6px;
+  }
+  .project-title a:hover {
+    background-size: 100% 1px;
+  }
+  .project-subtitle {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    transition: color var(--transition-theme);
+  }
+  .project-body {
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+    max-width: 440px;
+  }
+  .project-meta-line {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 20px;
+    border-top: 1px solid var(--hairline);
+    max-width: 440px;
+    letter-spacing: 0.04em;
+    transition: color var(--transition-theme), border-color var(--transition-theme);
+  }
+
+  /* CONTACT */
+  .contact {
+    text-align: center;
+    padding: 200px 40px 120px;
+    border-top: 1px solid var(--hairline);
+    transition: border-color var(--transition-theme);
+  }
+  .contact-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+    transition: color var(--transition-theme);
+  }
+  .contact-line {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 64px;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+  .contact-line a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 6px;
+    transition: border-color 400ms ease, color var(--transition-theme);
+  }
+  .contact-line a:hover { border-bottom-color: var(--text); }
+  .contact-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 12px;
+    transition: color var(--transition-theme);
+  }
+  .footer {
+    padding: 80px 80px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    transition: color var(--transition-theme);
+  }
+
+  /* Scroll-reveal generic */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .section { padding: 100px 32px; }
+    .hero-overlay { left: 24px; bottom: 24px; }
+    .hero-caption { right: 24px; bottom: 24px; }
+    .hero-name { font-size: 56px; }
+    .project-module, .project-module.flip {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .project-module.flip .project-img-col { order: 1; }
+    .project-module.flip .project-text-col { order: 2; }
+    .project-title { font-size: 40px; }
+    .profile-portrait { width: 180px; height: 225px; margin: 4px 0 16px 24px; }
+    .contact-line { font-size: 36px; }
+    .top-bar, .theme-toggle { top: 16px; padding: 8px 14px; font-size: 11px; }
+    .theme-toggle { font-size: 14px; }
+    .top-bar { left: 16px; }
+    .theme-toggle { right: 16px; }
+    .footer { padding: 40px 24px; flex-direction: column; gap: 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+    .reveal, .project-module { opacity: 1 !important; transform: none !important; }
+    .hero-img-wrap { clip-path: inset(0) !important; }
+    .hero-name .word { opacity: 1 !important; transform: none !important; }
+    .hero-img, .project-img-col img, .profile-portrait img { filter: var(--img-hover) !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<a class="top-bar" href="../../index.html"><span class="arrow">←</span> 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="active" id="modeAlba">alba</span><span class="sep">/</span><span class="inactive" id="modeNotte">notte</span>
+</button>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-img-wrap" id="heroImgWrap">
+    <img class="hero-img" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="Team in conversation" />
+  </div>
+  <div class="hero-overlay">
+    <div class="hero-eyebrow">Portfolio — Volume Ⅰ</div>
+    <h1 class="hero-name" id="heroName" aria-label="김태윤">
+      <span class="word">김</span><span class="word">태</span><span class="word">윤</span>
+    </h1>
+  </div>
+  <div class="hero-caption">
+    Service Planner · PM<br />Seoul, KR
+  </div>
+</section>
+
+<!-- 01 PROFILE -->
+<section class="section" id="profile">
+  <div class="profile-wrap">
+    <div class="section-eyebrow reveal">01 — Profile</div>
+    <h2 class="profile-title reveal">비즈니스의 목적과 개발의 언어, 그 사이를 잇는 사람.</h2>
+
+    <div class="profile-text reveal">
+      <div class="profile-portrait">
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="Portrait of Kim Taeyoon" />
+      </div>
+
+      <p class="lead">
+        비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.
+      </p>
+
+      <p>
+        학내 동아리방 예약 서비스 RoomSync에서는 회장단 설문으로 ‘실시간 현황 확인’이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다.
+      </p>
+
+      <p>
+        MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.
+      </p>
+
+      <p>
+        데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자가 되고자 합니다.
+      </p>
+    </div>
+
+    <div class="profile-meta reveal">
+      <div>
+        <div class="label">Major</div>
+        <div class="value">경영학 + 컴퓨터공학 복수전공 (3.9/4.5)</div>
+      </div>
+      <div>
+        <div class="label">Focus</div>
+        <div class="value">서비스 기획자 / PM</div>
+      </div>
+      <div>
+        <div class="label">Toolkit</div>
+        <div class="value">Notion · Figma · GA4 · SQL · Agile</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 PROJECTS -->
+<section class="section" id="projects" style="padding-top: 80px;">
+  <div class="projects-header">
+    <div class="section-eyebrow reveal">02 — Selected Projects</div>
+    <h2 class="projects-intro reveal">세 개의 프로젝트, 세 가지 듣는 방식.</h2>
+  </div>
+
+  <!-- Project 1 — image LEFT -->
+  <article class="project-module">
+    <div class="project-img-col">
+      <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync team session" />
+      <div class="img-caption">2023 — PM — RoomSync</div>
+    </div>
+    <div class="project-text-col">
+      <div class="project-number">Case 01 · 2023.07–2023.11</div>
+      <h3 class="project-title"><a href="detail.html">RoomSync</a></h3>
+      <div class="project-subtitle">학내 동아리방 예약 관리 웹서비스</div>
+      <p class="project-body">
+        50여 개 동아리가 공용 회의실을 수기로 예약하다 겹침 사고가 반복되던 문제를, 회장단 설문으로 ‘실시간 예약 현황 확인’ 니즈를 검증한 뒤 예약·취소·실시간 뷰만 남긴 MVP로 해결했습니다. 출시 1개월 만에 30개 동아리가 가입했고, 노쇼율은 60% 감소했습니다.
+      </p>
+      <div class="project-meta-line">PM 1 · Backend 2 — API 명세 초안 · Jira 스크럼 마스터</div>
+    </div>
+  </article>
+
+  <!-- Project 2 — image RIGHT (flip) -->
+  <article class="project-module flip">
+    <div class="project-img-col">
+      <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="Commerce A/B test review" />
+      <div class="img-caption">2023 — Intern — A사 커머스</div>
+    </div>
+    <div class="project-text-col">
+      <div class="project-number">Case 02 · 2023.01–2023.06</div>
+      <h3 class="project-title"><a href="detail.html">A사 커머스 인턴</a></h3>
+      <div class="project-subtitle">MAU 50만 커머스의 장바구니 전환율 개선</div>
+      <p class="project-body">
+        GA4와 앰플리튜드로 상세→장바구니 구간 이탈 45%를 확인하고, 사용자 5명 UT에서 ‘하단 고정 구매 버튼이 텍스트를 가린다’는 페인포인트를 발견했습니다. 투명도·높이 조정과 ‘무료배송’ 넛지 카피를 더한 B안으로 A/B 테스트를 기획해 장바구니 담기 전환율을 12%p 끌어올렸고, 그대로 정규 배포되었습니다.
+      </p>
+      <div class="project-meta-line">Service Planning Intern — GA4 · Amplitude · 사용성 테스트</div>
+    </div>
+  </article>
+
+  <!-- Project 3 — image LEFT -->
+  <article class="project-module">
+    <div class="project-img-col">
+      <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="Cross-discipline seminar" />
+      <div class="img-caption">2022 — President — IT 연합 동아리</div>
+    </div>
+    <div class="project-text-col">
+      <div class="project-number">Case 03 · 2022.03–2022.12</div>
+      <h3 class="project-title"><a href="detail.html">IT 연합 동아리 회장</a></h3>
+      <div class="project-subtitle">100명 규모, 데모데이 완성률 40 → 85%</div>
+      <p class="project-body">
+        기획·디자인·개발 파트 간 교류가 없어 프로젝트 완성률이 40%에 머물던 조직에서, ‘크로스오버 해커톤’과 ‘서로의 언어로 말하기 세미나’를 월 1회 운영했습니다. 직무 간 이해가 깊어지며 마찰이 줄었고, 연말 데모데이에서는 85%의 팀이 실제 서비스를 배포하는 결과로 이어졌습니다.
+      </p>
+      <div class="project-meta-line">President — 100명 IT 연합 창업 동아리</div>
+    </div>
+  </article>
+</section>
+
+<!-- 03 CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-eyebrow reveal">03 — Contact</div>
+  <div class="contact-line reveal">
+    <a href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+  </div>
+  <div class="contact-sub reveal">
+    천천히, 그러나 정확히 답장합니다.
+  </div>
+</section>
+
+<footer class="footer">
+  <div>© 2026 KIM TAEYOON</div>
+  <div>WHISPER EDITORIAL — VOL.Ⅰ</div>
+</footer>
+
+<script>
+  // Theme toggle
+  (function() {
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const alba = document.getElementById('modeAlba');
+    const notte = document.getElementById('modeNotte');
+    const KEY = 'tk-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved === 'alt') {
+      root.setAttribute('data-theme', 'alt');
+      alba.classList.remove('active'); alba.classList.add('inactive');
+      notte.classList.remove('inactive'); notte.classList.add('active');
+    }
+    toggle.addEventListener('click', function() {
+      const isAlt = root.getAttribute('data-theme') === 'alt';
+      if (isAlt) {
+        root.removeAttribute('data-theme');
+        localStorage.setItem(KEY, 'default');
+        alba.classList.add('active'); alba.classList.remove('inactive');
+        notte.classList.add('inactive'); notte.classList.remove('active');
+      } else {
+        root.setAttribute('data-theme', 'alt');
+        localStorage.setItem(KEY, 'alt');
+        alba.classList.remove('active'); alba.classList.add('inactive');
+        notte.classList.remove('inactive'); notte.classList.add('active');
+      }
+    });
+  })();
+
+  // Progress bar
+  (function() {
+    const bar = document.getElementById('progressBar');
+    function update() {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+
+  // Hero reveal
+  window.addEventListener('load', function() {
+    requestAnimationFrame(function() {
+      document.getElementById('heroImgWrap').classList.add('revealed');
+    });
+  });
+
+  // Intersection observer
+  (function() {
+    const els = document.querySelectorAll('.reveal, .project-module');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => io.observe(el));
+  })();
+</script>
+
+</body>
+</html>

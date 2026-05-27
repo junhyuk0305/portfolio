@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ko" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lot 01 — RoomSync · Heritage Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5EFE5;
+    --paper:#EFE7D8;
+    --ink:#1A1A1A;
+    --ink-soft:#332E2B;
+    --accent:#4A2C2A;
+    --secondary:#6B5238;
+    --hair:rgba(74,44,42,.45);
+    --hair-soft:rgba(74,44,42,.22);
+    --plate:#F5EFE5;
+  }
+  [data-theme="night"]{
+    --bg:#1A1614;
+    --paper:#221C19;
+    --ink:#F5EFE5;
+    --ink-soft:#E8DFCB;
+    --accent:#D9A6A6;
+    --secondary:#E0C485;
+    --hair:rgba(245,239,229,.42);
+    --hair-soft:rgba(245,239,229,.18);
+    --plate:#1A1614;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    transition:background 400ms ease,color 400ms ease;}
+  body{
+    font-family:'EB Garamond','Cormorant Garamond','Noto Serif KR',serif;
+    font-size:17px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+
+  .progress{
+    position:fixed;top:0;left:0;height:1px;width:0%;
+    background:var(--accent);z-index:1000;
+    transition:width 120ms linear,background 400ms ease;
+  }
+  .theme-toggle{
+    position:fixed;top:14px;right:18px;z-index:900;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-soft);background:transparent;border:0;
+    cursor:pointer;padding:12px 14px;min-height:44px;min-width:44px;
+    transition:color 400ms ease;
+  }
+  .gallery-back{
+    position:fixed;top:14px;left:18px;z-index:900;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-style:italic;font-size:13px;
+    color:var(--accent);background:transparent;
+    padding:12px 14px;min-height:44px;display:inline-flex;align-items:center;
+    border-bottom:1px solid var(--hair-soft);
+    transition:color 300ms ease,border-color 300ms ease;
+  }
+  .gallery-back:hover{color:var(--ink);border-color:var(--accent);}
+  .theme-toggle .dot{color:var(--accent);margin:0 .5em;transition:color 400ms ease;}
+  .theme-toggle .on{color:var(--accent);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 56px;}
+
+  /* top bar */
+  .topbar{
+    padding:22px 0 0;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--secondary);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .topbar a{border-bottom:1px solid var(--hair-soft);padding:10px 4px;display:inline-block;min-height:44px;
+    transition:border-color 300ms ease,color 300ms ease;}
+  .topbar a:hover{color:var(--accent);border-color:var(--accent);}
+
+  /* ornamental rule */
+  .rule{display:flex;align-items:center;justify-content:center;gap:14px;
+    margin:28px 0;color:var(--accent);}
+  .rule::before,.rule::after{content:"";flex:1;height:1px;background:var(--hair);
+    max-width:240px;}
+  .rule .b{font-size:12px;line-height:1;color:var(--accent);}
+
+  .smcaps{
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:14px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);font-weight:500;
+  }
+  .smcaps.soft{color:var(--secondary)}
+
+  /* lot header */
+  .lot-header{padding:56px 0 12px;text-align:center;}
+  .lot-header .lotno{
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--secondary);margin-bottom:18px;
+  }
+  .lot-header h1{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-weight:500;font-size:72px;line-height:1.05;color:var(--ink);
+  }
+  .lot-header h1 .it{font-style:italic;}
+  .lot-header .role-line{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    margin-top:22px;
+  }
+  .lot-header .role-line::before,.lot-header .role-line::after{
+    content:"";height:1px;width:96px;background:var(--hair);
+  }
+  .lot-header .role{
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:13px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+
+  .mask-reveal{
+    -webkit-clip-path:inset(0 0 100% 0);clip-path:inset(0 0 100% 0);
+    opacity:0;
+    transition:clip-path 900ms cubic-bezier(.7,0,.3,1),
+               -webkit-clip-path 900ms cubic-bezier(.7,0,.3,1),
+               opacity 900ms ease;
+  }
+  .mask-reveal.in{
+    -webkit-clip-path:inset(0 0 0 0);clip-path:inset(0 0 0 0);opacity:1;
+  }
+
+  /* hero plate */
+  .hero-plate{
+    margin:48px auto 18px;max-width:1080px;
+  }
+  .plate{
+    background:var(--plate);padding:8px;
+    outline:1px solid var(--accent);outline-offset:0;
+    overflow:hidden;
+    transition:box-shadow 500ms ease, background 400ms ease;
+  }
+  .plate .ph{
+    width:100%;display:block;background:#cdbfa6;
+    transform:scale(1.04);
+    transition:transform 1500ms cubic-bezier(.2,.6,.2,1);
+  }
+  .plate.in .ph{transform:scale(1.0);}
+  .plate:hover{box-shadow:0 8px 24px rgba(26,22,20,.18);}
+  .plate-16x9 .ph{aspect-ratio:16/9;object-fit:cover;}
+  .plate-4x3 .ph{aspect-ratio:4/3;object-fit:cover;}
+  .caption{
+    margin-top:14px;text-align:center;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-style:italic;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--secondary);
+  }
+
+  /* particulars / spec block */
+  .particulars{
+    max-width:760px;margin:36px auto 56px;
+    display:grid;grid-template-columns:160px 1fr;gap:14px 28px;
+    border-top:1px solid var(--hair-soft);border-bottom:1px solid var(--hair-soft);
+    padding:24px 0;
+  }
+  .particulars .k{
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .particulars .v{color:var(--ink-soft);font-family:'EB Garamond','Noto Serif KR',serif;}
+
+  .body{max-width:640px;margin:0 auto;}
+  .body section{padding:48px 0;border-top:1px solid var(--hair-soft);}
+  .body section:first-of-type{border-top:0;}
+  .body h2{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-weight:500;font-style:italic;font-size:32px;
+    color:var(--ink);margin:8px 0 18px;line-height:1.1;
+  }
+  .body .eyebrow{margin-bottom:6px;}
+  .body p{color:var(--ink-soft);margin:0 0 14px;}
+  .body p strong{color:var(--ink);font-weight:500;}
+  .body ul{list-style:none;margin:14px 0;padding:0;}
+  .body ul li{
+    color:var(--ink-soft);padding:8px 0 8px 22px;position:relative;
+    border-bottom:1px dotted var(--hair-soft);
+  }
+  .body ul li::before{
+    content:"·";color:var(--accent);position:absolute;left:6px;top:6px;font-size:22px;
+  }
+
+  .inline-plate{margin:28px 0 6px;}
+  .pullquote{
+    text-align:center;margin:28px 0;padding:22px 16px;
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-style:italic;font-size:22px;color:var(--ink);
+  }
+  .pullquote .att{
+    display:block;margin-top:10px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--secondary);font-style:normal;
+  }
+
+  .estimate-callout{
+    margin:28px auto;max-width:560px;text-align:center;
+    padding:22px 18px;border:1px solid var(--accent);
+    background:var(--paper);
+    transition:background 400ms ease,border-color 400ms ease;
+  }
+  .estimate-callout .label{
+    font-family:'Cormorant Garamond',serif;
+    font-size:11px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:10px;
+  }
+  .estimate-callout .value{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-style:italic;font-size:24px;color:var(--ink);line-height:1.3;
+  }
+
+  .metrics{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+    margin:18px 0 6px;
+  }
+  .metrics .m{
+    text-align:center;padding:18px 6px;
+    border:1px solid var(--hair-soft);
+  }
+  .metrics .m .n{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-weight:500;font-size:34px;color:var(--accent);line-height:1;
+    font-style:italic;
+  }
+  .metrics .m .l{
+    margin-top:8px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--secondary);
+  }
+
+  /* timeline */
+  .timeline{margin:18px 0;}
+  .timeline .ev{
+    display:grid;grid-template-columns:80px 1fr;gap:18px;
+    padding:12px 0;border-bottom:1px dotted var(--hair-soft);
+  }
+  .timeline .ev .d{
+    font-family:'Cormorant Garamond',serif;font-style:italic;
+    color:var(--secondary);font-size:13px;letter-spacing:.12em;
+    text-transform:uppercase;
+  }
+  .timeline .ev .t{color:var(--ink-soft);font-size:16px;}
+
+  /* in-view */
+  .iv{opacity:0;transform:translateY(8px);
+    transition:opacity 600ms ease, transform 600ms cubic-bezier(.7,0,.3,1);}
+  .iv.in{opacity:1;transform:none;}
+
+  /* footer */
+  footer{
+    padding:60px 0 80px;text-align:center;
+    border-top:1px solid var(--hair-soft);margin-top:40px;
+  }
+  .crest{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-style:italic;font-size:22px;color:var(--ink);margin-bottom:10px;
+  }
+  .crest .em{color:var(--accent);}
+  .imprint{
+    color:var(--secondary);font-family:'Cormorant Garamond',serif;
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;margin-top:8px;
+  }
+  .contacts{
+    display:flex;justify-content:center;gap:28px;margin-top:22px;
+    color:var(--ink-soft);font-style:italic;font-size:15px;flex-wrap:wrap;
+  }
+  .contacts a{border-bottom:1px solid var(--hair-soft);padding:10px 4px;display:inline-block;min-height:44px;}
+  .contacts a:hover{border-color:var(--accent);color:var(--accent);}
+
+  @media (max-width:780px){
+    .wrap{padding:0 24px;}
+    .lot-header h1{font-size:46px;}
+    .particulars{grid-template-columns:1fr;gap:6px 0;}
+    .particulars .k{margin-top:10px;}
+    .metrics{grid-template-columns:1fr;}
+    .topbar{flex-direction:column;gap:10px;}
+    .theme-toggle{top:12px;right:14px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:0ms !important;animation-duration:0ms !important;}
+    .iv{opacity:1 !important;transform:none !important;}
+    .mask-reveal{clip-path:none !important;-webkit-clip-path:none !important;opacity:1 !important;}
+    .plate .ph{transform:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<a class="gallery-back" href="../../index.html">&larr; 갤러리</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle day or night">
+  <span class="day on">Day</span><span class="dot">·</span><span class="night">Night</span>
+</button>
+
+<main class="wrap">
+  <div class="topbar">
+    <a href="index.html">&larr; Return to Catalogue</a>
+    <span>Heritage Catalogue · Spring Sale MMXXVI</span>
+  </div>
+
+  <!-- HEADER -->
+  <section class="lot-header">
+    <div class="lotno iv">Lot 01 — Property of a Campus Initiative</div>
+    <h1>
+      <span class="mask-reveal" id="hn1">ROOMSYNC</span><br>
+      <span class="mask-reveal it" id="hn2" style="font-size:34px;display:inline-block;margin-top:12px;letter-spacing:.06em;">학내 동아리방, 실시간 예약 관리</span>
+    </h1>
+    <div class="role-line iv">
+      <span class="role">2023.07 – 2023.11 · PM · 학내 50여 동아리</span>
+    </div>
+  </section>
+
+  <!-- HERO PLATE -->
+  <div class="hero-plate">
+    <div class="plate plate-16x9">
+      <img class="ph" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync founding team in working session">
+    </div>
+    <div class="caption">Lot 01 — 회장단 설문 정리 세션, MMXXIII</div>
+  </div>
+
+  <div class="rule iv"><span class="b">&#10070;</span></div>
+
+  <!-- PARTICULARS -->
+  <section class="particulars iv">
+    <div class="k">Period</div>          <div class="v">2023.07 — 2023.11 · MVP 출시까지 1개월</div>
+    <div class="k">Role</div>            <div class="v">PM — 회장단 설문 · 기획 · API 명세 초안 · Jira/스크럼</div>
+    <div class="k">Provenance</div>      <div class="v">학내 50여 동아리의 수기 동아리방 예약</div>
+    <div class="k">Medium</div>          <div class="v">웹서비스 · Notion · Figma · Jira</div>
+    <div class="k">Condition</div>       <div class="v">30개 동아리 도입 · 노쇼 −60%</div>
+  </section>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- 배경 -->
+    <section class="iv">
+      <div class="smcaps eyebrow">I. Subject — 배경</div>
+      <h2>“방은 비어 있지만, 다음 사람은 알 수 없다.”</h2>
+      <p>
+        학내 50여 개 동아리는 동아리방 예약을 카톡과 단체 시트로 수기 관리해 왔습니다.
+        누가 언제 쓰는지, 지금 비어 있는지 알 수 있는 곳이 한 군데도 없었고,
+        예약을 잡고도 나타나지 않는 <strong>노쇼</strong>가 빈 방을 잠그고 있었습니다.
+      </p>
+      <p>
+        문제는 ‘앱이 없는 것’ 이 아니라 <em>‘실시간 현황을 모르는 것’</em>이었습니다.
+        그 가설은 회장단 설문에서 분명해졌습니다.
+      </p>
+    </section>
+
+    <!-- 리서치 -->
+    <section class="iv">
+      <div class="smcaps eyebrow">II. Research — 리서치</div>
+      <h2>회장단 설문에서 ‘실시간 현황’ 니즈를 발견하다</h2>
+      <p>
+        먼저 학내 동아리 회장단을 대상으로 설문을 돌리고,
+        응답을 어피니티 매핑으로 정리했습니다. 공통적으로 떠오른 단어는
+        ‘지금 비었나?’ 였습니다.
+      </p>
+      <ul>
+        <li>가장 자주 언급된 불편: <strong>지금 비어 있는지 모른다</strong></li>
+        <li>예약 충돌과 노쇼 처리는 회장단의 ‘카톡 노동’으로 흡수되고 있었다</li>
+        <li>기능 요청은 단순했다 — <em>예약 · 취소 · 실시간 뷰</em> 세 가지</li>
+      </ul>
+
+      <div class="inline-plate">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문 응답 정리">
+        </div>
+        <div class="caption">Plate II — 회장단 설문 어피니티 매핑, MMXXIII</div>
+      </div>
+
+      <div class="pullquote">
+        “비었는지만 알면, 우리가 알아서 잡을 수 있어요.”
+        <span class="att">— 회장단 설문, 자유 응답 중</span>
+      </div>
+    </section>
+
+    <!-- 실행 -->
+    <section class="iv">
+      <div class="smcaps eyebrow">III. Execution — 실행</div>
+      <h2>예약 · 취소 · 실시간 뷰만 담은 MVP</h2>
+      <p>
+        설문이 말한 세 가지 — <strong>예약 · 취소 · 실시간 뷰</strong> — 만 담은
+        가장 얇은 웹 MVP를 한 달 안에 출시하는 것을 목표로 잡았습니다.
+        나머지 기능은 모두 ‘다음 학기 백로그’ 로 미뤘습니다.
+      </p>
+      <ul>
+        <li>회장단 설문 결과를 기획서로 정리하고, 화면별 요구사항을 Notion에 문서화</li>
+        <li>예약/취소/현황 API 명세 초안을 직접 작성해 개발자와 합의</li>
+        <li>Jira와 스크럼으로 1개월 일정 운영 — MVP 범위를 매주 줄여 나감</li>
+      </ul>
+
+      <div class="inline-plate">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="기획 검토 세션">
+        </div>
+        <div class="caption">Plate III — 기획 검토 세션, MMXXIII</div>
+      </div>
+
+      <div class="timeline">
+        <div class="ev"><div class="d">2023.07</div><div class="t">회장단 설문 · 응답 정리 · 문제 정의</div></div>
+        <div class="ev"><div class="d">2023.08</div><div class="t">MVP 범위 합의 — 예약 · 취소 · 실시간 뷰</div></div>
+        <div class="ev"><div class="d">2023.09</div><div class="t">API 명세 초안 · Jira 백로그 구성 · 스크럼 운영</div></div>
+        <div class="ev"><div class="d">2023.10</div><div class="t">MVP 출시 — 첫 동아리 대상 시범 운영</div></div>
+        <div class="ev"><div class="d">2023.11</div><div class="t">30개 동아리로 확산 · 회장단 회고</div></div>
+      </div>
+    </section>
+
+    <!-- 결과 -->
+    <section class="iv">
+      <div class="smcaps eyebrow">IV. Outcome — 결과</div>
+      <h2>30개 동아리 도입 · 노쇼 −60%</h2>
+
+      <div class="metrics">
+        <div class="m"><div class="n">30</div><div class="l">도입 동아리</div></div>
+        <div class="m"><div class="n">−60%</div><div class="l">노쇼</div></div>
+        <div class="m"><div class="n">1개월</div><div class="l">MVP 출시까지</div></div>
+      </div>
+
+      <div class="inline-plate">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="동아리 회의 장면">
+        </div>
+        <div class="caption">Plate IV — 동아리 회의 장면, MMXXIII</div>
+      </div>
+
+      <div class="estimate-callout iv">
+        <div class="label">Estimate · Impact</div>
+        <div class="value">30개 동아리 도입 · 노쇼 −60% · MVP 출시까지 1개월</div>
+      </div>
+
+      <p>
+        가장 큰 변화는 회장단의 시간이었습니다.
+        ‘비었나요?’ 를 묻는 카톡이 줄었고,
+        회장은 예약 충돌 중재가 아니라 동아리 활동에 시간을 쓰게 되었습니다.
+      </p>
+    </section>
+
+    <!-- 회고 -->
+    <section class="iv">
+      <div class="smcaps eyebrow">V. Reflection — 회고</div>
+      <h2>다시 한다면 — 더 일찍, 더 얇게</h2>
+      <p>
+        가장 잘한 결정은 ‘만들고 싶은 기능’ 이 아니라
+        ‘설문이 말한 세 가지’ 만 MVP에 담은 것이었습니다.
+        다음에는 설문을 돌리기 전 한 동아리와 일주일 동행 관찰을 먼저 해 보고 싶습니다.
+      </p>
+      <ul>
+        <li><strong>Keep</strong> — 회장단 설문에서 출발해 MVP 범위를 좁히는 의식</li>
+        <li><strong>Problem</strong> — API 명세 초안에서 권한 모델이 늦게 잡혔다</li>
+        <li><strong>Try</strong> — 다음 학기 백로그를 동아리와 함께 분기 회고로 다듬기</li>
+      </ul>
+    </section>
+
+  </div>
+
+  <div class="rule iv" style="margin-top:40px;"><span class="b">&#10070;</span></div>
+
+  <div style="text-align:center;padding:20px 0 0;">
+    <a href="index.html" class="smcaps" style="border-bottom:1px solid var(--accent);padding-bottom:4px;">Return to Catalogue &nbsp;→</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="crest iv">Kim Taeyoon — <span class="em">Product Manager</span></div>
+    <div class="imprint iv">Heritage Catalogue · Seoul · MMXXVI</div>
+    <div class="contacts iv">
+      <a href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+    </div>
+    <div class="rule iv" style="margin-top:30px;"><span class="b">&#10070;</span></div>
+  </div>
+</footer>
+
+<script>
+  // theme (shared key 'tk-theme')
+  (function(){
+    var k='tk-theme';
+    var t=localStorage.getItem(k)||'day';
+    document.documentElement.setAttribute('data-theme',t);
+    var btn=document.getElementById('themeToggle');
+    function paint(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      btn.querySelector('.day').classList.toggle('on',cur==='day');
+      btn.querySelector('.night').classList.toggle('on',cur==='night');
+    }
+    paint();
+    btn.addEventListener('click',function(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      var n=cur==='day'?'night':'day';
+      document.documentElement.setAttribute('data-theme',n);
+      localStorage.setItem(k,n);
+      paint();
+    });
+  })();
+
+  // progress bar
+  (function(){
+    var bar=document.getElementById('progress');
+    function up(){
+      var h=document.documentElement;
+      var max=h.scrollHeight-h.clientHeight;
+      var p=max>0?(h.scrollTop/max)*100:0;
+      bar.style.width=p+'%';
+    }
+    document.addEventListener('scroll',up,{passive:true});
+    up();
+  })();
+
+  // intersection observer
+  (function(){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+      });
+    },{threshold:.16,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.iv,.plate,.mask-reveal').forEach(function(n){io.observe(n);});
+  })();
+
+  // hero mask reveal
+  window.addEventListener('load',function(){
+    setTimeout(function(){document.getElementById('hn1').classList.add('in');},80);
+    setTimeout(function(){document.getElementById('hn2').classList.add('in');},320);
+  });
+</script>
+</body>
+</html>

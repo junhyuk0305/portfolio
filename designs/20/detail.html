@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — 학내 동아리방 예약 관리 · 김태윤 서비스 기획</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ECECEC;
+    --text: #111111;
+    --muted: #4a4a4a;   /* WCAG 4.5:1 on #ECECEC */
+    --card: #ffffff;
+    --line: rgba(17,17,17,0.08);
+    --accent: #1D4ED8;  /* deeper blue for 4.5:1 */
+    --shadow: 0 14px 40px rgba(17,17,17,0.10);
+    --shadow-hi: 0 28px 60px rgba(17,17,17,0.18);
+  }
+  [data-theme="dark"] {
+    --bg: #0F0F0F;
+    --text: #ECECEC;
+    --muted: #b6b6b6;
+    --card: #161616;
+    --line: rgba(236,236,236,0.10);
+    --accent: #93C5FD;
+    --shadow: 0 14px 40px rgba(0,0,0,0.45);
+    --shadow-hi: 0 28px 60px rgba(0,0,0,0.65);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    transition: background 300ms ease, color 300ms ease;
+    overflow-x: hidden;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .progress {
+    position: fixed; top: 0; left: 0; height: 1px; width: 0%;
+    background: var(--accent); z-index: 9999;
+    transition: width 80ms linear;
+  }
+  .theme-toggle {
+    position: fixed; top: 14px; right: 14px; z-index: 100;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: transparent;
+    cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .theme-toggle::before {
+    content: '';
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1.5px solid var(--text);
+    background: linear-gradient(90deg, var(--text) 50%, var(--bg) 50%);
+    box-shadow: 0 0 0 1px var(--bg);
+    transition: background 300ms ease, border-color 300ms ease, transform 200ms ease;
+  }
+  [data-theme="dark"] .theme-toggle::before {
+    background: linear-gradient(90deg, var(--bg) 50%, var(--text) 50%);
+  }
+  .theme-toggle:hover::before { transform: scale(1.1); }
+  .theme-toggle .tip {
+    position: absolute; right: 44px; top: 50%; transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); white-space: nowrap; letter-spacing: 0.1em;
+    opacity: 0; pointer-events: none; transition: opacity 200ms ease;
+  }
+  .theme-toggle:hover .tip { opacity: 1; }
+
+  /* Breadcrumb */
+  .crumb {
+    position: fixed; top: 14px; left: 14px; z-index: 100;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.12em;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    max-width: calc(100% - 76px);
+  }
+  .crumb a {
+    color: var(--text); text-decoration: none; border-bottom: 1px solid transparent;
+    padding: 10px 4px; min-height: 44px; display: inline-flex; align-items: center;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .crumb a:hover { color: var(--accent); border-color: var(--accent); }
+  .crumb .sep { opacity: 0.5; }
+  @media (max-width: 640px){
+    .crumb { font-size: 10px; gap: 8px; }
+  }
+
+  /* Small 3D top */
+  .mini-stage {
+    padding: 110px 24px 24px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .mini-stage .stage-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .mini-canvas-wrap {
+    width: 160px; height: 160px; position: relative;
+  }
+  #mini-canvas { width: 100%; height: 100%; display: block; cursor: pointer; }
+
+  /* Hero plate */
+  .hero {
+    max-width: 1100px; margin: 30px auto 60px; padding: 0 24px;
+  }
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  h1.case-title {
+    font-size: clamp(40px, 6vw, 64px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.0; margin-bottom: 14px;
+  }
+  h1.case-title .word {
+    display: inline-block; opacity: 0; transform: translateY(20px);
+    transition: opacity 600ms ease, transform 600ms cubic-bezier(.2,.7,.2,1);
+  }
+  h1.case-title.reveal .word { opacity: 1; transform: translateY(0); }
+
+  .case-sub {
+    font-size: 17px; color: var(--muted); max-width: 720px;
+    margin-bottom: 28px;
+  }
+  .hero-plate {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: 20px; overflow: hidden; position: relative;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+  }
+  .hero-plate img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transform: scale(1.06);
+    transition: transform 1300ms cubic-bezier(.2,.7,.2,1);
+  }
+  .hero-plate.in img { transform: scale(1.0); }
+  .hero-plate .cap {
+    position: absolute; bottom: 12px; left: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #fff; background: rgba(0,0,0,0.55);
+    padding: 4px 10px; border-radius: 6px; letter-spacing: 0.1em;
+  }
+
+  /* Meta strip */
+  .meta-strip {
+    max-width: 1100px; margin: 0 auto; padding: 18px 24px 40px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 18px; border-bottom: 1px solid var(--line);
+  }
+  .meta-strip > div { display: flex; flex-direction: column; gap: 4px; }
+  .meta-strip span {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase;
+  }
+  .meta-strip strong { font-weight: 600; font-size: 14.5px; color: var(--text); }
+
+  /* Section */
+  .section { max-width: 1100px; margin: 0 auto; padding: 70px 24px; }
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 30px; gap: 14px;
+  }
+  .sec-title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .sec-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase;
+  }
+
+  /* Case grid - 3 cards with tilt */
+  .case-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 26px;
+  }
+  .ccard {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 20px; overflow: hidden;
+    transition: transform 320ms cubic-bezier(.2,.7,.2,1), box-shadow 320ms ease, border-color 200ms ease;
+    transform-style: preserve-3d; will-change: transform;
+    opacity: 0; transform: translateY(24px);
+  }
+  .ccard.in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 500ms ease, transform 500ms cubic-bezier(.2,.7,.2,1), box-shadow 320ms ease;
+  }
+  .ccard:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-hi);
+    border-color: var(--accent);
+  }
+  .ccard-img { width: 100%; aspect-ratio: 16/9; overflow: hidden; position: relative; background: #ddd; }
+  .ccard-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    transform: scale(1.06);
+    transition: transform 1300ms cubic-bezier(.2,.7,.2,1);
+  }
+  .ccard.in .ccard-img img { transform: scale(1.0); }
+  .ccard:hover .ccard-img img { transform: scale(1.03); }
+  .ccard-cap {
+    position: absolute; bottom: 8px; left: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #fff; background: rgba(0,0,0,0.55);
+    padding: 3px 8px; border-radius: 6px; letter-spacing: 0.1em;
+  }
+  .ccard-body { padding: 22px 22px 26px; }
+  .ccard-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--accent); letter-spacing: 0.2em; margin-bottom: 8px;
+  }
+  .ccard h3 {
+    font-size: 19px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 10px;
+  }
+  .ccard p {
+    font-size: 14px; color: var(--muted); line-height: 1.65;
+  }
+  .ccard ul {
+    list-style: none; margin-top: 12px;
+  }
+  .ccard ul li {
+    font-size: 13.5px; color: var(--text); padding: 6px 0;
+    border-top: 1px solid var(--line); padding-left: 14px; position: relative;
+  }
+  .ccard ul li:first-child { border-top: none; }
+  .ccard ul li:before {
+    content: ''; position: absolute; left: 0; top: 14px;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Metrics tiles */
+  .metrics {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+  }
+  .tile {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 22px;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 500ms ease, transform 500ms cubic-bezier(.2,.7,.2,1), border-color 200ms ease;
+  }
+  .tile.in { opacity: 1; transform: translateY(0); }
+  .tile:hover { border-color: var(--accent); }
+  .tile .tlabel {
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+    letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .tile .tval {
+    font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.0;
+    color: var(--text);
+  }
+  .tile .tval em {
+    font-style: normal; font-size: 16px; color: var(--accent); font-weight: 600; margin-left: 4px;
+  }
+  .tile .tnote {
+    margin-top: 8px; font-size: 12px; color: var(--muted);
+  }
+
+  /* Result card with image inside */
+  .result-card {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 0;
+  }
+  .result-card .ccard-img { aspect-ratio: auto; height: 100%; }
+  .result-card .ccard-img img { height: 100%; }
+  @media (max-width: 760px){
+    .result-card { grid-template-columns: 1fr; }
+  }
+
+  /* Quote */
+  .quote {
+    max-width: 880px; margin: 30px auto 0;
+    padding: 28px 28px; border-left: 3px solid var(--accent);
+    background: var(--card); border-radius: 0 14px 14px 0;
+    font-size: 17px; color: var(--text); line-height: 1.6;
+  }
+  .quote .who {
+    margin-top: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  /* Next / footer */
+  .next {
+    max-width: 1100px; margin: 60px auto 0; padding: 60px 24px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .next a {
+    text-decoration: none; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.14em; border-bottom: 1.5px solid var(--text);
+    padding: 10px 6px; min-height: 44px;
+    display: inline-flex; align-items: center;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .next a:hover { color: var(--accent); border-color: var(--accent); }
+  .next h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  footer {
+    text-align: center; padding: 26px 16px 40px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.12em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<nav class="crumb mono">
+  <a href="../../index.html">← 갤러리</a>
+  <span class="sep">/</span>
+  <a href="index.html">INDEX</a>
+  <span class="sep">/</span>
+  <span style="color:var(--accent)">ROOMSYNC</span>
+</nav>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="tip mono">STAGE / NIGHT</span>
+</button>
+
+<!-- MINI 3D -->
+<section class="mini-stage">
+  <div class="stage-tag mono">// CASE OBJECT · WIREFRAME</div>
+  <div class="mini-canvas-wrap">
+    <canvas id="mini-canvas"></canvas>
+  </div>
+</section>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label mono">// CASE STUDY · 2023.07 — 2023.11</div>
+  <h1 class="case-title" id="caseTitle">
+    <span class="word">RoomSync</span>
+    <span class="word" style="transition-delay:80ms;">—</span>
+    <span class="word" style="transition-delay:160ms;">학내</span>
+    <span class="word" style="transition-delay:240ms;">동아리방</span>
+    <span class="word" style="transition-delay:320ms;">예약 관리</span>
+  </h1>
+  <p class="case-sub">학내 50여 동아리가 공용 회의실을 수기로 예약하다 보니 시간 겹침이 잦았다. 회장단 설문으로 '실시간 현황' 니즈를 확인하고, 예약·취소·실시간 뷰 3가지만 갖춘 MVP를 1개월에 출시한 웹서비스.</p>
+  <div class="hero-plate" id="heroPlate">
+    <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 동아리방 예약 서비스 팀" />
+    <span class="cap mono">IMG_TEAM · ROOMSYNC TEAM</span>
+  </div>
+</section>
+
+<!-- META STRIP -->
+<div class="meta-strip">
+  <div><span class="mono">ROLE</span><strong>서비스 기획 · 스크럼 마스터</strong></div>
+  <div><span class="mono">METHOD</span><strong>Jira · Agile · API 명세 초안</strong></div>
+  <div><span class="mono">PERIOD</span><strong>2023.07 — 2023.11</strong></div>
+  <div><span class="mono">PLATFORM</span><strong>학내 웹서비스</strong></div>
+  <div><span class="mono">STAGE</span><strong>0 → 1 · MVP 출시</strong></div>
+</div>
+
+<!-- CASE SECTIONS -->
+<section class="section">
+  <div class="sec-head">
+    <div class="sec-title">Process · 가설 → 검증</div>
+    <div class="sec-tag mono">[ 03 PHASES ]</div>
+  </div>
+  <div class="case-grid">
+
+    <article class="ccard reveal-card">
+      <div class="ccard-img">
+        <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문과 현장 관찰" />
+        <span class="ccard-cap mono">IMG_INTERVIEW · 리서치</span>
+      </div>
+      <div class="ccard-body">
+        <div class="ccard-num mono">PHASE 01 / 문제 정의</div>
+        <h3>수기 예약 → 시간 겹침</h3>
+        <p>50여 동아리가 공용 회의실을 칠판·단톡으로 예약하다 겹침이 잦았다. 회장단 구글폼 설문에서 '실시간 현황'이 가장 큰 니즈로 드러났다.</p>
+        <ul>
+          <li>회장단 구글폼 설문 (니즈 우선순위)</li>
+          <li>학내 50여 동아리 사용 패턴 관찰</li>
+          <li>핵심 가설: 실시간 현황만 있어도 겹침이 사라진다</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="ccard reveal-card">
+      <div class="ccard-img">
+        <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="MVP 스코프 정의" />
+        <span class="ccard-cap mono">IMG_LECTURE · 실행</span>
+      </div>
+      <div class="ccard-body">
+        <div class="ccard-num mono">PHASE 02 / 실행</div>
+        <h3>MVP = 예약·취소·실시간 뷰</h3>
+        <p>가설 검증에 필요 없는 알림은 2차로 미루고, 3가지 핵심만 1개월에 출시. 서비스 기획자로서 API 명세 초안을 작성하고 Jira 스크럼 마스터를 맡았다.</p>
+        <ul>
+          <li>MVP 스코프 3기능 확정 (알림은 2차)</li>
+          <li>API 명세 초안 · Notion 기반 문서화</li>
+          <li>Jira 백로그 · 스크럼 마스터 · Agile</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="ccard reveal-card">
+      <div class="ccard-img">
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="출시 후 운영 지표" />
+        <span class="ccard-cap mono">IMG_PORTRAIT · 결과</span>
+      </div>
+      <div class="ccard-body">
+        <div class="ccard-num mono">PHASE 03 / 결과</div>
+        <h3>30개 동아리 · 노쇼 -60%</h3>
+        <p>출시 1개월 만에 30개 동아리가 가입했고, 회장단 운영 회의 기준 노쇼율이 60% 줄었다. 알림 기능을 2차 우선순위로 확정.</p>
+        <ul>
+          <li>30개 동아리 가입 (50여 중)</li>
+          <li>노쇼율 60% 감소</li>
+          <li>출시 1개월 · 2차 백로그 정의 완료</li>
+        </ul>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- KEY METRICS -->
+<section class="section" style="padding-top:0;">
+  <div class="sec-head">
+    <div class="sec-title">Key Metrics</div>
+    <div class="sec-tag mono">[ 04 TILES ]</div>
+  </div>
+  <div class="metrics">
+    <div class="tile reveal-tile">
+      <div class="tlabel mono">가입 동아리</div>
+      <div class="tval">30<em>개</em></div>
+      <div class="tnote">학내 50여 동아리 중 (1개월)</div>
+    </div>
+    <div class="tile reveal-tile">
+      <div class="tlabel mono">노쇼율 감소</div>
+      <div class="tval">-60<em>%</em></div>
+      <div class="tnote">회장단 운영 회의 기준</div>
+    </div>
+    <div class="tile reveal-tile">
+      <div class="tlabel mono">MVP 출시</div>
+      <div class="tval">1<em>개월</em></div>
+      <div class="tnote">스코프 확정 → 운영 시작</div>
+    </div>
+    <div class="tile reveal-tile">
+      <div class="tlabel mono">MVP 핵심 기능</div>
+      <div class="tval">3<em>개</em></div>
+      <div class="tnote">예약 · 취소 · 실시간 뷰 (알림 2차)</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    "기획에서 가장 중요한 건 <strong>지금 안 만들 것을 정하는 일</strong>이었다. 알림을 2차로 미룬 덕분에 가설 검증을 1개월 안에 끝낼 수 있었다."
+    <div class="who mono">— 김태윤 · RoomSync 회고</div>
+  </div>
+</section>
+
+<!-- NEXT -->
+<section class="next">
+  <div>
+    <div class="sec-tag mono" style="margin-bottom:6px;">// BACK TO INDEX</div>
+    <h3>다른 프로젝트 — A사 커머스 인턴 · IT 연합 동아리</h3>
+  </div>
+  <a href="index.html">← INDEX</a>
+</section>
+
+<footer class="mono">© 2026 김태윤 · DESIGN #20 / 3D OBJECT SHOWCASE · ROOMSYNC CASE · taeyoon@example.com</footer>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* THEME */
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('tk-theme');
+  if (saved === 'dark') root.setAttribute('data-theme', 'dark');
+  toggle.addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('tk-theme', next);
+    updateMiniColor();
+  });
+
+  /* PROGRESS */
+  const bar = document.getElementById('progress');
+  function onScroll(){
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* HERO REVEAL */
+  const ct = document.getElementById('caseTitle');
+  requestAnimationFrame(() => setTimeout(() => ct.classList.add('reveal'), 200));
+  const hp = document.getElementById('heroPlate');
+  setTimeout(() => hp.classList.add('in'), 400);
+
+  /* OBSERVERS */
+  const cardsAll = document.querySelectorAll('.reveal-card');
+  if ('IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting){
+          const list = Array.from(cardsAll);
+          const i = list.indexOf(e.target);
+          setTimeout(() => e.target.classList.add('in'), i * 100);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    cardsAll.forEach(c => io.observe(c));
+
+    const tiles = document.querySelectorAll('.reveal-tile');
+    const io2 = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting){
+          const list = Array.from(tiles);
+          const i = list.indexOf(e.target);
+          setTimeout(() => e.target.classList.add('in'), i * 100);
+          io2.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    tiles.forEach(t => io2.observe(t));
+  } else {
+    cardsAll.forEach(c => c.classList.add('in'));
+    document.querySelectorAll('.reveal-tile').forEach(t => t.classList.add('in'));
+  }
+
+  /* CARD TILT — desktop only (pointer:fine) */
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!prefersReduced && canHover){
+    cardsAll.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const px = ((e.clientX - r.left) / r.width) - 0.5;
+        const py = ((e.clientY - r.top) / r.height) - 0.5;
+        const ry = px * 16;
+        const rx = -py * 16;
+        card.style.transform = `translateY(-12px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  }
+
+  /* MINI THREE.JS — wireframe icosahedron */
+  const canvas = document.getElementById('mini-canvas');
+  let scene, camera, renderer, mesh, wire;
+  let mtx = 0, mty = 0, ctx_ = 0, cty = 0;
+
+  function getWireColor(){
+    const dark = root.getAttribute('data-theme') === 'dark';
+    return dark ? 0x60A5FA : 0x111111;
+  }
+  function updateMiniColor(){
+    if (!wire) return;
+    wire.material.color.setHex(getWireColor());
+  }
+
+  function init(){
+    if (typeof THREE === 'undefined') { fallback(); return; }
+    const size = canvas.clientWidth;
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.z = 4;
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(size, size, false);
+
+    const geo = new THREE.IcosahedronGeometry(1.3, 1);
+    const mat = new THREE.MeshBasicMaterial({
+      color: getWireColor(), wireframe: true
+    });
+    wire = new THREE.Mesh(geo, mat);
+    scene.add(wire);
+
+    // subtle inner solid for depth
+    const innerGeo = new THREE.IcosahedronGeometry(1.25, 1);
+    const innerMat = new THREE.MeshBasicMaterial({
+      color: 0x000000, transparent: true, opacity: 0.0
+    });
+    mesh = new THREE.Mesh(innerGeo, innerMat);
+    scene.add(mesh);
+
+    window.addEventListener('mousemove', (e) => {
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      mtx = ny * (15 * Math.PI/180);
+      mty = nx * (15 * Math.PI/180);
+    });
+
+    canvas.addEventListener('click', () => {
+      // pulse on click
+      wire.scale.set(1.15, 1.15, 1.15);
+      setTimeout(() => wire.scale.set(1, 1, 1), 200);
+    });
+
+    animate();
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if (!wire) return;
+    if (!prefersReduced){
+      wire.rotation.y += 0.005;
+      wire.rotation.x += 0.002;
+    }
+    ctx_ += (mtx - ctx_) * 0.06;
+    cty += (mty - cty) * 0.06;
+    wire.rotation.z = cty * 0.15;
+    wire.rotation.y += window.scrollY * 0.0005 * 0.0005;
+    renderer.render(scene, camera);
+  }
+
+  function fallback(){
+    canvas.style.display = 'none';
+    const wrap = canvas.parentElement;
+    const fb = document.createElement('div');
+    fb.style.cssText = `
+      width: 130px; height: 130px; margin: 15px auto;
+      border: 1.5px solid var(--text); border-radius: 50%;
+      animation: spin 6s linear infinite;
+    `;
+    const sty = document.createElement('style');
+    sty.textContent = '@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(sty);
+    wrap.appendChild(fb);
+  }
+
+  window.addEventListener('load', init);
+})();
+</script>
+
+</body>
+</html>

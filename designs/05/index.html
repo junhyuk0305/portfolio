@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TK MAGAZINE · ISSUE 01 · 2026 — 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FCFCFC;
+    --ink:#0E0E0E;
+    --muted:#555;
+    --rule:#C9C5BD;
+    --accent:#C8102E;
+    --tag-bg:#FFFFFF;
+  }
+  [data-theme="alt"]{
+    --bg:#0E0E0E;
+    --ink:#F5F1E8;
+    --muted:#999;
+    --rule:#2E2A24;
+    --accent:#FF3344;
+    --tag-bg:#161310;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink)}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Source Sans 3","Inter","Pretendard","Noto Serif KR",system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    transition:background-color .25s ease, color .25s ease;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  a{color:inherit;text-decoration:none}
+  a.link{position:relative;display:inline-block}
+  a.link::after{
+    content:"";
+    position:absolute;left:0;right:0;bottom:-2px;
+    height:1px;background:currentColor;
+    transform:scaleX(0);transform-origin:left center;
+    transition:transform .35s ease;
+  }
+  a.link:hover::after{transform:scaleX(1)}
+
+  /* ===== Scroll Progress Bar ===== */
+  .scroll-progress{
+    position:fixed;
+    top:0;left:0;
+    height:2px;
+    width:0%;
+    background:var(--accent);
+    z-index:100;
+    transition:width .08s linear, background-color .25s ease;
+  }
+
+  /* ===== Back to Gallery ===== */
+  .back-gallery{
+    position:fixed;
+    top:14px;left:20px;
+    z-index:90;
+    min-height:44px;
+    display:inline-flex;align-items:center;
+    padding:10px 14px;
+    background:var(--bg);
+    color:var(--ink);
+    border:1px solid var(--rule);
+    border-radius:999px;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .back-gallery:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ===== Theme Toggle ===== */
+  .theme-toggle{
+    position:fixed;
+    top:14px;right:20px;
+    z-index:90;
+    min-height:44px;
+    display:inline-flex;align-items:center;
+    background:var(--bg);
+    color:var(--ink);
+    border:1px solid var(--rule);
+    padding:10px 16px;
+    font-family:"Spectral","Source Serif 4","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:.18em;
+    cursor:pointer;
+    border-radius:999px;
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+  .theme-toggle .sep{opacity:.4;margin:0 4px}
+  .theme-toggle .active{color:var(--accent);font-weight:600}
+
+  /* ===== Masthead ===== */
+  .masthead{
+    border-bottom:1px solid var(--ink);
+    padding:14px 200px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--ink);
+    transition:border-color .25s ease, color .25s ease;
+    word-break:keep-all;
+  }
+  .masthead .mast-left,.masthead .mast-right{flex:1}
+  .masthead .mast-right{text-align:right;color:var(--muted)}
+  .masthead .mast-center{
+    flex:0 0 auto;
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:.04em;
+    text-transform:none;
+  }
+
+  .top-rule{
+    border-top:3px double var(--ink);
+    margin:0 40px;
+    transition:border-color .25s ease;
+  }
+
+  /* ===== Hero ===== */
+  .hero{
+    padding:120px 40px 96px;
+    border-bottom:1px solid var(--rule);
+    max-width:1400px;margin:0 auto;
+    transition:border-color .25s ease;
+  }
+  .hero .kicker{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;
+    margin-bottom:28px;
+  }
+  .hero h1{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:88px;
+    line-height:1.02;
+    letter-spacing:-.01em;
+    color:var(--ink);
+    margin-bottom:24px;
+  }
+  /* Mask reveal for hero name */
+  .hero h1 .mask{
+    display:inline-block;
+    clip-path:inset(0 100% 0 0);
+    transition:clip-path .9s cubic-bezier(.7,0,.3,1);
+  }
+  .hero h1 .mask.in{clip-path:inset(0 0 0 0)}
+
+  .hero .deck{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:400;
+    font-size:22px;
+    line-height:1.45;
+    color:var(--ink);
+    max-width:760px;
+  }
+  .hero .byline{
+    margin-top:32px;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  .hero .byline strong{color:var(--ink);font-weight:600}
+
+  /* ===== Main Grid 65/35 ===== */
+  .magazine{
+    max-width:1400px;
+    margin:0 auto;
+    padding:96px 40px 64px;
+    display:grid;
+    grid-template-columns:65fr 35fr;
+    gap:64px;
+  }
+  .col-main{min-width:0}
+  .col-side{min-width:0}
+
+  /* ===== Section / Essay ===== */
+  .section{
+    padding:64px 0 80px;
+    border-bottom:1px solid var(--rule);
+    transition:border-color .25s ease;
+  }
+  .section:last-child{border-bottom:none}
+  .section .kicker{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:18px;
+  }
+  .section h2{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:600;
+    font-size:42px;
+    line-height:1.12;
+    letter-spacing:-.005em;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .section .subtitle{
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-size:18px;
+    color:var(--muted);
+    margin-bottom:28px;
+  }
+  .section .meta-line{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:24px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--rule);
+    transition:border-color .25s ease;
+  }
+  .body p{
+    font-family:"Source Sans 3","Pretendard",sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    color:var(--ink);
+    margin-bottom:18px;
+  }
+
+  /* Drop cap */
+  .body.has-drop > p:first-of-type::first-letter{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:600;
+    font-size:96px;
+    line-height:.85;
+    float:left;
+    margin:6px 12px 0 -4px;
+    color:var(--ink);
+    display:inline-block;
+    transform:scale(1.4);
+    opacity:0;
+    transform-origin:left top;
+    transition:transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
+  }
+  .section.in .body.has-drop > p:first-of-type::first-letter{
+    transform:scale(1);
+    opacity:1;
+  }
+
+  /* Tag pills */
+  .tags{
+    margin-top:24px;
+    display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .tags span{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink);
+    border:1px solid var(--rule);
+    padding:5px 10px;
+    background:var(--tag-bg);
+    transition:background-color .25s ease, border-color .25s ease, color .25s ease;
+  }
+
+  .cta-read{
+    display:inline-block;
+    margin-top:22px;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:12px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--accent);
+  }
+
+  /* Pull quote */
+  .pullquote{
+    margin:72px 0;
+    padding:8px 0 8px 24px;
+    position:relative;
+  }
+  .pullquote::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;
+    width:3px;height:0;
+    background:var(--accent);
+    transition:height .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .pullquote.in::before{height:100%}
+  .pullquote q{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:28px;
+    line-height:1.35;
+    color:var(--ink);
+    quotes:"\201C" "\201D";
+    opacity:0;
+    transition:opacity .55s ease .35s;
+    display:block;
+  }
+  .pullquote q::before{content:open-quote}
+  .pullquote q::after{content:close-quote}
+  .pullquote.in q{opacity:1}
+  .pullquote cite{
+    display:block;
+    margin-top:12px;
+    font-style:normal;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    opacity:0;
+    transition:opacity .55s ease .55s;
+  }
+  .pullquote.in cite{opacity:1}
+
+  /* ===== Editorial Image Plates ===== */
+  .plate{
+    margin:0 auto 32px;
+    overflow:hidden;
+    max-width:560px;
+  }
+  .plate.lede{margin-bottom:28px;max-width:620px}
+  .plate .frame{
+    width:100%;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    background:var(--rule);
+    border:1px solid var(--rule);
+    transition:border-color .25s ease, background-color .25s ease;
+  }
+  .plate.portrait{max-width:300px;margin-left:0;margin-right:auto}
+  .plate.portrait .frame{aspect-ratio:3/4}
+  .plate.square{max-width:300px;margin-left:0;margin-right:auto}
+  .plate.square .frame{aspect-ratio:1/1}
+  .plate img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+    transform:scale(1.05);
+    transition:transform 1.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .plate.in img{transform:scale(1.0)}
+  .plate .cap{
+    margin-top:10px;
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-size:13px;
+    line-height:1.55;
+    color:var(--muted);
+  }
+
+  /* ===== Sidebar ===== */
+  .side-block{
+    margin-bottom:56px;
+  }
+  .portrait-caption{
+    margin-top:10px;
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.5;
+    font-style:italic;
+  }
+
+  .factbox{
+    border-top:2px solid var(--ink);
+    border-bottom:1px solid var(--ink);
+    padding:18px 0;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:13px;
+    line-height:1.6;
+    transition:border-color .25s ease;
+  }
+  .factbox .factbox-title{
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:14px;
+  }
+  .factbox dl{display:grid;grid-template-columns:1fr;gap:12px}
+  .factbox dt{
+    font-size:10px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+    margin-bottom:3px;
+  }
+  .factbox dd{color:var(--ink)}
+
+  .datestamp{
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:14px;
+    letter-spacing:.32em;
+    color:var(--muted);
+    border-left:1px solid var(--rule);
+    padding:8px 0 8px 8px;
+    margin-left:8px;
+    height:240px;
+    transition:border-color .25s ease;
+  }
+  .side-with-stamp{
+    display:flex;align-items:flex-start;
+  }
+  .side-with-stamp .side-inner{flex:1}
+
+  .sticky{
+    position:sticky;
+    top:24px;
+  }
+
+  /* Footer */
+  .colophon{
+    border-top:3px double var(--ink);
+    margin:40px;
+    padding:40px 0 60px;
+    text-align:center;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+    line-height:2;
+    transition:border-color .25s ease;
+  }
+  .colophon .col-title{
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:20px;
+    letter-spacing:.04em;
+    text-transform:none;
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+
+  /* ===== Fade Up (generic reveal) ===== */
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  /* ===== Mobile ===== */
+  @media (max-width:880px){
+    .back-gallery{
+      top:8px;left:10px;
+      padding:10px 12px;
+      font-size:10px;
+      min-height:44px;
+    }
+    .theme-toggle{
+      top:8px;right:10px;
+      padding:10px 12px;
+      font-size:10px;
+      min-height:44px;
+    }
+    .masthead{padding:64px 20px 12px;flex-wrap:wrap;gap:6px}
+    .masthead .mast-left,.masthead .mast-right{flex:0 0 100%;text-align:left;font-size:10px}
+    .masthead .mast-center{flex:0 0 100%;text-align:center;margin:6px 0}
+    .top-rule{margin:0 20px}
+    .hero{padding:72px 20px 60px;max-width:100%}
+    .hero h1{font-size:46px;letter-spacing:-.005em}
+    .hero .deck{font-size:18px}
+    .magazine{
+      grid-template-columns:1fr;
+      gap:48px;
+      padding:60px 20px;
+      max-width:100%;
+    }
+    .plate, .plate.lede{max-width:100%}
+    .plate.portrait, .plate.square{max-width:240px}
+    .section h2{font-size:28px}
+    .body.has-drop > p:first-of-type::first-letter{font-size:64px}
+    .datestamp{display:none}
+    .sticky{position:static}
+    .side-with-stamp{display:block}
+    .colophon{margin:24px 20px;padding:32px 0 40px}
+    .pullquote q{font-size:20px}
+  }
+
+  /* ===== Reduced Motion ===== */
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+    .reveal{opacity:1 !important;transform:none !important}
+    .hero h1 .mask{clip-path:inset(0 0 0 0) !important}
+    .plate img{transform:none !important}
+    .pullquote::before{height:100% !important}
+    .pullquote q,.pullquote cite{opacity:1 !important}
+    .body.has-drop > p:first-of-type::first-letter{transform:none !important;opacity:1 !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<a class="back-gallery" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+  <span class="m active">Morning</span><span class="sep">/</span><span class="e">Evening</span>
+</button>
+
+<header class="masthead">
+  <div class="mast-left">VOL. I · NO. 01</div>
+  <div class="mast-center">TK Magazine</div>
+  <div class="mast-right">ISSUE 01 · 2026</div>
+</header>
+<div class="top-rule"></div>
+
+<section class="hero">
+  <div class="kicker reveal">THE PROFILE · 서비스 기획자</div>
+  <h1><span class="mask" id="heroMask">김태윤</span></h1>
+  <p class="deck reveal">비즈니스의 언어와 개발의 언어를 잇는 서비스 기획자. 가설을 데이터로 세우고, 현장의 목소리로 검증한다.</p>
+  <p class="byline reveal">글 · <strong>편집부</strong> &nbsp;|&nbsp; 2026년 봄 · 서울</p>
+</section>
+
+<main class="magazine">
+
+  <!-- ===== LEFT COLUMN: ESSAY + PROJECTS ===== -->
+  <div class="col-main">
+
+    <article class="section reveal">
+      <div class="kicker">PROLOGUE · 자기소개</div>
+      <h2>병목을 끊어내는 사람</h2>
+      <p class="subtitle">— 비즈니스와 개발 사이, 잃어버린 번역어를 찾아서.</p>
+      <div class="body has-drop">
+        <p>비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+        <p>학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+        <p>이처럼 저는 데이터로 가설을 세우고 현장의 목소리로 검증하며, 개발팀과의 소통 비용을 직접 줄이는 기획자입니다.</p>
+      </div>
+    </article>
+
+    <div class="pullquote reveal">
+      <q>데이터로 가설을 세우고, 현장의 목소리로 검증한다.</q>
+      <cite>— 김태윤, 기획 노트 중에서</cite>
+    </div>
+
+    <article class="section reveal">
+      <div class="kicker">FEATURE / 01 · RoomSync</div>
+      <h2><a href="detail.html" class="link">RoomSync, 동아리방을 다시 설계하다</a></h2>
+      <p class="subtitle">— 50개 동아리가 수기로 다투던 회의실, 한 달 만에 노쇼가 사라졌다.</p>
+      <div class="meta-line">2023.07 — 2023.11 · 30개 동아리 가입 · 노쇼 −60%</div>
+
+      <figure class="plate lede reveal">
+        <div class="frame"><img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 회의 장면"></div>
+        <figcaption class="cap">Photo — RoomSync 스프린트 플래닝 · 김태윤</figcaption>
+      </figure>
+
+      <div class="body has-drop">
+        <p>50여 개 동아리가 공용 회의실을 수기로 예약하다 겹침 사고가 빈번하게 일어났다. 회장단 설문을 돌려 '실시간 예약 현황 확인'이 최대 니즈임을 데이터로 확인했고, 백엔드 2명과 협업해 MVP 전략으로 핵심(예약·취소·실시간 뷰)만 남기고 알림은 2차 스프린트로 미뤘다.</p>
+        <p>API 명세는 직접 초안을 작성했고, Jira를 도입하며 스크럼 마스터를 맡았다. 출시 1개월 만에 30개 동아리가 가입했고 노쇼는 60% 줄었다. 이 글은 그 5개월의 기록이다.</p>
+      </div>
+      <div class="tags">
+        <span>서비스 기획</span><span>MVP</span><span>API 명세</span><span>스크럼</span>
+      </div>
+      <a href="detail.html" class="cta-read link">→ 케이스 스터디 전문 읽기</a>
+    </article>
+
+    <article class="section reveal">
+      <div class="kicker">FEATURE / 02 · A사 커머스 인턴십</div>
+      <h2><a href="detail.html" class="link">12%p 전환율, 버튼 하나의 무게</a></h2>
+      <p class="subtitle">— MAU 50만의 장바구니, 텍스트를 가리던 고정 버튼을 옮긴 결과.</p>
+      <div class="meta-line">2023.01 — 2023.06 · 장바구니 전환율 +12%p · 정규 배포</div>
+
+      <figure class="plate lede reveal">
+        <div class="frame"><img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="사용성 테스트 장면"></div>
+        <figcaption class="cap">Photo — 사용성 테스트(UT) 세션 · 김태윤</figcaption>
+      </figure>
+
+      <div class="body has-drop">
+        <p>MAU 50만 커머스에서 장바구니 전환율 개선 과제를 맡았다. GA4와 앰플리튜드 분석으로 상세→장바구니 구간의 이탈이 45%에 달함을 확인했고, 사용자 5명 UT에서 하단 고정 구매 버튼이 본문 텍스트를 가린다는 페인포인트를 발견했다.</p>
+        <p>투명도와 높이를 조정한 안과 무료배송 넛지 카피를 더한 안을 A/B로 분기시켰다. B안이 12%p 상승했고, 그대로 정규 배포로 이어졌다.</p>
+      </div>
+      <div class="tags">
+        <span>그로스</span><span>A/B 테스트</span><span>GA4</span><span>UT</span>
+      </div>
+      <a href="detail.html" class="cta-read link">→ 케이스 스터디 전문 읽기</a>
+    </article>
+
+    <div class="pullquote reveal">
+      <q>기획자는 결국 팀이 같은 단어로 같은 그림을 보게 만드는 사람이다.</q>
+      <cite>— RoomSync 회고 노트</cite>
+    </div>
+
+    <article class="section reveal">
+      <div class="kicker">FEATURE / 03 · 연합 창업 동아리</div>
+      <h2><a href="detail.html" class="link">서로의 언어로 말하기</a></h2>
+      <p class="subtitle">— 직무가 갈라진 100명의 동아리, 데모데이 배포율을 두 배 넘게 끌어올린 회장의 1년.</p>
+      <div class="meta-line">2022.03 — 2022.12 · 데모데이 배포율 40 → 85%</div>
+
+      <figure class="plate lede reveal">
+        <div class="frame"><img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="세미나 발표 장면"></div>
+        <figcaption class="cap">Photo — '서로의 언어로 말하기' 세미나 · 김태윤</figcaption>
+      </figure>
+
+      <div class="body has-drop">
+        <p>100명 규모 IT 연합 창업 동아리의 회장을 맡았을 때, 직무 간 교류 부재로 프로젝트 완성률은 40%에 머물러 있었다. '크로스오버 해커톤'과 '서로의 언어로 말하기' 세미나를 월 1회 운영하며 디자이너·개발자·기획자가 한 테이블에 앉도록 강제했다.</p>
+        <p>연말 데모데이에서는 85%의 팀이 실제로 제품을 배포했다. 사람 사이의 번역어를 만드는 것 또한 기획의 일이라는 사실을 그때 배웠다.</p>
+      </div>
+      <div class="tags">
+        <span>리더십</span><span>커뮤니티</span><span>운영</span><span>퍼실리테이션</span>
+      </div>
+      <a href="detail.html" class="cta-read link">→ 케이스 스터디 전문 읽기</a>
+    </article>
+
+  </div>
+
+  <!-- ===== RIGHT COLUMN: SIDEBAR ===== -->
+  <aside class="col-side">
+    <div class="sticky">
+
+      <div class="side-with-stamp">
+        <div class="side-inner">
+          <div class="side-block">
+            <figure class="plate portrait reveal">
+              <div class="frame"><img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 포트레이트"></div>
+              <figcaption class="cap">Photo — 김태윤 (Taeyoon Kim), 서울 · 2026</figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="datestamp">MAY · 2026 · SEOUL</div>
+      </div>
+
+      <div class="side-block factbox reveal">
+        <div class="factbox-title">FACT BOX</div>
+        <dl>
+          <div><dt>이름</dt><dd>김태윤 · Taeyoon Kim</dd></div>
+          <div><dt>전공</dt><dd>경영학과 / 컴퓨터공학 복수전공 (3.9 / 4.5)</dd></div>
+          <div><dt>희망 직무</dt><dd>서비스 기획자 · PM</dd></div>
+          <div><dt>스킬</dt><dd>Notion, Figma(기본), GA4, SQL, Agile 스크럼 리드</dd></div>
+          <div><dt>연락처</dt><dd><a href="mailto:taeyoon@example.com" class="link">taeyoon@example.com</a></dd></div>
+        </dl>
+      </div>
+
+      <div class="side-block factbox reveal">
+        <div class="factbox-title">IN THIS ISSUE</div>
+        <dl>
+          <div><dt>FEATURE 01</dt><dd>RoomSync — 동아리방을 다시 설계하다</dd></div>
+          <div><dt>FEATURE 02</dt><dd>12%p 전환율, 버튼 하나의 무게</dd></div>
+          <div><dt>FEATURE 03</dt><dd>서로의 언어로 말하기</dd></div>
+        </dl>
+      </div>
+
+      <div class="side-block factbox reveal">
+        <div class="factbox-title">KEY METRICS</div>
+        <dl>
+          <div><dt>RoomSync</dt><dd>30개 동아리 · 노쇼 −60%</dd></div>
+          <div><dt>A사 커머스</dt><dd>장바구니 전환율 +12%p</dd></div>
+          <div><dt>연합 동아리</dt><dd>데모데이 배포율 40 → 85%</dd></div>
+        </dl>
+      </div>
+
+    </div>
+  </aside>
+
+</main>
+
+<footer class="colophon">
+  <div class="col-title">TK Magazine</div>
+  <div>COLOPHON · ISSUE 01 · 2026 · SEOUL</div>
+  <div>편집 & 글 · 김태윤 &nbsp;|&nbsp; <a href="mailto:taeyoon@example.com" class="link">taeyoon@example.com</a></div>
+  <div>SET IN SOURCE SERIF 4 · SPECTRAL · SOURCE SANS 3 · NOTO SERIF KR</div>
+</footer>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ----- Theme toggle ----- */
+  var STORAGE_KEY = 'tk-theme';
+  var toggle = document.getElementById('themeToggle');
+  var mSpan = toggle.querySelector('.m');
+  var eSpan = toggle.querySelector('.e');
+
+  function applyTheme(theme){
+    if(theme === 'alt'){
+      document.documentElement.setAttribute('data-theme','alt');
+      mSpan.classList.remove('active');
+      eSpan.classList.add('active');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      eSpan.classList.remove('active');
+      mSpan.classList.add('active');
+    }
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e){}
+  if(saved === 'alt') applyTheme('alt'); else applyTheme('light');
+
+  toggle.addEventListener('click', function(){
+    var isAlt = document.documentElement.getAttribute('data-theme') === 'alt';
+    var next = isAlt ? 'light' : 'alt';
+    applyTheme(next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch(e){}
+  });
+
+  /* ----- Scroll progress ----- */
+  var bar = document.getElementById('scrollProgress');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop || document.body.scrollTop;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var pct = Math.min(100, Math.max(0, (scrolled / max) * 100));
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ----- Hero mask reveal ----- */
+  var heroMask = document.getElementById('heroMask');
+  if(heroMask){
+    if(prefersReduced){
+      heroMask.classList.add('in');
+    } else {
+      requestAnimationFrame(function(){
+        setTimeout(function(){ heroMask.classList.add('in'); }, 120);
+      });
+    }
+  }
+
+  /* ----- Intersection Observer reveals ----- */
+  if('IntersectionObserver' in window && !prefersReduced){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, {threshold:0.15, rootMargin:'0px 0px -40px 0px'});
+
+    document.querySelectorAll('.reveal, .section, .pullquote, .plate').forEach(function(el){
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.reveal, .section, .pullquote, .plate').forEach(function(el){
+      el.classList.add('in');
+    });
+  }
+})();
+</script>
+</body>
+</html>

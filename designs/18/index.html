@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="ko" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>김태윤 — Heritage Catalogue · Spring Sale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5EFE5;
+    --paper:#EFE7D8;
+    --ink:#1A1A1A;
+    --ink-soft:#332E2B;            /* >7:1 on cream */
+    --accent:#4A2C2A;              /* burgundy, ~8.6:1 */
+    --secondary:#6B5238;           /* darker antique gold, ~5.6:1 */
+    --hair:rgba(74,44,42,.45);
+    --hair-soft:rgba(74,44,42,.22);
+    --plate:#F5EFE5;
+  }
+  [data-theme="night"]{
+    --bg:#1A1614;                  /* dark walnut */
+    --paper:#221C19;
+    --ink:#F5EFE5;                 /* ~13:1 */
+    --ink-soft:#E8DFCB;             /* ~10:1 */
+    --accent:#D9A6A6;               /* lifted burgundy, ~7:1 */
+    --secondary:#E0C485;            /* lifted gold, ~9:1 */
+    --hair:rgba(245,239,229,.42);
+    --hair-soft:rgba(245,239,229,.18);
+    --plate:#1A1614;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);
+    transition:background 400ms ease,color 400ms ease;}
+  body{
+    font-family:'EB Garamond','Cormorant Garamond','Noto Serif KR',serif;
+    font-size:17px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+
+  .progress{
+    position:fixed;top:0;left:0;height:1px;width:0%;
+    background:var(--accent);z-index:1000;
+    transition:width 120ms linear,background 400ms ease;
+  }
+
+  .theme-toggle{
+    position:fixed;top:14px;right:18px;z-index:900;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-soft);background:transparent;border:0;
+    cursor:pointer;padding:12px 14px;min-height:44px;min-width:44px;
+    transition:color 400ms ease;
+  }
+  .gallery-back{
+    position:fixed;top:14px;left:18px;z-index:900;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-style:italic;font-size:13px;
+    color:var(--accent);background:transparent;
+    padding:12px 14px;min-height:44px;display:inline-flex;align-items:center;
+    border-bottom:1px solid var(--hair-soft);
+    transition:color 300ms ease,border-color 300ms ease;
+  }
+  .gallery-back:hover{color:var(--ink);border-color:var(--accent);}
+  .theme-toggle .dot{color:var(--accent);margin:0 .5em;
+    transition:color 400ms ease;}
+  .theme-toggle .on{color:var(--accent);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 56px;}
+
+  /* ornamental rule */
+  .rule{display:flex;align-items:center;justify-content:center;gap:14px;
+    margin:28px 0;color:var(--accent);}
+  .rule::before,.rule::after{content:"";flex:1;height:1px;background:var(--hair);
+    max-width:240px;}
+  .rule .b{font-size:12px;line-height:1;color:var(--accent);}
+
+  /* small caps eyebrow */
+  .smcaps{
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:14px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);font-weight:500;
+  }
+  .smcaps.soft{color:var(--secondary)}
+
+  /* hero */
+  .hero{padding:96px 0 56px;text-align:center;}
+  .hero .house{
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--secondary);margin-bottom:18px;
+  }
+  .hero .plate-portrait{
+    width:180px;height:240px;margin:0 auto 36px;
+    position:relative;
+  }
+  .hero .name{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-weight:500;font-size:84px;line-height:1.05;
+    letter-spacing:.005em;
+    color:var(--ink);
+  }
+  .hero .name .it{font-style:italic;font-weight:500;}
+  .hero .role-line{
+    display:flex;align-items:center;justify-content:center;gap:18px;
+    margin-top:22px;color:var(--accent);
+  }
+  .hero .role-line::before,.hero .role-line::after{
+    content:"";height:1px;width:96px;background:var(--hair);
+  }
+  .hero .role{
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:13px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .hero .meta{
+    margin-top:30px;color:var(--ink-soft);
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-style:italic;font-size:15px;
+  }
+
+  /* mask reveal for hero name */
+  .mask-reveal{
+    -webkit-clip-path:inset(0 0 100% 0);clip-path:inset(0 0 100% 0);
+    opacity:0;
+    transition:clip-path 900ms cubic-bezier(.7,0,.3,1),
+               -webkit-clip-path 900ms cubic-bezier(.7,0,.3,1),
+               opacity 900ms ease;
+  }
+  .mask-reveal.in{
+    -webkit-clip-path:inset(0 0 0 0);clip-path:inset(0 0 0 0);
+    opacity:1;
+  }
+
+  /* framed image plate */
+  .plate{
+    background:var(--plate);
+    padding:8px;
+    outline:1px solid var(--accent);
+    outline-offset:0;
+    box-shadow:0 1px 0 var(--hair-soft);
+    overflow:hidden;
+    transition:box-shadow 500ms ease, background 400ms ease;
+  }
+  .plate .ph{
+    width:100%;display:block;background:#cdbfa6;
+    transform:scale(1.04);
+    transition:transform 1500ms cubic-bezier(.2,.6,.2,1);
+  }
+  .plate.in .ph{transform:scale(1.0);}
+  .plate:hover{box-shadow:0 8px 24px rgba(26,22,20,.18);}
+
+  .plate-4x3 .ph{aspect-ratio:4/3;object-fit:cover;}
+  .plate-portrait .ph{aspect-ratio:3/4;object-fit:cover;height:100%;width:100%;}
+  .caption{
+    margin-top:14px;text-align:center;
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-style:italic;font-size:12px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--secondary);
+  }
+
+  /* profile column */
+  .profile{max-width:640px;margin:24px auto 64px;text-align:center;}
+  .profile h2{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-weight:500;font-size:28px;font-style:italic;
+    color:var(--ink);margin:8px 0 18px;
+  }
+  .profile p{color:var(--ink-soft);margin:0 0 14px;}
+  .profile .keys{
+    display:flex;justify-content:center;gap:22px;flex-wrap:wrap;
+    margin-top:26px;color:var(--accent);
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+  }
+  .profile .keys span{position:relative;padding:0 4px;}
+  .profile .keys span+span::before{
+    content:"·";position:absolute;left:-15px;top:-1px;color:var(--secondary);
+  }
+
+  /* lots */
+  .lots{padding:24px 0 40px;}
+  .section-title{
+    text-align:center;margin:36px 0 8px;
+  }
+  .lot{
+    display:grid;grid-template-columns:1fr;gap:34px;
+    padding:64px 0;border-top:1px solid var(--hair-soft);
+  }
+  .lot:first-of-type{border-top:0;}
+  .lot-head{text-align:center;}
+  .lot-no{
+    font-family:'Cormorant Garamond','EB Garamond',serif;
+    font-size:13px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:14px;display:inline-block;
+    opacity:0;transform:translateY(8px);
+    transition:opacity 600ms ease, transform 600ms cubic-bezier(.7,0,.3,1);
+  }
+  .lot.in .lot-no{opacity:1;transform:none;transition-delay:300ms;}
+
+  .lot-image{
+    max-width:760px;margin:0 auto;width:100%;
+    opacity:0;transform:translateY(8px);
+    transition:opacity 600ms ease, transform 600ms cubic-bezier(.7,0,.3,1);
+  }
+  .lot.in .lot-image{opacity:1;transform:none;transition-delay:500ms;}
+
+  .lot-body{
+    max-width:640px;margin:0 auto;text-align:center;
+    opacity:0;transform:translateY(8px);
+    transition:opacity 600ms ease, transform 600ms cubic-bezier(.7,0,.3,1);
+  }
+  .lot.in .lot-body{opacity:1;transform:none;transition-delay:700ms;}
+
+  .lot-title{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-size:36px;font-style:italic;font-weight:500;
+    color:var(--ink);margin:18px 0 10px;line-height:1.1;
+  }
+  .lot-title a{border-bottom:1px solid var(--hair-soft);padding-bottom:2px;
+    transition:border-color 300ms ease,color 300ms ease;}
+  .lot-title a:hover{border-color:var(--accent);color:var(--accent);}
+  .lot-meta{
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--secondary);margin-bottom:14px;
+  }
+  .lot-estimate{
+    display:inline-block;
+    font-family:'Cormorant Garamond',serif;
+    font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);padding:10px 22px;
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);
+    margin:16px 0 22px;
+  }
+  .lot-desc{color:var(--ink-soft);font-size:17px;}
+  .lot-cta{
+    margin-top:24px;
+    font-family:'Cormorant Garamond',serif;
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .lot-cta a{border-bottom:1px solid var(--accent);padding:10px 4px;display:inline-block;min-height:44px;}
+
+  /* generic in-view */
+  .iv{opacity:0;transform:translateY(8px);
+    transition:opacity 600ms ease, transform 600ms cubic-bezier(.7,0,.3,1);}
+  .iv.in{opacity:1;transform:none;}
+
+  /* about / philosophy */
+  .pillars{
+    max-width:880px;margin:0 auto;padding:32px 0 80px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:32px;
+  }
+  .pillar{text-align:center;padding:0 6px;}
+  .pillar .n{
+    font-family:'Cormorant Garamond',serif;font-style:italic;
+    color:var(--secondary);font-size:14px;letter-spacing:.2em;
+    text-transform:uppercase;margin-bottom:10px;
+  }
+  .pillar h4{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-style:italic;font-weight:500;font-size:22px;margin-bottom:10px;
+    color:var(--ink);
+  }
+  .pillar p{color:var(--ink-soft);font-size:15px;}
+
+  /* skill ledger */
+  .ledger{max-width:760px;margin:0 auto 90px;}
+  .ledger h3{text-align:center;margin-bottom:18px;}
+  .ledger .row{
+    display:grid;grid-template-columns:200px 1fr 80px;gap:18px;
+    align-items:baseline;padding:14px 0;
+    border-bottom:1px solid var(--hair-soft);
+    font-family:'EB Garamond','Noto Serif KR',serif;font-size:15px;
+  }
+  .ledger .row .k{
+    font-family:'Cormorant Garamond',serif;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--accent);font-size:12px;
+  }
+  .ledger .row .v{color:var(--ink-soft);}
+  .ledger .row .y{
+    font-family:'Cormorant Garamond',serif;font-style:italic;
+    color:var(--secondary);text-align:right;font-size:13px;
+  }
+
+  /* footer crest */
+  footer{
+    padding:60px 0 80px;text-align:center;
+    border-top:1px solid var(--hair-soft);
+  }
+  .crest{
+    font-family:'Cormorant Garamond','Noto Serif KR',serif;
+    font-style:italic;font-size:22px;color:var(--ink);
+    margin-bottom:10px;
+  }
+  .crest .em{color:var(--accent);}
+  .imprint{
+    color:var(--secondary);font-family:'Cormorant Garamond',serif;
+    font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+    margin-top:8px;
+  }
+  .contacts{
+    display:flex;justify-content:center;gap:28px;margin-top:22px;
+    color:var(--ink-soft);font-style:italic;font-size:15px;
+    flex-wrap:wrap;
+  }
+  .contacts a{border-bottom:1px solid var(--hair-soft);padding:10px 4px;display:inline-block;min-height:44px;}
+  .contacts a:hover{border-color:var(--accent);color:var(--accent);}
+
+  @media (max-width:780px){
+    .wrap{padding:0 24px;}
+    .hero{padding:84px 0 36px;}
+    .hero .name{font-size:56px;}
+    .pillars{grid-template-columns:1fr;gap:24px;}
+    .ledger .row{grid-template-columns:120px 1fr;}
+    .ledger .row .y{grid-column:1/-1;text-align:left;}
+    .theme-toggle{top:12px;right:14px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:0ms !important;animation-duration:0ms !important;}
+    .iv,.lot-no,.lot-image,.lot-body{opacity:1 !important;transform:none !important;}
+    .mask-reveal{clip-path:none !important;-webkit-clip-path:none !important;opacity:1 !important;}
+    .plate .ph{transform:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<a class="gallery-back" href="../../index.html">&larr; 갤러리</a>
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle day or night">
+  <span class="day on">Day</span><span class="dot">·</span><span class="night">Night</span>
+</button>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="house iv">Heritage Catalogue — Spring Sale · MMXXVI</div>
+    <div class="plate plate-portrait iv" style="width:180px;height:240px;">
+      <img class="ph" src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait plate">
+    </div>
+    <div class="caption iv" style="max-width:240px;margin:14px auto 24px;">Frontispiece — Portrait of the Maker</div>
+
+    <h1 class="name">
+      <span class="mask-reveal" id="hn1">김태윤</span><br>
+      <span class="mask-reveal it" id="hn2" style="font-size:38px;letter-spacing:.05em;display:inline-block;margin-top:14px;">Taeyoon Kim</span>
+    </h1>
+
+    <div class="role-line iv">
+      <span class="role">Product Manager · Seoul</span>
+    </div>
+
+    <div class="meta iv">Lots 01 – 03 · 서비스기획자 · PM 지망 · 경영학 + 컴퓨터공학 복수전공</div>
+  </section>
+
+  <div class="rule iv"><span class="b">&#10070;</span></div>
+
+  <!-- PROFILE -->
+  <section class="profile iv">
+    <div class="smcaps">Provenance — Statement of the Maker</div>
+    <h2>“현장의 불편을 가설로, 가설을 가장 작은 실험으로.”</h2>
+    <p>
+      경영학 · 컴퓨터공학을 복수전공하며 학점 3.9/4.5를 유지해 온 서비스기획자/PM 지망생입니다.
+      RoomSync에서는 학내 동아리방 예약을 디지털로 옮기며 노쇼를 60% 줄였고,
+      A사 커머스 인턴십에서는 5명 UT와 A/B 테스트로 무료배송 넛지 B안을 전환율 +12%p로 정규 배포까지 가져갔습니다.
+    </p>
+    <p>
+      도구는 Notion · Figma(기본) · GA4 · SQL · Agile. 가장 자주 쓰는 도구는
+      <em>‘다시 한 번 물어보기’</em> 입니다.
+    </p>
+    <div class="keys">
+      <span>Discovery</span><span>Experimentation</span><span>Delivery</span><span>Storytelling</span>
+    </div>
+  </section>
+
+  <div class="rule iv"><span class="b">&#10070;</span></div>
+
+  <!-- LOTS -->
+  <section class="lots">
+    <div class="section-title iv">
+      <div class="smcaps">The Catalogue — Three Lots on Offer</div>
+    </div>
+
+    <!-- LOT 01 -->
+    <article class="lot" id="lot01">
+      <div class="lot-head">
+        <div class="lot-no">Lot 01 — Property of a Campus Initiative</div>
+      </div>
+      <div class="lot-image">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync working session">
+        </div>
+        <div class="caption">Lot 01 — RoomSync working session, MMXXIII</div>
+      </div>
+      <div class="lot-body">
+        <h3 class="lot-title"><a href="detail.html">RoomSync</a></h3>
+        <div class="lot-meta">2023.07 – 2023.11 · PM · 학내 동아리방 예약</div>
+        <div class="lot-estimate">Estimate — 30개 동아리 도입 · 노쇼 −60%</div>
+        <p class="lot-desc">
+          학내 50여 개 동아리가 수기로 관리하던 동아리방 예약을 디지털 서비스로 옮긴 웹 프로젝트.
+          회장단 설문에서 ‘실시간 현황’ 니즈를 발견해, 예약·취소·실시간 뷰만 담은 MVP를 1개월에 출시했습니다.
+        </p>
+        <div class="lot-cta"><a href="detail.html">View the lot &nbsp;→</a></div>
+      </div>
+    </article>
+
+    <!-- LOT 02 -->
+    <article class="lot" id="lot02">
+      <div class="lot-head">
+        <div class="lot-no">Lot 02 — Property from a Private Internship</div>
+      </div>
+      <div class="lot-image">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A company user interviews">
+        </div>
+        <div class="caption">Lot 02 — A사 커머스 UT 세션, MMXXIII</div>
+      </div>
+      <div class="lot-body">
+        <h3 class="lot-title">A사 커머스 상세페이지 A/B</h3>
+        <div class="lot-meta">2023.01 – 2023.06 · Product Intern</div>
+        <div class="lot-estimate">Estimate — B안 +12%p · 정규 배포</div>
+        <p class="lot-desc">
+          MAU 50만 커머스에서 GA4 퍼널 분석으로 이탈률 45%를 확인하고, 5명 UT로 가설을 좁혔습니다.
+          상세페이지 투명도·높이 조정과 무료배송 넛지를 결합한 B안을 A/B 테스트해
+          전환 +12%p로 정규 배포까지 가져갔습니다.
+        </p>
+      </div>
+    </article>
+
+    <!-- LOT 03 -->
+    <article class="lot" id="lot03">
+      <div class="lot-head">
+        <div class="lot-no">Lot 03 — Property of a Student Society</div>
+      </div>
+      <div class="lot-image">
+        <div class="plate plate-4x3">
+          <img class="ph" src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="Society lecture session">
+        </div>
+        <div class="caption">Lot 03 — 동아리 월례 세미나, MMXXII</div>
+      </div>
+      <div class="lot-body">
+        <h3 class="lot-title">IT 연합 동아리 회장</h3>
+        <div class="lot-meta">2022.03 – 2022.12 · 회장 · 100명</div>
+        <div class="lot-estimate">Estimate — 프로젝트 완성률 40% → 85%</div>
+        <p class="lot-desc">
+          100명 규모 IT 연합 동아리의 프로젝트 완성률이 40%에 그치던 문제를,
+          월 1회 세미나로 진척 점검과 회고 의식을 만들어 한 해 만에 85%까지 끌어올렸습니다.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <div class="rule iv"><span class="b">&#10070;</span></div>
+
+  <!-- PHILOSOPHY -->
+  <section>
+    <div class="section-title iv">
+      <div class="smcaps">House Notes — Three Principles</div>
+    </div>
+    <div class="pillars">
+      <div class="pillar iv">
+        <div class="n">I.</div>
+        <h4>Listen twice, ship once</h4>
+        <p>제품 결정의 절반은 사용자의 말에서 나옵니다. GA4·SQL이 가설을 좁히고, 인터뷰가 가설을 바꿉니다.</p>
+      </div>
+      <div class="pillar iv">
+        <div class="n">II.</div>
+        <h4>Smallest honest test</h4>
+        <p>가장 작은 정직한 실험을 한 가지씩. 한 번에 한 변인만 바꾸고, A/B로 정직하게 확인합니다.</p>
+      </div>
+      <div class="pillar iv">
+        <div class="n">III.</div>
+        <h4>Trust compounds</h4>
+        <p>지표보다 신뢰가 먼저 복리됩니다. 회장단 설문과 회고 의식이 RoomSync와 동아리 운영의 출발점이었습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule iv"><span class="b">&#10070;</span></div>
+
+  <!-- LEDGER -->
+  <section class="ledger">
+    <h3 class="section-title iv"><span class="smcaps">Ledger of Skills &amp; Provenance</span></h3>
+    <div class="row iv"><div class="k">Discovery</div><div class="v">User Interview · Survey · 5명 UT</div><div class="y">—</div></div>
+    <div class="row iv"><div class="k">Analytics</div><div class="v">GA4 · SQL · A/B Test</div><div class="y">—</div></div>
+    <div class="row iv"><div class="k">Design</div><div class="v">Figma (기본) · Wireframe · API 명세 초안</div><div class="y">—</div></div>
+    <div class="row iv"><div class="k">Delivery</div><div class="v">Notion · Jira · Agile · 스크럼</div><div class="y">—</div></div>
+    <div class="row iv"><div class="k">Academics</div><div class="v">경영학 + 컴퓨터공학 복수전공 · 3.9/4.5</div><div class="y">—</div></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="rule iv"><span class="b">&#10070;</span></div>
+    <div class="crest iv">Kim Taeyoon — <span class="em">Product Manager</span></div>
+    <div class="imprint iv">Heritage Catalogue · Seoul · MMXXVI</div>
+    <div class="contacts iv">
+      <a href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+    </div>
+    <div class="rule iv" style="margin-top:30px;"><span class="b">&#10070;</span></div>
+  </div>
+</footer>
+
+<script>
+  // theme
+  (function(){
+    var k='tk-theme';
+    var t=localStorage.getItem(k)||'day';
+    document.documentElement.setAttribute('data-theme',t);
+    var btn=document.getElementById('themeToggle');
+    function paint(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      btn.querySelector('.day').classList.toggle('on',cur==='day');
+      btn.querySelector('.night').classList.toggle('on',cur==='night');
+    }
+    paint();
+    btn.addEventListener('click',function(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      var n=cur==='day'?'night':'day';
+      document.documentElement.setAttribute('data-theme',n);
+      localStorage.setItem(k,n);
+      paint();
+    });
+  })();
+
+  // progress
+  (function(){
+    var bar=document.getElementById('progress');
+    function up(){
+      var h=document.documentElement;
+      var max=h.scrollHeight-h.clientHeight;
+      var p=max>0?(h.scrollTop/max)*100:0;
+      bar.style.width=p+'%';
+    }
+    document.addEventListener('scroll',up,{passive:true});
+    up();
+  })();
+
+  // observer
+  (function(){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:.18,rootMargin:'0px 0px -40px 0px'});
+    document.querySelectorAll('.iv,.lot,.plate,.mask-reveal').forEach(function(n){io.observe(n);});
+    // ensure plates also marked in when intersecting (separate so Ken Burns scale triggers)
+    var io2=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io2.unobserve(e.target);}});
+    },{threshold:.1});
+    document.querySelectorAll('.plate').forEach(function(n){io2.observe(n);});
+  })();
+
+  // hero mask reveal on load
+  window.addEventListener('load',function(){
+    setTimeout(function(){document.getElementById('hn1').classList.add('in');},80);
+    setTimeout(function(){document.getElementById('hn2').classList.add('in');},320);
+  });
+</script>
+</body>
+</html>

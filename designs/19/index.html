@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Scroll Cinema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@300;400;700&family=Inter:wght@300;400;500;700&family=Noto+Serif+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow-x: hidden; }
+
+  :root {
+    --bg: #0A0A0A;
+    --fg: #FFFFFF;
+    --accent: #FFFFFF;
+    --divider: rgba(255,255,255,.15);
+    --cursor-color: #FFFFFF;
+    --img-filter: none;
+  }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    transition: background-color 1.2s cubic-bezier(.7,0,.3,1), color 1.2s cubic-bezier(.7,0,.3,1);
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Primary (chromatic) palettes */
+  body[data-theme="primary"].chapter-1 { --bg:#0A0A0A; --fg:#FFFFFF; --accent:#FFFFFF; --divider:rgba(255,255,255,.15); --img-filter: none; }
+  body[data-theme="primary"].chapter-2 { --bg:#E5E2DC; --fg:#1A1A1A; --accent:#1A1A1A; --divider:rgba(26,26,26,.18); --img-filter: none; }
+  body[data-theme="primary"].chapter-3 { --bg:#1F2937; --fg:#FFFFFF; --accent:#FFFFFF; --divider:rgba(255,255,255,.18); --img-filter: none; }
+  body[data-theme="primary"].chapter-4 { --bg:#FEF3C7; --fg:#1F2937; --accent:#1F2937; --divider:rgba(31,41,55,.2); --img-filter: none; }
+  body[data-theme="primary"].chapter-5 { --bg:#064E3B; --fg:#FFFFFF; --accent:#FFFFFF; --divider:rgba(255,255,255,.18); --img-filter: none; }
+  body[data-theme="primary"].chapter-6 { --bg:#FFFFFF; --fg:#000000; --accent:#000000; --divider:rgba(0,0,0,.18); --img-filter: none; }
+
+  /* Alt (mono cinema) palettes */
+  body[data-theme="alt"] {
+    --fg: #1A1A1A;
+    --accent: #C8102E;
+    --divider: #C0BBB3;
+    --cursor-color: #C8102E;
+    --img-filter: none;
+  }
+  body[data-theme="alt"].chapter-1 { --bg:#F4F1ED; }
+  body[data-theme="alt"].chapter-2 { --bg:#ECE8E1; }
+  body[data-theme="alt"].chapter-3 { --bg:#F8F5EF; }
+  body[data-theme="alt"].chapter-4 { --bg:#EDE9E2; }
+  body[data-theme="alt"].chapter-5 { --bg:#F4F1ED; }
+  body[data-theme="alt"].chapter-6 { --bg:#F8F5EF; }
+
+  .serif { font-family: 'DM Serif Display','Playfair Display','Noto Serif KR', serif; font-weight: 300; }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; top:0; left:0;
+    width: 64px; height: 64px;
+    border: 1.5px solid var(--cursor-color);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: border-color .25s, background-color .25s;
+    z-index: 9999;
+    mix-blend-mode: difference;
+    color: var(--cursor-color);
+  }
+  .cursor.hover { background-color: var(--cursor-color); }
+  @media (max-width: 768px), (hover: none), (pointer: coarse) {
+    .cursor { display: none; }
+    body { cursor: auto; }
+  }
+
+  /* Top fixed progress bar */
+  .topbar-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 300;
+    transition: background-color 1.2s, width .15s linear;
+  }
+
+  /* Left progress indicator */
+  .progress {
+    position: fixed;
+    left: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 240px;
+    width: 1px;
+    background: currentColor;
+    opacity: .25;
+    z-index: 100;
+  }
+  .progress::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .35;
+  }
+  .progress-dot {
+    position: fixed;
+    left: 36px;
+    top: calc(50% - 120px);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    z-index: 101;
+    transition: transform .8s cubic-bezier(.7,0,.3,1), background-color 1.2s;
+  }
+  .progress-label {
+    position: fixed;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 101;
+    font-size: 11px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: .55;
+    transition: color 1.2s;
+  }
+  @media (max-width: 768px) {
+    .progress, .progress-label { display: none; }
+    .progress-dot { display: none; }
+    .progress-mobile {
+      position: fixed; left: 0; right: 0; top: 0;
+      height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px;
+      font-size: 10px; letter-spacing: .25em;
+      z-index: 99;
+      background: var(--bg);
+      transition: background-color 1.2s, color 1.2s;
+      border-bottom: 1px solid var(--divider);
+    }
+    .progress-mobile .pm-label { opacity: .85; }
+    .progress-mobile .pm-dots {
+      display: inline-flex; gap: 6px; align-items: center;
+    }
+    .progress-mobile .pm-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .25;
+      transition: opacity .4s, transform .4s;
+    }
+    .progress-mobile .pm-dot.active {
+      opacity: 1;
+      transform: scale(1.6);
+    }
+  }
+  @media (min-width: 769px) {
+    .progress-mobile { display: none; }
+  }
+
+  /* Top nav */
+  .topbar {
+    position: fixed;
+    top: 28px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    font-size: 14px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    opacity: .9;
+    transition: color 1.2s;
+    font-family: 'DM Serif Display','Playfair Display', serif;
+  }
+  /* Back-to-gallery link (visible on every chapter via difference blend) */
+  .back-gallery {
+    position: fixed;
+    top: 22px; left: 28px;
+    z-index: 260;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-size: 11px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: #FFFFFF;
+    text-decoration: none;
+    mix-blend-mode: difference;
+    transition: opacity .25s;
+  }
+  .back-gallery:hover { opacity: .7; }
+  @media (max-width: 768px) {
+    .back-gallery { top: 44px; left: 8px; padding: 12px; font-size: 10px; }
+  }
+  .topbar-right {
+    position: fixed;
+    top: 28px;
+    right: 84px;
+    z-index: 200;
+    font-size: 11px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    opacity: .55;
+    transition: color 1.2s;
+  }
+  @media (max-width: 768px) {
+    .topbar { top: 48px; }
+    .topbar-right { display: none; }
+  }
+
+  /* Theme toggle (top-right) */
+  .theme-toggle {
+    position: fixed;
+    top: 22px; right: 28px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    background: transparent;
+    overflow: hidden;
+    cursor: none;
+    z-index: 250;
+    transition: transform .25s, border-color 1.2s;
+    padding: 0;
+    color: inherit;
+  }
+  .theme-toggle:hover { transform: rotate(180deg); }
+  .theme-toggle .moon-half-l {
+    position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+    background: #1A1A1A;
+  }
+  .theme-toggle .moon-half-r {
+    position: absolute; top: 0; right: 0; width: 50%; height: 100%;
+    background: #FFFFFF;
+  }
+  .theme-toggle .tooltip {
+    position: absolute;
+    top: 46px; right: 0;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 9px;
+    letter-spacing: .25em;
+    padding: 6px 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+  .theme-toggle:hover .tooltip { opacity: 1; }
+  @media (max-width: 768px) {
+    .theme-toggle { top: 44px; right: 12px; width: 44px; height: 44px; }
+    .theme-toggle .tooltip { display: none; }
+  }
+
+  /* Chapters */
+  .chapter {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6vw;
+  }
+  @media (max-width: 768px) {
+    .chapter { padding: 60px 6vw 24px; }
+  }
+
+  /* Image cinematic plate (with curtain reveal + Ken Burns) */
+  .cine-plate {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+  .cine-plate .cine-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.15);
+    transition: transform 2200ms cubic-bezier(.2,.7,.2,1), filter 1.2s;
+    filter: var(--img-filter);
+  }
+  .cine-plate.in .cine-img { transform: scale(1); }
+  .cine-plate .curtain {
+    position: absolute; inset: 0;
+    background: var(--bg);
+    transform: translateY(0);
+    transition: transform 800ms cubic-bezier(.7,0,.3,1), background-color 1.2s;
+    z-index: 2;
+  }
+  .cine-plate.in .curtain { transform: translateY(-101%); }
+
+  /* Chapter 1 hero — half-screen portrait right */
+  .hero-grid {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero-left {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 6vw;
+    z-index: 3;
+  }
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-right .cine-plate { will-change: transform; }
+  .hero-right .cine-img {
+    background-image: linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.15)),
+      url('../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png');
+  }
+  .hero-content {
+    text-align: left;
+    max-width: 540px;
+    position: relative;
+    z-index: 4;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: .4em;
+    text-transform: uppercase;
+    opacity: .78;
+    margin-bottom: 32px;
+    font-weight: 500;
+  }
+  .hero-name {
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: -.02em;
+    margin-bottom: 28px;
+  }
+  .hero-sub {
+    font-size: 15px;
+    opacity: .88;
+    letter-spacing: .04em;
+  }
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px; left: 6vw;
+    font-size: 10px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    opacity: .5;
+    z-index: 5;
+  }
+  @media (max-width: 768px) {
+    .hero-grid { grid-template-columns: 1fr; grid-template-rows: 40vh 1fr; }
+    .hero-left { padding: 24px 6vw 0; align-items: flex-end; justify-content: flex-start; }
+    .hero-right { order: -1; }
+    .hero-name { font-size: 56px; }
+    .hero-scroll { bottom: 18px; left: 6vw; }
+  }
+
+  /* Chapter heading common */
+  .chapter-heading {
+    font-family: 'DM Serif Display','Playfair Display','Noto Serif KR', serif;
+    font-size: 72px;
+    line-height: 1.05;
+    letter-spacing: -.015em;
+    max-width: 14ch;
+    margin-bottom: 48px;
+    overflow: hidden;
+  }
+  .chapter-heading .h-mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+  .chapter-heading .word {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 900ms cubic-bezier(.2,.7,.2,1);
+  }
+  .chapter-heading.h-in .word {
+    transform: translateY(0);
+  }
+  .chapter-eyebrow {
+    font-size: 11px;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 24px;
+    opacity: .78;
+    overflow: hidden;
+  }
+  body[data-theme="alt"] .chapter-eyebrow {
+    color: var(--accent);
+    opacity: 1;
+  }
+  body[data-theme="alt"] .ch-num {
+    color: var(--accent);
+  }
+  @media (max-width: 768px) {
+    .chapter-heading { font-size: 38px; margin-bottom: 28px; }
+  }
+
+  /* Body text reveal */
+  .body-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 700ms cubic-bezier(.2,.7,.2,1) 200ms, transform 700ms cubic-bezier(.2,.7,.2,1) 200ms;
+  }
+  .body-reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Chapter 2 profile */
+  .profile-inner {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 0.7fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .profile-meta {
+    font-size: 13px;
+    opacity: .8;
+  }
+  .profile-meta div { margin-bottom: 14px; }
+  .profile-meta span { display: block; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; opacity: .65; margin-bottom: 4px; }
+  .profile-body p {
+    font-size: 16px;
+    line-height: 1.75;
+    margin-bottom: 18px;
+    max-width: 50ch;
+  }
+  .profile-figure {
+    aspect-ratio: 3/4;
+    width: 100%;
+    max-width: 260px;
+    position: relative;
+    overflow: hidden;
+    justify-self: end;
+  }
+  .profile-figure .cine-img {
+    background-image: url('../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png');
+  }
+  @media (max-width: 980px) {
+    .profile-inner { grid-template-columns: 1fr; gap: 30px; }
+    .profile-figure { max-width: 200px; aspect-ratio: 1/1; }
+    .profile-body p { font-size: 15px; }
+  }
+
+  /* Project chapters — left cinematic plate (60%) + right text (40%) */
+  .project-inner {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 60% 40%;
+  }
+  .project-left {
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+  .project-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 6vw 80px 64px;
+    position: relative;
+    z-index: 2;
+    background: var(--bg);
+    transition: background-color 1.2s;
+  }
+  .project-numeral-bg {
+    position: absolute;
+    right: 4vw; top: 10vh;
+    font-family: 'DM Serif Display','Playfair Display', serif;
+    font-size: 240px;
+    line-height: .8;
+    opacity: .08;
+    letter-spacing: -.05em;
+    pointer-events: none;
+    will-change: transform;
+  }
+  body[data-theme="alt"] .project-numeral-bg {
+    color: var(--accent);
+    opacity: .12;
+  }
+
+  .project-text {
+    max-width: 420px;
+  }
+  .project-title {
+    font-family: 'DM Serif Display','Playfair Display','Noto Serif KR', serif;
+    font-size: 44px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -.015em;
+    overflow: hidden;
+  }
+  .project-title .word {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 900ms cubic-bezier(.2,.7,.2,1);
+  }
+  .project-title.h-in .word { transform: translateY(0); }
+  .project-meta {
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    opacity: .82;
+    margin-bottom: 20px;
+  }
+  .project-summary {
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 32px;
+    opacity: .96;
+  }
+  .project-outcome {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .project-outcome div {
+    border-top: 1px solid var(--accent);
+    padding-top: 10px;
+    min-width: 90px;
+  }
+  .project-outcome strong {
+    display: block;
+    font-family: 'DM Serif Display','Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    color: var(--accent);
+  }
+  .project-outcome span {
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    opacity: .82;
+  }
+  .project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: currentColor;
+    text-decoration: none;
+    padding: 14px 2px;
+    min-height: 44px;
+    border-bottom: 1px solid currentColor;
+    font-weight: 500;
+    transition: gap .3s;
+    align-self: flex-start;
+  }
+  .project-link:hover { gap: 20px; }
+
+  /* Per-chapter plate image */
+  .plate-roomsync .cine-img { background-image: url('../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png'); }
+  .plate-commerce .cine-img { background-image: url('../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png'); }
+  .plate-club .cine-img { background-image: url('../png/Gemini_Generated_Image_o20szmo20szmo20s.png'); }
+
+  @media (max-width: 980px) {
+    .project-inner {
+      position: relative;
+      grid-template-columns: 1fr;
+      grid-template-rows: 35vh 1fr;
+      height: 100%;
+    }
+    .project-right { padding: 30px 6vw; }
+    .project-title { font-size: 32px; }
+    .project-numeral-bg { font-size: 130px; top: auto; bottom: 20px; right: 6vw; }
+  }
+
+  /* Contact */
+  .contact-inner {
+    text-align: center;
+    max-width: 900px;
+    position: relative;
+    z-index: 2;
+  }
+  .contact-heading {
+    font-family: 'DM Serif Display','Playfair Display','Noto Serif KR', serif;
+    font-size: 72px;
+    line-height: 1.1;
+    margin-bottom: 56px;
+    letter-spacing: -.015em;
+    overflow: hidden;
+  }
+  .contact-heading .word {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 900ms cubic-bezier(.2,.7,.2,1);
+  }
+  .contact-heading.h-in .word { transform: translateY(0); }
+  .contact-email {
+    font-family: 'DM Serif Display','Playfair Display', serif;
+    font-size: 36px;
+    margin-bottom: 32px;
+    display: inline-block;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 6px;
+    text-decoration: none;
+    color: currentColor;
+  }
+  .contact-social {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 48px;
+    font-size: 12px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+  }
+  .contact-social a {
+    color: currentColor;
+    text-decoration: none;
+    opacity: .65;
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 16px;
+    transition: opacity .25s;
+  }
+  .contact-social a:hover { opacity: 1; }
+  .contact-figure {
+    position: absolute;
+    right: 6vw; bottom: 100px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 2;
+  }
+  .contact-figure .cine-img {
+    background-image: url('../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png');
+  }
+  .contact-footer {
+    position: absolute;
+    bottom: 28px; left: 0; right: 0;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: .2em;
+    opacity: .4;
+    z-index: 2;
+  }
+  @media (max-width: 768px) {
+    .contact-heading { font-size: 36px; margin-bottom: 28px; }
+    .contact-email { font-size: 22px; }
+    .contact-figure { width: 140px; height: 140px; right: 6vw; bottom: 60px; }
+  }
+
+  /* Generic reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 700ms cubic-bezier(.2,.7,.2,1), transform 700ms cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal.d1 { transition-delay: .1s; }
+  .reveal.d2 { transition-delay: .2s; }
+  .reveal.d3 { transition-delay: .3s; }
+  .reveal.d4 { transition-delay: .4s; }
+
+  a { color: inherit; }
+  button { font-family: inherit; }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cine-plate .curtain { display: none; }
+    .cine-plate .cine-img { transform: scale(1); transition: none; }
+    .parallax { transform: none !important; }
+    .chapter-heading .word,
+    .project-title .word,
+    .contact-heading .word {
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body class="chapter-1" data-theme="primary">
+
+<div class="cursor" id="cursor"></div>
+
+<div class="topbar-progress" id="topbarProgress"></div>
+
+<a href="../../index.html" class="back-gallery" aria-label="갤러리로 돌아가기">← 갤러리</a>
+<div class="topbar">TK</div>
+<div class="topbar-right" id="topbarRight">SCROLL CINEMA · 2026</div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="moon-half-l"></span>
+  <span class="moon-half-r"></span>
+  <span class="tooltip" id="themeTooltip">CHROMATIC / MONO</span>
+</button>
+
+<div class="progress-mobile" id="progressMobile">
+  <span class="pm-label" id="progressMobileLabel">01 / 06 — HERO</span>
+  <span class="pm-dots" id="progressMobileDots"></span>
+</div>
+<div class="progress"></div>
+<div class="progress-dot" id="progressDot"></div>
+<div class="progress-label" id="progressLabel">01 / 06 — HERO</div>
+
+<!-- Chapter 1 — Hero -->
+<section class="chapter" id="c1" data-chapter="1" data-label="01 / 06 — HERO">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-content">
+        <div class="hero-eyebrow reveal"><span class="ch-num">01</span> &middot; TAEYOON KIM &middot; PORTFOLIO</div>
+        <h1 class="serif hero-name chapter-heading" data-split>김태윤</h1>
+        <p class="hero-sub body-reveal">서비스 기획자 · 비즈니스와 개발 사이의 통역사</p>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="cine-plate parallax" data-parallax="0.18">
+        <div class="curtain"></div>
+        <div class="cine-img"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL ↓</div>
+</section>
+
+<!-- Chapter 2 — Profile -->
+<section class="chapter" id="c2" data-chapter="2" data-label="02 / 06 — PROFILE">
+  <div class="profile-inner">
+    <div>
+      <div class="chapter-eyebrow reveal"><span class="ch-num">02</span> &nbsp; PROFILE</div>
+      <h2 class="serif chapter-heading" data-split>만든다는 것은 잇는 일.</h2>
+      <div class="profile-meta body-reveal">
+        <div><span>전공</span>경영학 / 컴퓨터공학 복수전공 (3.9 / 4.5)</div>
+        <div><span>직무</span>서비스 기획자 · PM</div>
+        <div><span>스킬</span>Notion · Figma · GA4 · SQL · Agile</div>
+      </div>
+    </div>
+    <div class="profile-body body-reveal">
+      <p>비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+      <p>학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다.</p>
+      <p>MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+    </div>
+    <div class="profile-figure parallax" data-parallax="0.08">
+      <div class="cine-plate">
+        <div class="curtain"></div>
+        <div class="cine-img"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter 3 — Project 1 RoomSync -->
+<section class="chapter" id="c3" data-chapter="3" data-label="03 / 06 — PROJECT I">
+  <div class="project-inner">
+    <div class="project-left">
+      <div class="cine-plate plate-roomsync parallax" data-parallax="0.1">
+        <div class="curtain"></div>
+        <div class="cine-img"></div>
+      </div>
+    </div>
+    <div class="project-right">
+      <div class="project-numeral-bg parallax" data-parallax="-0.2">01</div>
+      <div class="project-text">
+        <div class="chapter-eyebrow reveal"><span class="ch-num">03</span> &middot; ROOMSYNC</div>
+        <h3 class="project-title" data-split>동아리방 예약을 다시 설계하다.</h3>
+        <div class="project-meta body-reveal">2023.07 – 2023.11 · 학내 프로젝트</div>
+        <p class="project-summary body-reveal">50여 개 동아리가 수기로 회의실을 예약하며 발생한 겹침 사고. 회장단 설문으로 핵심 니즈를 검증하고 MVP로 출시까지, 한 달 만에 시장 정의에 성공했습니다.</p>
+        <div class="project-outcome body-reveal">
+          <div><strong>30</strong><span>가입 동아리</span></div>
+          <div><strong>−60%</strong><span>노쇼율</span></div>
+          <div><strong>1개월</strong><span>출시 기간</span></div>
+        </div>
+        <a href="detail.html" class="project-link body-reveal">케이스 보기 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter 4 — Project 2 -->
+<section class="chapter" id="c4" data-chapter="4" data-label="04 / 06 — PROJECT II">
+  <div class="project-inner">
+    <div class="project-left">
+      <div class="cine-plate plate-commerce parallax" data-parallax="0.1">
+        <div class="curtain"></div>
+        <div class="cine-img"></div>
+      </div>
+    </div>
+    <div class="project-right">
+      <div class="project-numeral-bg parallax" data-parallax="-0.2">02</div>
+      <div class="project-text">
+        <div class="chapter-eyebrow reveal"><span class="ch-num">04</span> &middot; A사 커머스 인턴십</div>
+        <h3 class="project-title" data-split>데이터로 장바구니를 다시 보다.</h3>
+        <div class="project-meta body-reveal">2023.01 – 2023.06 · MAU 50만 커머스</div>
+        <p class="project-summary body-reveal">GA4 퍼널 분석과 사용성 테스트로 이탈 구간을 진단하고 A/B 테스트를 기획했습니다. 장바구니 전환율을 12%p 끌어올린 B안은 그대로 정규 배포로 이어졌습니다.</p>
+        <div class="project-outcome body-reveal">
+          <div><strong>+12%p</strong><span>장바구니 전환율</span></div>
+          <div><strong>MAU 50만</strong><span>서비스 규모</span></div>
+          <div><strong>정규배포</strong><span>B안 채택</span></div>
+        </div>
+        <a href="detail.html" class="project-link body-reveal">케이스 보기 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter 5 — Project 3 -->
+<section class="chapter" id="c5" data-chapter="5" data-label="05 / 06 — PROJECT III">
+  <div class="project-inner">
+    <div class="project-left">
+      <div class="cine-plate plate-club parallax" data-parallax="0.1">
+        <div class="curtain"></div>
+        <div class="cine-img"></div>
+      </div>
+    </div>
+    <div class="project-right">
+      <div class="project-numeral-bg parallax" data-parallax="-0.2">03</div>
+      <div class="project-text">
+        <div class="chapter-eyebrow reveal"><span class="ch-num">05</span> &middot; IT 연합 동아리 회장</div>
+        <h3 class="project-title" data-split>완주율을 두 배로 늘리다.</h3>
+        <div class="project-meta body-reveal">2022.03 – 2022.12 · 회장 · 운영 리드</div>
+        <p class="project-summary body-reveal">완성률 40%에 멈춰있던 100명 규모 동아리 운영을 정비했습니다. 월 1회 정기 세미나와 스프린트 단위 리뷰 루틴을 도입해 한 해 만에 완성률 85%를 달성했습니다.</p>
+        <div class="project-outcome body-reveal">
+          <div><strong>40→85%</strong><span>완성률</span></div>
+          <div><strong>100명</strong><span>운영 인원</span></div>
+          <div><strong>월 1회</strong><span>정기 세미나</span></div>
+        </div>
+        <a href="detail.html" class="project-link body-reveal">케이스 보기 →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter 6 — Contact -->
+<section class="chapter" id="c6" data-chapter="6" data-label="06 / 06 — CONTACT">
+  <div class="contact-inner">
+    <div class="chapter-eyebrow reveal"><span class="ch-num">06</span> &middot; CONTACT</div>
+    <h2 class="contact-heading" data-split>이제 함께 일할 차례입니다.</h2>
+    <a href="mailto:taeyoon@example.com" class="contact-email body-reveal">taeyoon@example.com</a>
+    <div class="contact-social body-reveal">
+      <a href="#">LinkedIn</a>
+      <a href="#">GitHub</a>
+      <a href="#">Notion</a>
+    </div>
+  </div>
+  <div class="contact-figure parallax" data-parallax="0.06">
+    <div class="cine-plate">
+      <div class="curtain"></div>
+      <div class="cine-img"></div>
+    </div>
+  </div>
+  <div class="contact-footer">© 2026 TAEYOON KIM · SCROLL CINEMA</div>
+</section>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  var isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  // Theme toggle with localStorage
+  var body = document.body;
+  var toggle = document.getElementById('themeToggle');
+  var savedTheme = null;
+  try { savedTheme = localStorage.getItem('tk-theme'); } catch(e){}
+  if (savedTheme === 'alt') body.setAttribute('data-theme','alt');
+  toggle.addEventListener('click', function(){
+    var current = body.getAttribute('data-theme');
+    var next = current === 'alt' ? 'primary' : 'alt';
+    body.setAttribute('data-theme', next);
+    try { localStorage.setItem('tk-theme', next); } catch(e){}
+  });
+
+  // Custom cursor
+  var cursor = document.getElementById('cursor');
+  if (!isTouch) {
+    var cx = window.innerWidth/2, cy = window.innerHeight/2;
+    var tx = cx, ty = cy;
+    var hovering = false;
+    document.addEventListener('mousemove', function(e){
+      tx = e.clientX; ty = e.clientY;
+    });
+    function rafCursor(){
+      cx += (tx - cx) * 0.18;
+      cy += (ty - cy) * 0.18;
+      var scale = hovering ? 2 : 1;
+      cursor.style.transform = 'translate(' + (cx - 32) + 'px,' + (cy - 32) + 'px) scale(' + scale + ')';
+      requestAnimationFrame(rafCursor);
+    }
+    rafCursor();
+    document.querySelectorAll('a, button, .project-link').forEach(function(el){
+      el.addEventListener('mouseenter', function(){
+        hovering = true;
+        cursor.classList.add('hover');
+      });
+      el.addEventListener('mouseleave', function(){
+        hovering = false;
+        cursor.classList.remove('hover');
+      });
+    });
+  }
+
+  // Split headings into words
+  document.querySelectorAll('[data-split]').forEach(function(h){
+    var text = h.textContent.trim();
+    var html = text.split(/\s+/).map(function(w, i){
+      return '<span class="h-mask"><span class="word" style="transition-delay:' + (i * 80) + 'ms">' + w + '</span></span>';
+    }).join(' ');
+    h.innerHTML = html;
+  });
+
+  // Chapter detection
+  var chapters = document.querySelectorAll('.chapter');
+  var total = chapters.length;
+  var dot = document.getElementById('progressDot');
+  var label = document.getElementById('progressLabel');
+  var mobileLabel = document.getElementById('progressMobileLabel');
+  var mobileDotsWrap = document.getElementById('progressMobileDots');
+
+  // Build mobile dots
+  if (mobileDotsWrap){
+    var dotsHtml = '';
+    for (var i = 0; i < total; i++){
+      dotsHtml += '<span class="pm-dot' + (i === 0 ? ' active' : '') + '" data-i="' + (i+1) + '"></span>';
+    }
+    mobileDotsWrap.innerHTML = dotsHtml;
+  }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting && e.intersectionRatio > 0.5){
+        var n = e.target.getAttribute('data-chapter');
+        var classes = body.className.split(/\s+/).filter(function(c){ return c.indexOf('chapter-') !== 0; });
+        classes.push('chapter-' + n);
+        body.className = classes.join(' ');
+        var idx = parseInt(n,10);
+        var trackHeight = 240;
+        var step = trackHeight / (total - 1);
+        if (dot) dot.style.transform = 'translateY(' + ((idx - 1) * step) + 'px)';
+        var labelTxt = e.target.getAttribute('data-label');
+        if (label) label.textContent = labelTxt;
+        if (mobileLabel) mobileLabel.textContent = labelTxt;
+        if (mobileDotsWrap){
+          mobileDotsWrap.querySelectorAll('.pm-dot').forEach(function(d){
+            d.classList.toggle('active', parseInt(d.getAttribute('data-i'),10) === idx);
+          });
+        }
+      }
+    });
+  }, { threshold: [0.5, 0.6, 0.7] });
+  chapters.forEach(function(c){ io.observe(c); });
+
+  // Heading reveal + body reveal + curtain reveal (all within chapter context)
+  var headingIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('h-in');
+      }
+    });
+  }, { threshold: 0.4 });
+  document.querySelectorAll('[data-split]').forEach(function(h){ headingIO.observe(h); });
+
+  var revealIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+      }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll('.reveal, .body-reveal').forEach(function(el){ revealIO.observe(el); });
+
+  // Curtain + Ken Burns reveal (on chapter entering viewport)
+  var plateIO = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting && e.intersectionRatio > 0.25){
+        e.target.classList.add('in');
+      }
+    });
+  }, { threshold: [0.25, 0.5] });
+  document.querySelectorAll('.cine-plate').forEach(function(el){ plateIO.observe(el); });
+
+  // Top progress bar
+  var bar = document.getElementById('topbarProgress');
+  function updateBar(){
+    var docH = document.documentElement.scrollHeight - window.innerHeight;
+    var pct = docH > 0 ? (window.scrollY / docH) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+
+  // Parallax
+  var parallaxEls = document.querySelectorAll('.parallax');
+  var lastY = 0, ticking = false;
+
+  function applyParallax(){
+    if (prefersReduced) { ticking = false; return; }
+    parallaxEls.forEach(function(el){
+      var rect = el.getBoundingClientRect();
+      var center = rect.top + rect.height/2 - window.innerHeight/2;
+      var factor = parseFloat(el.getAttribute('data-parallax') || '0.1');
+      if (isMobile) factor *= 0.4;
+      el.style.transform = 'translateY(' + (center * factor * -1) + 'px)';
+    });
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    lastY = window.scrollY;
+    if (!ticking){
+      requestAnimationFrame(function(){
+        applyParallax();
+        updateBar();
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+  applyParallax();
+  updateBar();
+})();
+</script>
+</body>
+</html>

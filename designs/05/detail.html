@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FEATURE / 01 — RoomSync, 동아리방을 다시 설계하다 · TK Magazine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FCFCFC;
+    --ink:#0E0E0E;
+    --muted:#555;
+    --rule:#C9C5BD;
+    --accent:#C8102E;
+    --tag-bg:#FFFFFF;
+  }
+  [data-theme="alt"]{
+    --bg:#0E0E0E;
+    --ink:#F5F1E8;
+    --muted:#999;
+    --rule:#2E2A24;
+    --accent:#FF3344;
+    --tag-bg:#161310;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink)}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Source Sans 3","Inter","Pretendard","Noto Serif KR",system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    transition:background-color .25s ease, color .25s ease;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  a{color:inherit;text-decoration:none}
+  a.link{position:relative;display:inline-block}
+  a.link::after{
+    content:"";
+    position:absolute;left:0;right:0;bottom:-2px;
+    height:1px;background:currentColor;
+    transform:scaleX(0);transform-origin:left center;
+    transition:transform .35s ease;
+  }
+  a.link:hover::after{transform:scaleX(1)}
+
+  /* ===== Scroll Progress Bar ===== */
+  .scroll-progress{
+    position:fixed;
+    top:0;left:0;
+    height:2px;
+    width:0%;
+    background:var(--accent);
+    z-index:100;
+    transition:width .08s linear, background-color .25s ease;
+  }
+
+  /* ===== Back to Gallery ===== */
+  .back-gallery{
+    position:fixed;
+    top:14px;left:20px;
+    z-index:90;
+    min-height:44px;
+    display:inline-flex;align-items:center;
+    padding:10px 14px;
+    background:var(--bg);
+    color:var(--ink);
+    border:1px solid var(--rule);
+    border-radius:999px;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .back-gallery:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ===== Theme Toggle ===== */
+  .theme-toggle{
+    position:fixed;
+    top:14px;right:20px;
+    z-index:90;
+    min-height:44px;
+    display:inline-flex;align-items:center;
+    background:var(--bg);
+    color:var(--ink);
+    border:1px solid var(--rule);
+    padding:10px 16px;
+    font-family:"Spectral","Source Serif 4","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:.18em;
+    cursor:pointer;
+    border-radius:999px;
+    transition:background-color .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+  .theme-toggle .sep{opacity:.4;margin:0 4px}
+  .theme-toggle .active{color:var(--accent);font-weight:600}
+
+  /* Masthead */
+  .masthead{
+    border-bottom:1px solid var(--ink);
+    padding:14px 200px;
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    transition:border-color .25s ease, color .25s ease;
+    word-break:keep-all;
+  }
+  .masthead .mast-center{
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:22px;
+    letter-spacing:.04em;
+    text-transform:none;
+  }
+  .masthead .mast-left,.masthead .mast-right{flex:1}
+  .masthead .mast-right{text-align:right;color:var(--muted)}
+  .top-rule{border-top:3px double var(--ink);margin:0 40px;transition:border-color .25s ease}
+
+  .backstrip{
+    max-width:1400px;
+    margin:0 auto;
+    padding:18px 40px 0;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:12px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* Hero */
+  .hero{
+    padding:80px 40px 88px;
+    border-bottom:1px solid var(--rule);
+    max-width:1400px;margin:0 auto;
+    transition:border-color .25s ease;
+  }
+  .hero .feature-no{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:24px;
+  }
+  .hero h1{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:78px;
+    line-height:1.05;
+    letter-spacing:-.01em;
+    color:var(--ink);
+    margin-bottom:22px;
+    max-width:1000px;
+  }
+  .hero h1 .mask{
+    display:inline-block;
+    clip-path:inset(0 100% 0 0);
+    transition:clip-path .9s cubic-bezier(.7,0,.3,1);
+  }
+  .hero h1 .mask.in{clip-path:inset(0 0 0 0)}
+  .hero .deck{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:400;
+    font-size:22px;
+    line-height:1.45;
+    color:var(--ink);
+    max-width:780px;
+  }
+  .hero .byline{
+    margin-top:30px;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  .hero .byline strong{color:var(--ink);font-weight:600}
+
+  /* Grid 65/35 */
+  .magazine{
+    max-width:1400px;
+    margin:0 auto;
+    padding:96px 40px 64px;
+    display:grid;
+    grid-template-columns:65fr 35fr;
+    gap:64px;
+  }
+
+  /* Sections */
+  .section{
+    padding:56px 0 72px;
+    border-bottom:1px solid var(--rule);
+    transition:border-color .25s ease;
+  }
+  .section:last-child{border-bottom:none}
+  .section .kicker{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:18px;
+  }
+  .section h2{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:600;
+    font-size:36px;
+    line-height:1.15;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  .body p{
+    font-family:"Source Sans 3","Pretendard",sans-serif;
+    font-size:17px;
+    line-height:1.7;
+    color:var(--ink);
+    margin-bottom:18px;
+  }
+  .body.has-drop > p:first-of-type::first-letter{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-weight:600;
+    font-size:96px;
+    line-height:.85;
+    float:left;
+    margin:6px 12px 0 -4px;
+    color:var(--ink);
+    display:inline-block;
+    transform:scale(1.4);
+    opacity:0;
+    transform-origin:left top;
+    transition:transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s ease;
+  }
+  .section.in .body.has-drop > p:first-of-type::first-letter{
+    transform:scale(1);
+    opacity:1;
+  }
+  .body ul{
+    margin:6px 0 18px 20px;
+    font-family:"Source Sans 3","Pretendard",sans-serif;
+  }
+  .body ul li{
+    margin-bottom:8px;
+    line-height:1.7;
+  }
+
+  /* Pull quote */
+  .pullquote{
+    margin:72px 0;
+    padding:8px 0 8px 24px;
+    position:relative;
+  }
+  .pullquote::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;
+    width:3px;height:0;
+    background:var(--accent);
+    transition:height .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .pullquote.in::before{height:100%}
+  .pullquote q{
+    font-family:"Source Serif 4","Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:400;
+    font-size:28px;
+    line-height:1.35;
+    color:var(--ink);
+    quotes:"\201C" "\201D";
+    display:block;
+    opacity:0;
+    transition:opacity .55s ease .35s;
+  }
+  .pullquote q::before{content:open-quote}
+  .pullquote q::after{content:close-quote}
+  .pullquote.in q{opacity:1}
+  .pullquote cite{
+    display:block;
+    margin-top:12px;
+    font-style:normal;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    opacity:0;
+    transition:opacity .55s ease .55s;
+  }
+  .pullquote.in cite{opacity:1}
+
+  /* Tags */
+  .tags{
+    margin-top:28px;
+    display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .tags span{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink);
+    border:1px solid var(--rule);
+    padding:5px 10px;
+    background:var(--tag-bg);
+    transition:background-color .25s ease, border-color .25s ease, color .25s ease;
+  }
+
+  /* ===== Editorial Image Plates ===== */
+  .plate{margin:0 auto 32px;overflow:hidden;max-width:560px}
+  .plate.hero-plate{margin:0 auto 56px;max-width:640px}
+  .plate .frame{
+    width:100%;
+    aspect-ratio:16/9;
+    overflow:hidden;
+    background:var(--rule);
+    border:1px solid var(--rule);
+    transition:border-color .25s ease, background-color .25s ease;
+  }
+  .plate.portrait{max-width:280px}
+  .plate.portrait .frame{aspect-ratio:3/4}
+  .plate.square{max-width:280px;margin-left:0;margin-right:auto}
+  .plate.square .frame{aspect-ratio:1/1}
+  .plate img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+    transform:scale(1.05);
+    transition:transform 1.4s cubic-bezier(.2,.7,.2,1);
+  }
+  .plate.in img{transform:scale(1.0)}
+  .plate .cap{
+    margin-top:10px;
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-size:13px;
+    line-height:1.55;
+    color:var(--muted);
+  }
+
+  /* Inline floated plates inside body */
+  .plate.float-right{
+    float:right;
+    width:30%;
+    max-width:280px;
+    margin:6px 0 18px 28px;
+  }
+  .plate.float-left{
+    float:left;
+    width:30%;
+    max-width:280px;
+    margin:6px 28px 18px 0;
+  }
+  .body::after{content:"";display:block;clear:both}
+
+  /* Sidebar */
+  .sticky{position:sticky;top:24px}
+  .side-block{margin-bottom:56px}
+
+  .factbox{
+    border-top:2px solid var(--ink);
+    border-bottom:1px solid var(--ink);
+    padding:18px 0;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:13px;
+    line-height:1.6;
+    transition:border-color .25s ease;
+  }
+  .factbox .factbox-title{
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:14px;
+  }
+  .factbox dl{display:grid;grid-template-columns:1fr;gap:12px}
+  .factbox dt{
+    font-size:10px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+    margin-bottom:3px;
+  }
+  .factbox dd{color:var(--ink)}
+
+  .metrics-callout{
+    background:var(--accent);
+    color:#fff;
+    padding:24px 22px;
+    font-family:"Spectral","Noto Serif KR",serif;
+    transition:background-color .25s ease;
+  }
+  .metrics-callout .mc-label{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:10px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    font-weight:700;
+    opacity:.85;
+    margin-bottom:14px;
+  }
+  .metrics-callout .mc-line{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid rgba(255,255,255,.25);
+  }
+  .metrics-callout .mc-line:last-child{border-bottom:none}
+  .metrics-callout .mc-num{
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:30px;
+    line-height:1;
+  }
+  .metrics-callout .mc-cap{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    text-align:right;
+    opacity:.95;
+  }
+
+  .related{
+    font-family:"Source Sans 3",sans-serif;
+    font-size:13px;
+    line-height:1.65;
+  }
+  .related .related-title{
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:14px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--ink);
+    transition:border-color .25s ease;
+  }
+  .related ul{list-style:none;padding:0;margin:0}
+  .related li{
+    padding:10px 0;
+    border-bottom:1px dotted var(--rule);
+    transition:border-color .25s ease;
+  }
+  .related li:last-child{border-bottom:none}
+  .related li .r-kicker{
+    display:block;
+    font-size:10px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:2px;
+  }
+
+  /* Footer */
+  .colophon{
+    border-top:3px double var(--ink);
+    margin:40px;
+    padding:36px 0 60px;
+    text-align:center;
+    font-family:"Source Sans 3",sans-serif;
+    font-size:11px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+    line-height:2;
+    transition:border-color .25s ease;
+  }
+  .colophon .back-main{
+    display:inline-block;
+    margin-top:8px;
+    font-family:"Spectral","Noto Serif KR",serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:18px;
+    letter-spacing:.02em;
+    text-transform:none;
+    color:var(--ink);
+  }
+
+  /* ===== Fade Up (generic reveal) ===== */
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  @media (max-width:880px){
+    .back-gallery{
+      top:8px;left:10px;
+      padding:10px 12px;
+      font-size:10px;
+      min-height:44px;
+    }
+    .theme-toggle{
+      top:8px;right:10px;
+      padding:10px 12px;
+      font-size:10px;
+      min-height:44px;
+    }
+    .masthead{padding:64px 20px 12px;flex-wrap:wrap}
+    .masthead .mast-left,.masthead .mast-right{flex:0 0 100%;text-align:left;font-size:10px}
+    .masthead .mast-center{flex:0 0 100%;text-align:center;margin:6px 0}
+    .top-rule{margin:0 20px}
+    .backstrip{padding:14px 20px 0}
+    .hero{padding:60px 20px 60px;max-width:100%}
+    .hero h1{font-size:36px;letter-spacing:-.005em}
+    .hero .deck{font-size:17px}
+    .magazine{grid-template-columns:1fr;gap:48px;padding:56px 20px;max-width:100%}
+    .plate, .plate.hero-plate{max-width:100%}
+    .plate.portrait, .plate.square{max-width:220px}
+    .section h2{font-size:26px}
+    .body.has-drop > p:first-of-type::first-letter{font-size:64px}
+    .pullquote q{font-size:20px}
+    .sticky{position:static}
+    .colophon{margin:24px 20px;padding:32px 0 40px}
+    /* Stack floated images on mobile (inline, not float) */
+    .plate.float-right, .plate.float-left{
+      float:none;
+      width:100%;
+      margin:8px 0 20px;
+    }
+    .metrics-callout .mc-num{font-size:26px}
+  }
+
+  /* ===== Reduced Motion ===== */
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+    .reveal{opacity:1 !important;transform:none !important}
+    .hero h1 .mask{clip-path:inset(0 0 0 0) !important}
+    .plate img{transform:none !important}
+    .pullquote::before{height:100% !important}
+    .pullquote q,.pullquote cite{opacity:1 !important}
+    .body.has-drop > p:first-of-type::first-letter{transform:none !important;opacity:1 !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<a class="back-gallery" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환">
+  <span class="m active">Morning</span><span class="sep">/</span><span class="e">Evening</span>
+</button>
+
+<header class="masthead">
+  <div class="mast-left">VOL. I · NO. 01</div>
+  <div class="mast-center">TK Magazine</div>
+  <div class="mast-right">FEATURE / 01</div>
+</header>
+<div class="top-rule"></div>
+
+<div class="backstrip">
+  <a href="index.html" class="link">← 메인 페이지</a>
+</div>
+
+<section class="hero">
+  <div class="feature-no reveal">FEATURE / 01 · CASE STUDY</div>
+  <h1><span class="mask" id="heroMask">RoomSync, 동아리방을 다시 설계하다</span></h1>
+  <p class="deck reveal">50여 개 동아리가 수기로 다투던 회의실. 한 장의 설문이 5개월의 스프린트로, 다시 한 달 만에 노쇼 60% 감소라는 숫자로 이어진 과정에 관하여.</p>
+  <p class="byline reveal">글 · <strong>김태윤</strong> &nbsp;|&nbsp; 2026년 봄 · 서울</p>
+</section>
+
+<main class="magazine">
+
+  <!-- LEFT BODY -->
+  <div class="col-main">
+
+    <figure class="plate hero-plate reveal">
+      <div class="frame"><img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 회의"></div>
+      <figcaption class="cap">Photo — RoomSync 팀 회의 (2023.09) · 김태윤</figcaption>
+    </figure>
+
+    <article class="section reveal">
+      <div class="kicker">CHAPTER 01 · 문제 정의</div>
+      <h2>겹쳐 적힌 칠판, 사라진 약속</h2>
+      <div class="body has-drop">
+        <p>학내 50여 개 동아리가 공용 회의실 두 개를 화이트보드 한 장으로 나눠 쓰고 있었다. 누가 먼저 적었는지, 누가 지우고 다시 적었는지 추적할 방법이 없었다. 약속한 사람이 오지 않는 '노쇼'와 한 시간대에 두 팀이 함께 들이닥치는 겹침이 매주 반복됐다.</p>
+        <p>회장단 단톡방에는 "또 겹쳤다"는 메시지가 한 학기 동안 쌓여 있었다. 누구의 잘못도 아니었지만, 그 사이의 모든 비용은 동아리 운영진이 짊어지고 있었다.</p>
+      </div>
+    </article>
+
+    <article class="section reveal">
+      <div class="kicker">CHAPTER 02 · 리서치</div>
+      <h2>데이터로 본 진짜 니즈</h2>
+      <div class="body has-drop">
+        <figure class="plate float-right reveal">
+          <div class="frame"><img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문 진행 장면"></div>
+          <figcaption class="cap">Photo — 회장단 설문 회수 · 김태윤</figcaption>
+        </figure>
+        <p>섣불리 화면부터 그리는 대신 회장단을 대상으로 구글 폼 설문을 돌렸다. "알림 기능이 필요하다"는 응답보다 압도적으로 많았던 것은 "지금 누가 방을 쓰고 있는지를 실시간으로 확인할 수 있어야 한다"였다.</p>
+        <p>응답을 정리하자 패턴은 분명해졌다. 약속을 어기는 사람이 늘어서가 아니라, '지금'을 알 길이 없어 약속이 무너지는 것이었다. 첫 화면의 핵심은 알림이 아니라 '현재 상황 한눈에 보기'여야 했다.</p>
+      </div>
+    </article>
+
+    <div class="pullquote reveal">
+      <q>알림이 필요한 게 아니었다. 지금 누가 방을 쓰고 있는지를 알 수 있어야 했다.</q>
+      <cite>— 회장단 설문 응답에서</cite>
+    </div>
+
+    <article class="section reveal">
+      <div class="kicker">CHAPTER 03 · MVP 결정</div>
+      <h2>덜어내기로 한 것들</h2>
+      <div class="body has-drop">
+        <p>한 학기 안에 출시하기로 정한 순간부터 기능 목록은 절반 이하로 줄어야 했다. 백엔드 2명과 함께 화이트보드 앞에 서서 모든 후보 기능에 '있어야 한다 / 있으면 좋다 / 나중에' 표를 붙였다.</p>
+        <ul>
+          <li>1차 스프린트(MVP): 예약 · 취소 · 실시간 현황 뷰</li>
+          <li>2차 스프린트: 푸시 알림, 노쇼 페널티, 통계</li>
+          <li>3차 이후: 외부 공간 연동, 캘린더 동기화</li>
+        </ul>
+        <p>가장 큰 결정은 '알림'을 1차에서 빼는 것이었다. 가장 자주 요구되는 기능이었지만, 현황 뷰가 충분히 정확하다면 알림은 보조 수단에 불과하다는 판단이었다.</p>
+      </div>
+    </article>
+
+    <article class="section reveal">
+      <div class="kicker">CHAPTER 04 · 실행과 협업</div>
+      <h2>API 명세를 직접 쓴 기획자</h2>
+      <div class="body has-drop">
+        <figure class="plate float-left reveal">
+          <div class="frame"><img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="기획 공유 세션"></div>
+          <figcaption class="cap">Photo — 개발팀 공유 세션 · 김태윤</figcaption>
+        </figure>
+        <p>개발팀과의 소통 비용을 줄이기 위해 API 명세의 초안을 직접 작성했다. 엔드포인트, 요청·응답 스키마, 에러 코드 규약까지 노션에 정리한 뒤 백엔드 개발자와 한 줄씩 맞춰갔다. 이 과정에서 기획서가 다섯 번 바뀌었지만, 개발 착수 후 사양 변경은 단 한 번에 그쳤다.</p>
+        <p>일정 관리에는 Jira를 도입했다. 회장단·개발자·기획자가 함께 보는 단일 백로그를 만들었고, 매주 월요일 30분의 스프린트 플래닝과 금요일 15분의 리뷰를 고정했다. 스크럼 마스터 역할은 내가 맡았다.</p>
+      </div>
+    </article>
+
+    <article class="section reveal">
+      <div class="kicker">CHAPTER 05 · 결과</div>
+      <h2>한 달, 30개 동아리, 노쇼 −60%</h2>
+      <div class="body has-drop">
+        <p>출시 한 달 만에 30개 동아리가 RoomSync에 가입했고, 노쇼 발생 건수는 출시 이전 대비 60% 감소했다. 무엇보다 큰 변화는 회장단 단톡방의 풍경이었다. "또 겹쳤다"는 메시지가 사라진 자리에 "이번 주 점유율 보셨어요?" 같은 새로운 대화가 등장했다.</p>
+        <p>처음의 가설이 옳았다. 사람들이 약속을 어기는 것이 아니라, 약속을 지킬 수 있는 정보가 없었던 것이었다. 정보를 정확한 자리에 두는 일 — 그것이 이 기획의 전부였다.</p>
+      </div>
+      <div class="tags">
+        <span>서비스 기획</span><span>MVP</span><span>API 명세</span><span>스크럼</span>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="col-side">
+    <div class="sticky">
+
+      <div class="side-block">
+        <figure class="plate square reveal">
+          <div class="frame"><img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 포트레이트"></div>
+          <figcaption class="cap">Photo — 김태윤 (Taeyoon Kim) · 서울</figcaption>
+        </figure>
+      </div>
+
+      <div class="side-block factbox reveal">
+        <div class="factbox-title">FACT BOX</div>
+        <dl>
+          <div><dt>기간</dt><dd>2023.07 — 2023.11 (5개월)</dd></div>
+          <div><dt>역할</dt><dd>서비스 기획 · 스크럼 마스터 · API 명세 초안</dd></div>
+          <div><dt>팀</dt><dd>기획 1 · 백엔드 2 · 회장단 자문</dd></div>
+          <div><dt>도구</dt><dd>Notion, Figma(기본), Jira, GA4, SQL</dd></div>
+        </dl>
+      </div>
+
+      <div class="side-block metrics-callout reveal">
+        <div class="mc-label">KEY METRICS</div>
+        <div class="mc-line">
+          <div class="mc-num">30</div>
+          <div class="mc-cap">개 동아리<br/>출시 1개월 가입</div>
+        </div>
+        <div class="mc-line">
+          <div class="mc-num">−60%</div>
+          <div class="mc-cap">노쇼율<br/>출시 전 대비</div>
+        </div>
+        <div class="mc-line">
+          <div class="mc-num">5</div>
+          <div class="mc-cap">개월<br/>총 개발 기간</div>
+        </div>
+      </div>
+
+      <div class="side-block related reveal">
+        <div class="related-title">RELATED · MORE FROM TK</div>
+        <ul>
+          <li>
+            <span class="r-kicker">FEATURE / 02</span>
+            <a href="index.html" class="link">12%p 전환율, 버튼 하나의 무게</a>
+          </li>
+          <li>
+            <span class="r-kicker">FEATURE / 03</span>
+            <a href="index.html" class="link">서로의 언어로 말하기</a>
+          </li>
+          <li>
+            <span class="r-kicker">PROLOGUE</span>
+            <a href="index.html" class="link">자기소개 — 병목을 끊어내는 사람</a>
+          </li>
+          <li>
+            <span class="r-kicker">CONTACT</span>
+            <a href="mailto:taeyoon@example.com" class="link">taeyoon@example.com</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </aside>
+
+</main>
+
+<footer class="colophon">
+  <a href="index.html" class="back-main link">← 메인으로 돌아가기</a>
+  <div style="margin-top:16px">COLOPHON · ISSUE 01 · 2026 · SEOUL</div>
+  <div>편집 & 글 · 김태윤 &nbsp;|&nbsp; <a href="mailto:taeyoon@example.com" class="link">taeyoon@example.com</a></div>
+  <div>SET IN SOURCE SERIF 4 · SPECTRAL · SOURCE SANS 3 · NOTO SERIF KR</div>
+</footer>
+
+<script>
+(function(){
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ----- Theme toggle ----- */
+  var STORAGE_KEY = 'tk-theme';
+  var toggle = document.getElementById('themeToggle');
+  var mSpan = toggle.querySelector('.m');
+  var eSpan = toggle.querySelector('.e');
+
+  function applyTheme(theme){
+    if(theme === 'alt'){
+      document.documentElement.setAttribute('data-theme','alt');
+      mSpan.classList.remove('active');
+      eSpan.classList.add('active');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      eSpan.classList.remove('active');
+      mSpan.classList.add('active');
+    }
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch(e){}
+  if(saved === 'alt') applyTheme('alt'); else applyTheme('light');
+
+  toggle.addEventListener('click', function(){
+    var isAlt = document.documentElement.getAttribute('data-theme') === 'alt';
+    var next = isAlt ? 'light' : 'alt';
+    applyTheme(next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch(e){}
+  });
+
+  /* ----- Scroll progress ----- */
+  var bar = document.getElementById('scrollProgress');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop || document.body.scrollTop;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var pct = Math.min(100, Math.max(0, (scrolled / max) * 100));
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  /* ----- Hero mask reveal ----- */
+  var heroMask = document.getElementById('heroMask');
+  if(heroMask){
+    if(prefersReduced){
+      heroMask.classList.add('in');
+    } else {
+      requestAnimationFrame(function(){
+        setTimeout(function(){ heroMask.classList.add('in'); }, 120);
+      });
+    }
+  }
+
+  /* ----- Intersection Observer reveals ----- */
+  if('IntersectionObserver' in window && !prefersReduced){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, {threshold:0.15, rootMargin:'0px 0px -40px 0px'});
+
+    document.querySelectorAll('.reveal, .section, .pullquote, .plate').forEach(function(el){
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.reveal, .section, .pullquote, .plate').forEach(function(el){
+      el.classList.add('in');
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="day">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Service Planner / PM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F5F1EB;
+    --surface:#FFFFFF;
+    --text:#2A2622;
+    --muted:#665C4D;
+    --accent:#8C6E4F;
+    --shadow:0 8px 24px rgba(42,38,34,0.06);
+    --shadow-hover:0 16px 36px rgba(42,38,34,0.10);
+    --border:rgba(42,38,34,0.06);
+    --overlay:rgba(255,255,255,0);
+  }
+  [data-theme="alt"]{
+    --bg:#1F1B17;
+    --surface:#2A2622;
+    --text:#F0EAE0;
+    --muted:#B5A993;
+    --accent:#D4956C;
+    --shadow:0 8px 24px rgba(0,0,0,0.35);
+    --shadow-hover:0 16px 36px rgba(0,0,0,0.45);
+    --border:rgba(240,234,224,0.08);
+    --overlay:rgba(40,28,18,0.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter','Pretendard','Apple SD Gothic Neo',sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    transition:background 300ms ease,color 300ms ease;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{
+    font-family:'Plus Jakarta Sans','Inter','Pretendard','Apple SD Gothic Neo',sans-serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    color:var(--text);
+  }
+  a{color:inherit;text-decoration:none}
+
+  /* progress bar */
+  .progress{
+    position:fixed;top:0;left:0;height:1px;width:0%;
+    background:var(--accent);z-index:100;transition:width 80ms linear;
+  }
+
+  /* back to gallery */
+  .gallery-back{
+    position:fixed;top:24px;left:24px;z-index:90;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:12px 18px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;font-weight:600;
+    letter-spacing:0.02em;
+    box-shadow:var(--shadow);
+    display:inline-flex;align-items:center;gap:8px;
+    min-height:44px;
+    transition:background 300ms ease,color 300ms ease,box-shadow 300ms ease,transform 220ms cubic-bezier(.2,.7,.2,1);
+  }
+  .gallery-back:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover);color:var(--accent)}
+
+  /* theme toggle */
+  .toggle{
+    position:fixed;top:24px;right:24px;z-index:90;
+    background:var(--surface);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:12px 18px;
+    font-family:'Inter',sans-serif;
+    font-size:12px;font-weight:600;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    display:inline-flex;align-items:center;gap:10px;
+    min-height:44px;
+    transition:background 300ms ease,color 300ms ease,box-shadow 300ms ease,transform 220ms cubic-bezier(.2,.7,.2,1);
+  }
+  .toggle:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover)}
+  .toggle .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    transition:transform 300ms ease;
+  }
+  [data-theme="alt"] .toggle .dot{transform:translateX(2px)}
+
+  /* layout */
+  .wrap{max-width:1080px;margin:0 auto;padding:0 32px}
+  @media (max-width:600px){
+    .wrap{padding:0 20px}
+    body{font-size:15px}
+    .gallery-back{top:16px;left:16px;padding:10px 14px;font-size:12px}
+    .toggle{top:16px;right:16px;padding:10px 14px}
+  }
+  section{padding:64px 0}
+  .section-label{
+    font-family:'Inter',sans-serif;
+    font-size:12px;font-weight:600;
+    letter-spacing:0.18em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .section-title{
+    font-size:32px;line-height:1.2;margin-bottom:36px;
+  }
+
+  /* hero */
+  .hero{
+    padding-top:140px;padding-bottom:80px;
+    display:grid;grid-template-columns:1fr auto;gap:48px;
+    align-items:center;
+  }
+  .hero-name{
+    font-size:80px;line-height:1.05;letter-spacing:-0.01em;font-weight:500;
+    clip-path:inset(0 100% 0 0);
+    transition:clip-path 800ms cubic-bezier(.2,.7,.2,1);
+    word-break:keep-all;
+  }
+  .hero-name.in{clip-path:inset(0 0 0 0)}
+  .hero-sub{
+    margin-top:24px;color:var(--muted);font-size:18px;max-width:520px;
+  }
+  .hero-meta{
+    margin-top:28px;display:flex;flex-wrap:wrap;gap:18px;
+    font-size:13px;color:var(--muted);letter-spacing:0.02em;
+  }
+  .hero-meta span{display:inline-flex;align-items:center;gap:8px}
+  .hero-meta span::before{
+    content:"";width:4px;height:4px;border-radius:50%;background:var(--accent);
+  }
+  .avatar-wrap{
+    width:200px;height:200px;border-radius:50%;
+    overflow:hidden;flex-shrink:0;position:relative;
+    box-shadow:var(--shadow);
+    clip-path:circle(0% at 50% 50%);
+    transition:clip-path 700ms cubic-bezier(.2,.7,.2,1);
+  }
+  .avatar-wrap.in{clip-path:circle(100% at 50% 50%)}
+  .avatar-wrap img{
+    width:100%;height:100%;object-fit:cover;
+  }
+  .avatar-wrap::after{
+    content:"";position:absolute;inset:0;background:var(--overlay);
+    transition:background 300ms ease;pointer-events:none;
+  }
+
+  /* values column shown under hero on small layouts; here under name */
+  .values{
+    margin-top:36px;
+    display:flex;flex-wrap:wrap;gap:10px;
+  }
+  .values li{
+    list-style:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 16px;border-radius:999px;
+    font-size:13px;font-weight:500;letter-spacing:0.01em;
+  }
+  .values li::before{
+    content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--accent);margin-right:8px;vertical-align:middle;
+  }
+
+  /* profile */
+  .profile-grid{
+    display:grid;grid-template-columns:60fr 40fr;gap:48px;
+  }
+  .bio{
+    background:var(--surface);
+    border-radius:24px;padding:32px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms cubic-bezier(.2,.7,.2,1),background 300ms ease;
+  }
+  .bio:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+  .bio p{color:var(--text);font-size:17px;line-height:1.75}
+  .bio .lead{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;
+    font-size:20px;line-height:1.5;margin-bottom:16px;color:var(--text);
+  }
+  .values-card{
+    background:var(--surface);
+    border-radius:24px;padding:32px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms cubic-bezier(.2,.7,.2,1),background 300ms ease;
+  }
+  .values-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+  .values-card h3{
+    font-size:13px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:18px;font-weight:600;
+    font-family:'Inter',sans-serif;
+  }
+  .values-card ul{list-style:none}
+  .values-card li{
+    padding:14px 0;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:12px;font-size:16px;
+  }
+  .values-card li:last-child{border-bottom:none}
+  .values-card li::before{
+    content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);
+  }
+
+  /* skills row */
+  .skills{
+    margin-top:24px;display:flex;flex-wrap:wrap;gap:8px;
+  }
+  .skills span{
+    font-size:12px;color:var(--muted);
+    padding:6px 12px;border:1px solid var(--border);
+    border-radius:999px;letter-spacing:0.02em;
+  }
+
+  /* projects */
+  .project{
+    display:grid;grid-template-columns:5fr 6fr;gap:36px;
+    background:var(--surface);
+    border-radius:24px;padding:32px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    margin-bottom:36px;
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms cubic-bezier(.2,.7,.2,1),background 300ms ease;
+    align-items:center;
+  }
+  .project:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+  .project.reverse{grid-template-columns:6fr 5fr}
+  .project.reverse .project-img{order:2}
+  .project.reverse .project-body{order:1}
+  .project-img{
+    position:relative;border-radius:16px;overflow:hidden;
+    aspect-ratio:4/3;
+  }
+  .project-img img{
+    width:100%;height:100%;object-fit:cover;
+    transform:scale(1.06);
+    transition:transform 1500ms cubic-bezier(.2,.7,.2,1);
+  }
+  .project-img::after{
+    content:"";position:absolute;inset:0;background:var(--overlay);
+    transition:background 300ms ease;pointer-events:none;
+  }
+  .project.in .project-img img{transform:scale(1)}
+  .project-body .num{
+    font-family:'Inter',sans-serif;
+    font-size:12px;letter-spacing:0.18em;color:var(--muted);
+    text-transform:uppercase;font-weight:600;margin-bottom:12px;
+  }
+  .project-body h3{
+    font-size:26px;line-height:1.25;margin-bottom:10px;
+  }
+  .project-body .period{
+    font-size:13px;color:var(--muted);margin-bottom:18px;
+  }
+  .project-body p{font-size:15px;color:var(--text);margin-bottom:20px}
+  .metrics{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:22px}
+  .metric .v{
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;
+    font-size:24px;color:var(--accent);line-height:1;
+  }
+  .metric .k{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:0.04em}
+  .project-body .more{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:600;color:var(--accent);
+    letter-spacing:0.04em;
+  }
+  .project-body .more::after{
+    content:"→";transition:transform 220ms cubic-bezier(.2,.7,.2,1);
+  }
+  .project:hover .project-body .more::after{transform:translateX(4px)}
+  .caption{
+    font-size:12px;color:var(--muted);margin-top:10px;letter-spacing:0.01em;
+  }
+
+  /* contact */
+  .contact{
+    background:var(--surface);
+    border-radius:24px;padding:48px 32px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    text-align:center;
+    transition:transform 220ms cubic-bezier(.2,.7,.2,1),box-shadow 220ms cubic-bezier(.2,.7,.2,1),background 300ms ease;
+  }
+  .contact:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+  .contact h2{font-size:28px;margin-bottom:14px}
+  .contact p{color:var(--muted);font-size:15px;margin-bottom:24px}
+  .contact a.mail{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:22px;font-weight:500;color:var(--accent);
+    border-bottom:1px solid var(--accent);padding-bottom:4px;
+  }
+
+  footer{
+    padding:48px 0 64px;color:var(--muted);font-size:12px;
+    display:flex;justify-content:space-between;letter-spacing:0.04em;
+  }
+
+  /* reveal */
+  .reveal{
+    opacity:0;transform:translateY(24px);
+    transition:opacity 600ms cubic-bezier(.2,.7,.2,1),transform 600ms cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.in{opacity:1;transform:translateY(0)}
+
+  @media (max-width:880px){
+    .hero{grid-template-columns:1fr;gap:32px;padding-top:120px}
+    .hero-name{font-size:56px}
+    .avatar-wrap{width:160px;height:160px;margin:0 auto}
+    .profile-grid{grid-template-columns:1fr;gap:24px}
+    .project,.project.reverse{grid-template-columns:1fr;padding:24px}
+    .project.reverse .project-img{order:0}
+    .project.reverse .project-body{order:0}
+    footer{flex-direction:column;gap:8px;text-align:center}
+  }
+  @media (max-width:480px){
+    .hero-name{font-size:40px}
+    .section-title{font-size:24px}
+    .bio,.values-card,.contact{padding:24px}
+    .contact h2{font-size:22px}
+    .contact a.mail{font-size:17px;word-break:break-all}
+    .project-body h3{font-size:22px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+    .reveal{opacity:1;transform:none}
+    .hero-name{clip-path:none}
+    .avatar-wrap{clip-path:none}
+    .project-img img{transform:scale(1)}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<a class="gallery-back" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<button class="toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="dot"></span>
+  <span id="themeLabel">DAY / NIGHT</span>
+</button>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div>
+      <div class="section-label reveal">01 — Portfolio</div>
+      <h1 class="hero-name" id="heroName">김태윤</h1>
+      <p class="hero-sub reveal">비즈니스의 목적과 개발의 언어를 동시에 이해하며, 프로덕트의 병목을 끊어내는 서비스 기획자입니다.</p>
+      <div class="hero-meta reveal">
+        <span>경영학 + 컴퓨터공학 복수전공</span>
+        <span>GPA 3.9 / 4.5</span>
+        <span>Service Planner / PM</span>
+      </div>
+      <ul class="values reveal">
+        <li>데이터 우선</li>
+        <li>MVP 정신</li>
+        <li>현장의 목소리</li>
+        <li>팀 친화 PM</li>
+      </ul>
+    </div>
+    <div class="avatar-wrap" id="avatar">
+      <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait" />
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profile">
+    <div class="section-label reveal">02 — Profile</div>
+    <h2 class="section-title reveal">사람을 향한 기획, 데이터로 검증한 실행.</h2>
+    <div class="profile-grid">
+      <div class="bio reveal">
+        <p class="lead">"가설은 회의실에서 만들고, 검증은 사용자에게서 얻습니다."</p>
+        <p>경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다. 학내 50여 동아리가 공용으로 쓰는 회의실 예약 서비스 'RoomSync' 기획 당시, 회장단 구글폼 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 출시 한 달 만에 30개 동아리 가입과 노쇼 60% 감소를 만들었습니다.</p>
+        <div class="skills">
+          <span>Notion</span><span>Figma</span><span>GA4</span><span>SQL</span><span>Agile</span><span>Jira</span><span>API Spec</span>
+        </div>
+      </div>
+      <div class="values-card reveal">
+        <h3>Working Values</h3>
+        <ul>
+          <li>데이터 우선 — 직관보다 지표를 신뢰</li>
+          <li>MVP 정신 — 작게 출시하고 빠르게 학습</li>
+          <li>현장의 목소리 — 사용자 인터뷰가 출발점</li>
+          <li>팀 친화 PM — 합의는 문서로, 실행은 함께</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-label reveal">03 — Selected Projects</div>
+    <h2 class="section-title reveal">세 개의 프로덕트, 하나의 태도.</h2>
+
+    <article class="project reveal">
+      <div class="project-img">
+        <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 작업 장면" />
+      </div>
+      <div class="project-body">
+        <div class="num">Case 01</div>
+        <h3>RoomSync — 학내 동아리방 실시간 예약 웹서비스</h3>
+        <div class="period">2023.07 – 2023.11 · Service Planner (Lead)</div>
+        <p>50여 동아리가 수기로 운영하다 겹침 사고가 잦던 공용 회의실 예약을, 실시간 현황 기반 MVP 웹서비스로 전환했습니다. 회장단 구글폼 설문으로 '실시간 현황 확인' 니즈를 검증한 뒤, 백엔드 2명·시간 부족 상황에서 예약·취소·실시간뷰만 남기고 알림은 2차로 미뤘습니다.</p>
+        <div class="metrics">
+          <div class="metric"><div class="v">30</div><div class="k">가입 동아리 수</div></div>
+          <div class="metric"><div class="v">-60%</div><div class="k">노쇼 감소</div></div>
+          <div class="metric"><div class="v">1mo</div><div class="k">출시 후 성과 시점</div></div>
+        </div>
+        <a class="more" href="detail.html">자세히 보기</a>
+        <div class="caption">팀 작업 — 스프린트 보드 정리</div>
+      </div>
+    </article>
+
+    <article class="project reverse reveal">
+      <div class="project-img">
+        <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 사용자 인터뷰" />
+      </div>
+      <div class="project-body">
+        <div class="num">Case 02</div>
+        <h3>A사 커머스 인턴 — 장바구니 전환 개선</h3>
+        <div class="period">2023.01 – 2023.06 · Product Intern</div>
+        <p>MAU 50만 서비스에서 상세→장바구니 단계 이탈률 45%를 GA4·앰플리튜드 퍼널과 5명 UT로 교차 분석해, 모바일 하단 구매 버튼이 잘리는 문제를 식별했습니다. 버튼 투명도·높이 조정과 무료배송 넛지를 A/B로 검증해 B안을 정규 배포했습니다.</p>
+        <div class="metrics">
+          <div class="metric"><div class="v">+12%p</div><div class="k">B안 전환율 상승</div></div>
+          <div class="metric"><div class="v">5</div><div class="k">UT 참여자</div></div>
+          <div class="metric"><div class="v">A/B</div><div class="k">실험 운영</div></div>
+        </div>
+        <div class="caption">현장 — 사용성 테스트(UT) 세션</div>
+      </div>
+    </article>
+
+    <article class="project reveal">
+      <div class="project-img">
+        <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="IT 연합 동아리 발표" />
+      </div>
+      <div class="project-body">
+        <div class="num">Case 03</div>
+        <h3>IT 연합 동아리 회장 — 데모데이 완성률 개선</h3>
+        <div class="period">2022.03 – 2022.12 · Club President</div>
+        <p>회원 100명 규모, 기존 프로젝트 완성률 40%라는 문제를 마주했습니다. 타 동아리와의 크로스오버 해커톤, 서로의 언어 세미나를 월 1회 운영해 팀이 멈추지 않을 환경을 설계했고, 데모데이 완성률을 40%에서 85%로 끌어올렸습니다.</p>
+        <div class="metrics">
+          <div class="metric"><div class="v">40 → 85%</div><div class="k">데모데이 완성률</div></div>
+          <div class="metric"><div class="v">100</div><div class="k">동아리 회원</div></div>
+          <div class="metric"><div class="v">1/mo</div><div class="k">정기 세미나 운영</div></div>
+        </div>
+        <div class="caption">강연 — 연합 데모데이 오프닝</div>
+      </div>
+    </article>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label reveal">04 — Contact</div>
+    <div class="contact reveal">
+      <h2>함께 만들고 싶은 프로덕트가 있다면.</h2>
+      <p>가설을 정리한 한 줄, 또는 지금 막힌 화면 한 컷이면 충분합니다. 24시간 안에 답장드립니다.</p>
+      <a class="mail" href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Taeyoon Kim</span>
+    <span>Neutral Stone · Design 03</span>
+  </footer>
+
+</main>
+
+<script>
+  // theme toggle with localStorage
+  (function(){
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var label = document.getElementById('themeLabel');
+    var saved = localStorage.getItem('tk-theme');
+    if(saved === 'alt'){ root.setAttribute('data-theme','alt'); label.textContent = 'NIGHT'; }
+    else { root.setAttribute('data-theme','day'); label.textContent = 'DAY'; }
+    btn.addEventListener('click', function(){
+      var now = root.getAttribute('data-theme') === 'alt' ? 'day' : 'alt';
+      root.setAttribute('data-theme', now);
+      localStorage.setItem('tk-theme', now);
+      label.textContent = now === 'alt' ? 'NIGHT' : 'DAY';
+    });
+  })();
+
+  // progress bar
+  (function(){
+    var bar = document.getElementById('progress');
+    function upd(){
+      var h = document.documentElement;
+      var sc = h.scrollTop || document.body.scrollTop;
+      var max = (h.scrollHeight - h.clientHeight) || 1;
+      bar.style.width = ((sc/max)*100) + '%';
+    }
+    document.addEventListener('scroll', upd, {passive:true});
+    upd();
+  })();
+
+  // reveal observer + stagger
+  (function(){
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced){
+      document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('in')});
+      document.getElementById('heroName').classList.add('in');
+      document.getElementById('avatar').classList.add('in');
+      document.querySelectorAll('.project').forEach(function(p){p.classList.add('in')});
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var el = e.target;
+          var delay = parseInt(el.dataset.delay || '0', 10);
+          setTimeout(function(){ el.classList.add('in'); }, delay);
+          io.unobserve(el);
+        }
+      });
+    }, {threshold:0.15});
+
+    // stagger reveal within sections
+    document.querySelectorAll('section').forEach(function(sec){
+      var items = sec.querySelectorAll('.reveal');
+      items.forEach(function(it,i){ it.dataset.delay = (i*100); io.observe(it); });
+    });
+
+    // project image ken burns trigger when project enters
+    var pio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); pio.unobserve(e.target); }
+      });
+    }, {threshold:0.2});
+    document.querySelectorAll('.project').forEach(function(p){ pio.observe(p); });
+
+    // hero mask + avatar reveal once
+    requestAnimationFrame(function(){
+      setTimeout(function(){
+        document.getElementById('heroName').classList.add('in');
+        document.getElementById('avatar').classList.add('in');
+      }, 120);
+    });
+  })();
+</script>
+
+</body>
+</html>

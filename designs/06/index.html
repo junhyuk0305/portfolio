@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>김태윤 — Portfolio · Vogue Italia Spread</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Noto+Serif+KR:wght@300;400;500;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --text: #1A1614;
+    --text-soft: #5a4f48;
+    --accent: #8B6914;
+    --accent-2: #C9A961;
+    --rule: rgba(139, 105, 20, 0.55);
+    --grain-opacity: 0.05;
+  }
+  [data-theme="alt"] {
+    --bg: #0F0B0A;
+    --text: #FAF7F2;
+    --text-soft: #c8bba8;
+    --accent: #D4B96B;
+    --accent-2: #E6CD89;
+    --rule: rgba(212, 185, 107, 0.55);
+    --grain-opacity: 0.07;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'EB Garamond', 'Playfair Display', 'Noto Serif KR', serif;
+    font-size: 16px;
+    line-height: 1.55;
+    font-feature-settings: "liga", "dlig", "kern";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background 350ms ease, color 350ms ease;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* Grain overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    transition: opacity 350ms ease;
+  }
+  [data-theme="alt"] body::before { mix-blend-mode: screen; }
+
+  /* Top progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 10000;
+    transition: width 80ms linear, background 350ms ease;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 28px;
+    right: 36px;
+    z-index: 10001;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 8px 0;
+    text-transform: uppercase;
+    transition: color 350ms ease, opacity 200ms ease;
+  }
+  .theme-toggle .sep { opacity: 0.4; margin: 0 6px; font-style: normal; }
+  .theme-toggle .on { font-weight: 700; }
+  .theme-toggle .off { opacity: 0.45; }
+  .theme-toggle:hover { opacity: 0.75; }
+
+  /* Top masthead */
+  .masthead {
+    position: fixed;
+    top: 28px;
+    left: 36px;
+    z-index: 10001;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .masthead .num { font-style: normal; opacity: 0.55; margin-left: 14px; letter-spacing: 0.2em; }
+  .masthead .back { margin-left: 14px; opacity: 0.75; }
+  .masthead .back:hover { opacity: 1; color: var(--accent-2); }
+
+  /* Vertical label */
+  .v-label {
+    position: absolute;
+    left: 36px;
+    top: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg) translateY(-100%);
+    font-family: 'Inter', monospace;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: transform 900ms cubic-bezier(.7,0,.3,1), opacity 900ms cubic-bezier(.7,0,.3,1);
+  }
+  .v-label.in { transform: rotate(180deg) translateY(0); opacity: 1; }
+  .v-label .dot { display: inline-block; margin: 0 10px; color: var(--accent-2); }
+
+  /* Sections */
+  section {
+    position: relative;
+    padding: 140px 120px 140px 140px;
+  }
+  @media (max-width: 900px) {
+    section { padding: 100px 28px 100px 64px; }
+    .masthead { left: 18px; font-size: 10px; }
+    .theme-toggle { right: 18px; font-size: 9px; }
+    .v-label { left: 18px; font-size: 9px; }
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    padding-top: 22vh;
+    padding-bottom: 80px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: end;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    align-items: end;
+    gap: 0;
+    position: relative;
+  }
+  .hero-name {
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(56px, 13vw, 180px);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0;
+    grid-column: 1 / -1;
+    align-self: end;
+    position: relative;
+    z-index: 3;
+    pointer-events: none;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .hero-name .line { display: block; }
+  .hero-name .line.last {
+    margin-left: 14vw;
+    margin-top: -0.18em;
+  }
+  .hero-name .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(40px) rotate(2deg);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .hero-name .char.in { opacity: 1; transform: translateY(0) rotate(0); }
+  .hero-name .char.space { width: 0.35em; }
+
+  .hero-portrait {
+    position: absolute;
+    right: -40px;
+    bottom: 24%;
+    width: 56%;
+    aspect-ratio: 21 / 26;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .hero-portrait .frame {
+    width: 100%;
+    height: 100%;
+    background-image: url("../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png");
+    background-size: cover;
+    background-position: center 30%;
+    clip-path: inset(0 0 100% 0);
+  }
+  .hero-portrait.in .frame {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1400ms cubic-bezier(.7,0,.3,1);
+  }
+
+  .hero-portrait .cap {
+    position: absolute;
+    left: 18px;
+    bottom: 14px;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(0,0,0,0.45);
+  }
+
+  .hero-meta {
+    position: absolute;
+    right: 0;
+    top: 8px;
+    text-align: right;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    z-index: 4;
+  }
+  .hero-meta .gold { color: var(--accent); display: block; margin-top: 6px; font-style: italic; font-family: 'Playfair Display', serif; font-size: 12px; letter-spacing: 0.2em; }
+
+  .hero-tag {
+    position: absolute;
+    left: 0;
+    top: -42px;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    z-index: 4;
+  }
+
+  .hero-foot {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 60px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    z-index: 5;
+    position: relative;
+  }
+  .hero-foot .roman { font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; letter-spacing: 0.18em; color: var(--accent); }
+
+  /* Section heading */
+  .sec-head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    margin-bottom: 80px;
+    gap: 40px;
+  }
+  .sec-head .kicker {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .sec-head h2 {
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(48px, 7vw, 92px);
+    line-height: 0.95;
+    margin: 14px 0 0;
+    letter-spacing: -0.01em;
+  }
+  .sec-head .lede {
+    font-family: 'EB Garamond', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-soft);
+    max-width: 36ch;
+    padding-bottom: 18px;
+  }
+
+  .gold-rule {
+    width: 80px;
+    height: 1px;
+    background: var(--accent);
+    margin: 0 0 40px;
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 900ms cubic-bezier(.7,0,.3,1);
+  }
+  .gold-rule.in { transform: scaleX(1); }
+
+  /* PROFILE */
+  .profile {
+    padding-top: 80px;
+  }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 100px;
+    margin-top: 40px;
+  }
+  .profile-grid .col-l {
+    padding-top: 80px; /* asymmetric 80px vertical offset */
+  }
+  .profile p {
+    font-family: 'EB Garamond', 'Noto Serif KR', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    margin: 0 0 22px;
+    color: var(--text);
+  }
+  .profile .lead {
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 26px;
+    line-height: 1.35;
+    color: var(--text);
+  }
+  .profile .lead::first-letter {
+    font-size: 3em;
+    float: left;
+    line-height: 0.9;
+    padding: 6px 14px 0 0;
+    color: var(--accent);
+    font-style: italic;
+  }
+  .pull {
+    margin: 60px 0;
+    padding: 0;
+    border: none;
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.18;
+    color: var(--text);
+    max-width: 22ch;
+  }
+  .pull span { color: var(--accent); }
+  .pull cite {
+    display: block;
+    margin-top: 24px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .facts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 40px;
+    border-top: 1px solid var(--rule);
+    padding-top: 28px;
+  }
+  .facts li {
+    font-family: 'EB Garamond', 'Noto Serif KR', serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .facts .k {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .facts .v { font-style: italic; }
+
+  /* PROGETTI */
+  .progetti { padding-top: 60px; }
+  .project {
+    position: relative;
+    margin-bottom: 160px;
+  }
+  .project-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+  }
+  .project-frame .img {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: transform 1400ms cubic-bezier(.7,0,.3,1);
+    clip-path: inset(0 0 100% 0);
+  }
+  .project-frame.in .img {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1400ms cubic-bezier(.7,0,.3,1), transform 1400ms cubic-bezier(.7,0,.3,1);
+  }
+  .project-frame:hover .img { transform: scale(1.02); }
+
+  .project-frame .caption {
+    position: absolute;
+    left: 30px;
+    bottom: 24px;
+    z-index: 2;
+    max-width: 60%;
+    transition: transform 500ms cubic-bezier(.7,0,.3,1), max-width 500ms cubic-bezier(.7,0,.3,1);
+  }
+  .project-frame:hover .caption {
+    transform: translateY(-6px);
+    max-width: 75%;
+  }
+  .project-frame .caption .name {
+    font-family: 'Playfair Display', serif;
+    font-variant: small-caps;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.22em;
+    color: var(--accent-2);
+    text-transform: lowercase;
+    display: block;
+    text-shadow: 0 0 16px rgba(0,0,0,0.5);
+  }
+  .project-frame .caption .desc {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent-2);
+    margin-top: 6px;
+    line-height: 1.4;
+    text-shadow: 0 0 14px rgba(0,0,0,0.5);
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 500ms cubic-bezier(.7,0,.3,1), opacity 500ms ease;
+  }
+  .project-frame:hover .caption .desc {
+    max-height: 80px;
+    opacity: 1;
+  }
+
+  .project .number {
+    position: absolute;
+    top: -64px;
+    right: 0;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .project .meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--rule);
+  }
+  .project .meta .label {
+    font-family: 'Inter', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .project .meta .val {
+    font-family: 'EB Garamond', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .project .head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 50px;
+    align-items: end;
+    margin-bottom: 30px;
+  }
+  .project .head .roman {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+  .project .head h3 {
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .project .head .ita {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-soft);
+    letter-spacing: 0.18em;
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* CONTATTO */
+  .contatto {
+    padding-top: 60px;
+    padding-bottom: 200px;
+  }
+  .contatto-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 100px;
+    margin-top: 60px;
+    align-items: start;
+  }
+  .contatto-grid .col-r { padding-top: 80px; }
+  .contatto h2 .ampr { color: var(--accent); }
+  .contatto .closing {
+    font-family: 'Playfair Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: clamp(30px, 3.6vw, 48px);
+    line-height: 1.25;
+    color: var(--text);
+    margin: 0 0 40px;
+  }
+  .contatto .closing span { color: var(--accent); }
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .contact-list li {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 24px;
+    align-items: baseline;
+  }
+  .contact-list .k {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .contact-list .v {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--text);
+  }
+  .contact-list a:hover { color: var(--accent); }
+
+  .colophon {
+    margin-top: 100px;
+    padding-top: 30px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--text-soft);
+    text-transform: uppercase;
+  }
+  .colophon .ita { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; letter-spacing: 0.2em; color: var(--accent); text-transform: none; }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+    .reveal, .hero-name .char, .v-label, .gold-rule, .project-frame .img, .hero-portrait .frame {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: inset(0 0 0 0) !important;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero { padding-top: 28vh; }
+    .hero-portrait { position: relative; right: auto; bottom: auto; width: 100%; margin-top: 30px; aspect-ratio: 4/5; }
+    .hero-name .line.last { margin-left: 6vw; }
+    .profile-grid, .contatto-grid { grid-template-columns: 1fr; gap: 50px; }
+    .profile-grid .col-l, .contatto-grid .col-r { padding-top: 0; }
+    .project .meta { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: 1fr; }
+    .sec-head { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <div class="masthead">VOGUE ITALIA <span class="num">N° 06 · MMXXVI</span> <a class="back" href="../../index.html">&larr; 갤러리</a></div>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <span class="on" id="tLabelL">L'AUBE</span><span class="sep">/</span><span class="off" id="tLabelN">LA NUIT</span>
+  </button>
+
+  <!-- HERO SPREAD -->
+  <section class="hero">
+    <span class="v-label" data-vlabel>EDIZIONE <span class="dot">·</span> PRIMAVERA <span class="dot">·</span> KIM TAE—YOON</span>
+
+    <div class="hero-grid">
+      <div class="hero-tag reveal">Un ritratto editoriale —</div>
+      <div class="hero-meta reveal">
+        SEOUL <span class="gold">서비스기획자 &middot; PM</span>
+      </div>
+
+      <h1 class="hero-name" id="heroName">
+        <span class="line" data-text="KIM"></span>
+        <span class="line last" data-text="TAE—YOON"></span>
+      </h1>
+
+      <div class="hero-portrait" id="heroPortrait">
+        <div class="frame"></div>
+        <div class="cap">RITRATTO &middot; 2025</div>
+      </div>
+
+      <div class="hero-foot reveal">
+        <div>김태윤 &middot; 경영학+컴퓨터공학 <span class="roman">&middot; Anno I</span></div>
+        <div class="roman">Capitolo I — Apertura</div>
+        <div>Pagina 001</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 PROFILE -->
+  <section class="profile" id="profile">
+    <span class="v-label" data-vlabel>01 <span class="dot">·</span> PROFILO <span class="dot">·</span> AUTORITRATTO</span>
+
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">Capitolo Uno</div>
+        <h2>Un <em>profilo</em>,<br/>in prima persona.</h2>
+      </div>
+      <div class="lede">
+        — “데이터가 가리키는 자리에서, 사용자가 말하지 않은 한 문장을 듣는다.” 경영학과 컴퓨터공학을 함께 공부하며, 기획서 한 줄을 다듬는 일을 익혀온 학부생 PM의 기록.
+      </div>
+    </div>
+
+    <div class="gold-rule" data-rule></div>
+
+    <div class="profile-grid">
+      <div class="col-l">
+        <p class="lead reveal">
+          김태윤은 사용자의 문제를 작은 단위로 쪼개 푸는 학부생 PM이다. 경영학과 컴퓨터공학을 복수전공하며(3.9/4.5), “데이터로 묻고, 인터뷰로 답을 듣는다”는 원칙으로 학내 서비스와 인턴 프로젝트를 다듬어 왔다.
+        </p>
+
+        <blockquote class="pull reveal">
+          “MVP는 <span>버리는 결정</span>의 다른 이름이다 — 무엇을 빼야 핵심이 남는지 묻는 일.”
+          <cite>— Kim Tae-yoon, Atelier Notes</cite>
+        </blockquote>
+      </div>
+
+      <div class="col-r">
+        <p class="reveal">
+          학내 동아리방(회의실) 예약 관리 웹서비스 <em>RoomSync</em>를 기획·런칭하며, 50여 개 동아리가 수기로 다투던 예약을 실시간 화면 위로 옮겼다. 시간이 부족한 상황에서 백엔드 개발자 2명과의 협업을 MVP 전략으로 좁혀 — 예약·취소·실시간 뷰만 1차 스프린트에 담고, 알림은 2차로 미뤘다.
+        </p>
+        <p class="reveal">
+          A사 커머스 인턴십에서는 MAU 50만 플랫폼의 장바구니 전환율을 다뤘다. GA4와 앰플리튜드로 이탈 45% 구간을 좁히고, 5명 UT에서 “하단 구매 버튼이 가려진다”는 발견을 얻어 투명도·높이를 조정한 A/B 테스트로 +12%p 전환 개선을 정규 배포까지 이끌었다. IT 연합 동아리 회장으로는 100명 규모에서 완성률 40% → 배포율 85%로 끌어올린 운영 경험을 가졌다.
+        </p>
+
+        <ul class="facts reveal">
+          <li><span class="k">Origine</span><span class="v">Seoul, KR</span></li>
+          <li><span class="k">Mestiere</span><span class="v">서비스기획자 / PM</span></li>
+          <li><span class="k">Studi</span><span class="v">경영학 + 컴퓨터공학 복수전공 (3.9/4.5)</span></li>
+          <li><span class="k">Lingue</span><span class="v">한국어 · English</span></li>
+          <li><span class="k">Strumenti</span><span class="v">Notion · Figma(기본) · GA4 · SQL · Agile</span></li>
+          <li><span class="k">Filosofia</span><span class="v">“MVP는 버리는 결정이다”</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 PROGETTI -->
+  <section class="progetti" id="progetti">
+    <span class="v-label" data-vlabel>02 <span class="dot">·</span> PROGETTI <span class="dot">·</span> OPERE SCELTE</span>
+
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">Capitolo Due</div>
+        <h2><em>Progetti</em> —<br/>tre opere scelte.</h2>
+      </div>
+      <div class="lede">
+        — 한 줄의 가설이 한 화면의 결정으로, 한 화면의 결정이 한 사용자의 변화로. 사이드 프로젝트부터 동아리까지, 세 편의 짧은 에세이.
+      </div>
+    </div>
+
+    <div class="gold-rule" data-rule></div>
+
+    <!-- Project 1: RoomSync -->
+    <article class="project">
+      <div class="number reveal">No. I &middot; MMXXIII</div>
+      <div class="head reveal">
+        <div class="roman">I.</div>
+        <div>
+          <h3>RoomSync — <em>Atelier</em></h3>
+          <div class="ita">학내 동아리방 예약 관리 웹서비스 &middot; 2023</div>
+        </div>
+      </div>
+      <a class="project-frame" href="detail.html" data-project>
+        <div class="img" style="background-image:url('../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png'); background-position: center 35%;"></div>
+        <div class="caption">
+          <span class="name">RoomSync · Caso Uno</span>
+          <span class="desc">학내 50여 개 동아리가 수기로 다투던 공용 회의실 예약을, 실시간 뷰 위로 옮긴 웹서비스. MVP에 예약·취소·실시간 뷰만 담아 출시 1개월에 30개 동아리가 가입했다.</span>
+        </div>
+      </a>
+      <div class="meta reveal">
+        <div><div class="label">Ruolo</div><div class="val">PM &middot; 0→1 기획 · 스크럼 마스터</div></div>
+        <div><div class="label">Periodo</div><div class="val">2023.07 — 2023.11</div></div>
+        <div><div class="label">Risultato</div><div class="val">30개 동아리 가입 &middot; 노쇼율 -60%</div></div>
+      </div>
+    </article>
+
+    <!-- Project 2: A사 커머스 인턴 -->
+    <article class="project">
+      <div class="number reveal">No. II &middot; MMXXIII</div>
+      <div class="head reveal">
+        <div class="roman">II.</div>
+        <div>
+          <h3>A사 커머스 인턴 — <em>Confessionale</em></h3>
+          <div class="ita">장바구니 이탈 45% 구간의 한 문장 &middot; 2023</div>
+        </div>
+      </div>
+      <a class="project-frame" href="detail.html" data-project>
+        <div class="img" style="background-image:url('../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png'); background-position: center;"></div>
+        <div class="caption">
+          <span class="name">A-Project · Caso Due</span>
+          <span class="desc">MAU 50만 커머스의 장바구니 전환율 개선. GA4·앰플리튜드로 이탈 45%를 좁히고, 5명 UT에서 발견한 “하단 버튼이 가려진다”를 A/B로 검증해 B안 +12%p, 정규 배포.</span>
+        </div>
+      </a>
+      <div class="meta reveal">
+        <div><div class="label">Ruolo</div><div class="val">서비스기획 인턴 &middot; UT·A/B</div></div>
+        <div><div class="label">Periodo</div><div class="val">2023.01 — 2023.06</div></div>
+        <div><div class="label">Risultato</div><div class="val">전환율 +12%p &middot; 정규 배포</div></div>
+      </div>
+    </article>
+
+    <!-- Project 3: IT 연합 동아리 회장 -->
+    <article class="project">
+      <div class="number reveal">No. III &middot; MMXXII</div>
+      <div class="head reveal">
+        <div class="roman">III.</div>
+        <div>
+          <h3>IT 연합 동아리 회장 — <em>Scuola</em></h3>
+          <div class="ita">완성률 40%를 배포율 85%로 &middot; 2022</div>
+        </div>
+      </div>
+      <a class="project-frame" href="detail.html" data-project>
+        <div class="img" style="background-image:url('../png/Gemini_Generated_Image_o20szmo20szmo20s.png'); background-position: center;"></div>
+        <div class="caption">
+          <span class="name">Scuola · Caso Tre</span>
+          <span class="desc">100명 규모 IT 연합 동아리. 끝나지 않는 프로젝트의 완성률 40%를, 크로스오버 해커톤과 ‘서로의 언어’ 세미나(월 1회)로 배포율 85%까지 끌어올렸다.</span>
+        </div>
+      </a>
+      <div class="meta reveal">
+        <div><div class="label">Ruolo</div><div class="val">회장 &middot; 운영 · 프로그램 기획</div></div>
+        <div><div class="label">Periodo</div><div class="val">2022.03 — 2022.12</div></div>
+        <div><div class="label">Risultato</div><div class="val">배포율 40% → 85%</div></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- 03 CONTATTO -->
+  <section class="contatto" id="contatto">
+    <span class="v-label" data-vlabel>03 <span class="dot">·</span> CONTATTO <span class="dot">·</span> APPUNTAMENTO</span>
+
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">Capitolo Tre</div>
+        <h2>Un <em>appuntamento</em><br/>che inizia con &amp;<span class="ampr"> </span>una mail.</h2>
+      </div>
+      <div class="lede">
+        — 어떤 문제를 함께 풀고 싶으신가요? 가벼운 커피 한 잔의 인사도, 진지한 협업 제안도, 모두 환영합니다.
+      </div>
+    </div>
+
+    <div class="gold-rule" data-rule></div>
+
+    <div class="contatto-grid">
+      <div class="col-l">
+        <p class="closing reveal">
+          “좋은 대화는 좋은 제품의 첫 문장이다.” <br/>
+          <span>한 잔의 espresso</span>처럼 짧고 또렷한 만남을 기다립니다.
+        </p>
+
+        <ul class="contact-list reveal">
+          <li><span class="k">Email</span><span class="v"><a href="mailto:taeyoon@example.com">taeyoon@example.com</a></span></li>
+          <li><span class="k">Base</span><span class="v">Seoul, KR</span></li>
+          <li><span class="k">Ruolo</span><span class="v">서비스기획자 / PM 지망</span></li>
+          <li><span class="k">Strumenti</span><span class="v">Notion · Figma · GA4 · SQL · Agile</span></li>
+        </ul>
+      </div>
+
+      <div class="col-r">
+        <p class="reveal" style="font-family:'Playfair Display', serif; font-style: italic; font-size: 20px; line-height:1.6;">
+          ※ 답장은 평일 24시간 이내, 주말은 월요일 아침의 커피와 함께. <br/><br/>
+          ※ 채용·협업 제안, 사이드 프로젝트 모두 환영합니다.
+        </p>
+      </div>
+    </div>
+
+    <div class="colophon reveal">
+      <div>© MMXXVI &middot; Kim Tae-yoon</div>
+      <div class="ita">— Fine del fascicolo —</div>
+      <div>Vogue Italia Spread &middot; Design No. 06</div>
+    </div>
+  </section>
+
+<script>
+(function(){
+  // ===== Theme =====
+  var KEY = 'tk-theme';
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var lL = document.getElementById('tLabelL');
+  var lN = document.getElementById('tLabelN');
+  function apply(t){
+    if(t==='alt'){ root.setAttribute('data-theme','alt'); lL.classList.remove('on'); lL.classList.add('off'); lN.classList.remove('off'); lN.classList.add('on'); }
+    else { root.removeAttribute('data-theme'); lN.classList.remove('on'); lN.classList.add('off'); lL.classList.remove('off'); lL.classList.add('on'); }
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch(e){}
+  apply(saved==='alt' ? 'alt' : 'light');
+  btn.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme')==='alt' ? 'alt' : 'light';
+    var next = cur==='alt' ? 'light' : 'alt';
+    apply(next);
+    try { localStorage.setItem(KEY, next); } catch(e){}
+  });
+
+  // ===== Progress bar =====
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    var p = max>0 ? (h.scrollTop / max) * 100 : 0;
+    bar.style.width = p + '%';
+    // Hero parallax
+    var hp = document.getElementById('heroPortrait');
+    var hn = document.getElementById('heroName');
+    var y = h.scrollTop;
+    if(hn){ hn.style.transform = 'translateY(' + Math.max(-40, -y * 0.08) + 'px)'; }
+    if(hp){ hp.style.transform = 'translateY(' + Math.max(-30, -y * 0.05) + 'px)'; }
+  }
+  document.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ===== Hero letter reveal =====
+  var heroName = document.getElementById('heroName');
+  heroName.querySelectorAll('.line').forEach(function(line){
+    var txt = line.getAttribute('data-text') || '';
+    line.innerHTML = '';
+    for(var i=0;i<txt.length;i++){
+      var c = txt[i];
+      var s = document.createElement('span');
+      s.className = 'char' + (c===' ' ? ' space' : '');
+      s.textContent = c===' ' ? ' ' : c;
+      line.appendChild(s);
+    }
+  });
+  var chars = heroName.querySelectorAll('.char');
+  if(reduce){
+    chars.forEach(function(c){ c.classList.add('in'); });
+  } else {
+    chars.forEach(function(c, i){
+      setTimeout(function(){ c.classList.add('in'); }, 250 + i*60);
+    });
+  }
+
+  // ===== IntersectionObserver =====
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          if(e.target.classList.contains('project-frame') || e.target.id==='heroPortrait'){
+            setTimeout(function(){ e.target.classList.add('color'); }, 600);
+          }
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+    document.querySelectorAll('.reveal, [data-vlabel], [data-rule], .project-frame, #heroPortrait').forEach(function(el){
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.reveal, [data-vlabel], [data-rule], .project-frame, #heroPortrait').forEach(function(el){
+      el.classList.add('in','color');
+    });
+  }
+})();
+</script>
+</body>
+</html>

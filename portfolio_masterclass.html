@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoundTable | AI 하이엔드 웹 포트폴리오 마스터클래스</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --bg-2:#F7F7F5;
+    --fg:#0A0A0A;
+    --fg-2:#1A1A1A;
+    --muted:#6B6B6B;
+    --line:rgba(0,0,0,0.10);
+    --line-strong:rgba(0,0,0,0.18);
+    --point:#FF6A1A;
+    --point-soft:#FFF1E6;
+    --point-deep:#D8520B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Pretendard','Inter',sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .stage{position:fixed;inset:0;}
+  .slide{
+    position:absolute;inset:0;
+    padding:120px 7vw 80px;
+    display:flex;flex-direction:column;justify-content:center;
+    opacity:0;
+    transform:translateY(30px);
+    transition:opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1);
+    pointer-events:none;
+    overflow:auto;
+    background:var(--bg);
+  }
+  .slide.active{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+  }
+
+  /* Typography — readability first */
+  .eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.85rem;letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--point);
+    font-weight:700;
+    margin-bottom:1.2rem;
+  }
+  .display{
+    font-family:'Pretendard','Inter',sans-serif;
+    font-weight:900;
+    font-size:clamp(2.6rem,6vw,5.8rem);
+    line-height:1.05;letter-spacing:-0.035em;
+    color:var(--fg);
+  }
+  .display .accent{
+    color:var(--point);
+  }
+  .display .hl{
+    background:linear-gradient(180deg, transparent 60%, var(--point-soft) 60%);
+    padding:0 .15em;
+  }
+  .display .muted{color:var(--muted);}
+  .subtitle{
+    margin-top:1.4rem;
+    font-size:clamp(1.05rem,1.45vw,1.4rem);
+    color:var(--fg-2);line-height:1.65;max-width:920px;font-weight:400;
+  }
+  .h2{
+    font-weight:800;
+    font-size:clamp(1.9rem,3.6vw,3rem);
+    letter-spacing:-0.025em;
+    line-height:1.18;
+    color:var(--fg);
+  }
+  .h3{
+    font-weight:700;
+    font-size:clamp(1.2rem,1.7vw,1.55rem);
+    letter-spacing:-0.012em;
+    color:var(--fg);
+    line-height:1.35;
+  }
+  .body{
+    font-size:clamp(1rem,1.1vw,1.1rem);
+    line-height:1.75;color:var(--fg-2);
+  }
+  .body b, .editorial li b, .subtitle b{
+    color:var(--fg);font-weight:700;
+  }
+  .micro{
+    font-family:'Space Grotesk',sans-serif;
+    color:var(--muted);
+    font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;font-weight:500;
+  }
+  .point{color:var(--point);font-weight:700;}
+  .hl{
+    background:linear-gradient(180deg, transparent 62%, var(--point-soft) 62%);
+    padding:0 .1em;
+  }
+
+  /* Layout */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+  .row{display:flex;gap:.6rem;flex-wrap:wrap;}
+  .stack > * + *{margin-top:1.2rem;}
+
+  .card{
+    border:1px solid var(--line);
+    background:var(--bg);
+    border-radius:14px;
+    padding:1.6rem 1.5rem;
+    transition:border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover{
+    border-color:var(--point);
+    transform:translateY(-2px);
+    box-shadow:0 12px 28px rgba(0,0,0,0.06);
+  }
+  .card .num{
+    font-family:'Space Grotesk',sans-serif;
+    color:var(--point);
+    font-size:.78rem;letter-spacing:.28em;font-weight:700;
+    margin-bottom:.7rem;display:block;
+  }
+  .pill{
+    display:inline-flex;align-items:center;gap:.4rem;
+    padding:.4rem .85rem;border-radius:999px;
+    border:1px solid var(--line-strong);
+    font-size:.82rem;letter-spacing:.04em;
+    color:var(--fg-2);
+    background:var(--bg);
+    font-weight:500;
+  }
+  .pill.accent{
+    color:var(--point-deep);
+    border-color:var(--point);
+    background:var(--point-soft);
+    font-weight:700;
+  }
+  .divider{
+    height:1px;background:var(--line);width:100%;margin:1.2rem 0;
+  }
+
+  ul.editorial{list-style:none;}
+  ul.editorial li{
+    position:relative;padding-left:1.4rem;margin-bottom:.7rem;
+    color:var(--fg-2);line-height:1.7;
+    font-size:clamp(1rem,1.1vw,1.1rem);
+  }
+  ul.editorial li::before{
+    content:"";position:absolute;left:0;top:.78em;
+    width:.7rem;height:2px;background:var(--point);
+  }
+  .kbd{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:32px;height:26px;padding:0 .55rem;
+    border:1px solid var(--line-strong);border-radius:6px;
+    font-family:'Space Grotesk',sans-serif;font-size:.78rem;color:var(--fg);
+    background:var(--bg-2);font-weight:500;
+  }
+  .step-badge{
+    display:inline-flex;align-items:center;gap:.55rem;
+    padding:.45rem .9rem;border-radius:6px;
+    background:var(--point-soft);
+    border:1px solid var(--point);
+    color:var(--point-deep);
+    font-family:'Space Grotesk',sans-serif;font-size:.78rem;letter-spacing:.18em;font-weight:700;
+  }
+  .meta-row{
+    display:flex;align-items:center;gap:1rem;color:var(--muted);
+    font-family:'Space Grotesk',sans-serif;font-size:.8rem;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:600;
+  }
+  .meta-row .point{color:var(--point);}
+  .quote{
+    border-left:3px solid var(--point);
+    padding:.3rem 0 .3rem 1.3rem;
+    color:var(--fg);line-height:1.65;
+    font-size:clamp(1.05rem,1.3vw,1.25rem);
+    font-weight:500;
+  }
+  .big-num{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:clamp(3rem,6vw,5.5rem);
+    line-height:1;letter-spacing:-0.04em;color:var(--point);
+  }
+
+  /* Fixed top-left title bar */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;height:64px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 2.4rem;z-index:50;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .title-block{
+    display:flex;align-items:center;gap:.8rem;
+  }
+  .title-block .mark{
+    width:10px;height:10px;border-radius:50%;background:var(--point);
+    flex:none;
+  }
+  .title-block .ttl{
+    font-weight:800;font-size:.98rem;color:var(--fg);letter-spacing:-0.01em;
+  }
+  .title-block .sub{
+    font-family:'Space Grotesk',sans-serif;
+    color:var(--muted);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-weight:600;
+    padding-left:.85rem;margin-left:.25rem;border-left:1px solid var(--line);
+  }
+
+  .bottombar{
+    position:fixed;left:0;right:0;bottom:0;height:48px;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 2.4rem;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    pointer-events:none;
+  }
+  .counter{
+    font-family:'Space Grotesk',sans-serif;letter-spacing:.18em;
+    color:var(--muted);font-size:.78rem;font-weight:600;
+  }
+  .counter b{color:var(--fg);font-weight:800;}
+  .hint{
+    font-family:'Space Grotesk',sans-serif;color:var(--muted);font-size:.7rem;
+    letter-spacing:.18em;display:flex;align-items:center;gap:.4rem;font-weight:600;
+  }
+
+  /* Progress bar — under topbar */
+  .progress{
+    position:fixed;left:0;right:0;top:64px;height:3px;z-index:60;
+    background:var(--bg-2);
+  }
+  .progress .bar{
+    height:100%;width:0%;
+    background:var(--point);
+    transition:width .45s cubic-bezier(.2,.8,.2,1);
+  }
+
+  /* Cover slide */
+  .cover{
+    display:grid;grid-template-columns:1.45fr 1fr;gap:3rem;align-items:end;
+  }
+  .cover .right{
+    border-left:1px solid var(--line);
+    padding-left:2.4rem;color:var(--fg-2);font-size:.95rem;line-height:1.7;
+  }
+  .cover .right .label{
+    font-family:'Space Grotesk',sans-serif;color:var(--muted);
+    font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;font-weight:600;
+    display:block;margin-bottom:.35rem;
+  }
+  .cover .right .val{font-weight:600;color:var(--fg);}
+  .cover .right .block + .block{margin-top:1.1rem;}
+
+  .tags{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.4rem;}
+
+  /* Timeline */
+  .timeline{
+    display:grid;grid-template-columns:130px 1fr;column-gap:1.6rem;row-gap:1rem;
+  }
+  .timeline .t-time{
+    font-family:'Space Grotesk',sans-serif;color:var(--point);font-size:.95rem;letter-spacing:.04em;
+    padding-top:.15rem;font-weight:700;
+  }
+  .timeline .t-body{border-left:2px solid var(--line);padding-left:1.4rem;padding-bottom:.5rem;}
+  .timeline .t-body .t-title{font-weight:700;font-size:1.08rem;margin-bottom:.3rem;color:var(--fg);}
+  .timeline .t-body .t-desc{color:var(--fg-2);font-size:.95rem;line-height:1.6;}
+
+  /* Compare blocks */
+  .compare{
+    display:grid;grid-template-columns:1fr 60px 1fr;gap:1rem;align-items:stretch;
+  }
+  .compare .arrow{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--point);font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;
+  }
+  .compare .col{
+    border:1px solid var(--line);border-radius:14px;padding:1.5rem 1.4rem;
+    background:var(--bg);
+  }
+  .compare .col.bad{background:var(--bg-2);}
+  .compare .col.good{border-color:var(--point);background:var(--point-soft);}
+  .compare h4{font-size:1.08rem;margin-bottom:.6rem;color:var(--fg);font-weight:800;}
+  .compare p{color:var(--fg-2);font-size:.95rem;line-height:1.6;}
+
+  /* Tool blocks */
+  .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+  .tool{
+    border:1px solid var(--line);border-radius:14px;padding:1.3rem;
+    background:var(--bg);
+  }
+  .tool .nm{font-weight:800;font-size:1.05rem;color:var(--fg);line-height:1.35;}
+  .tool .role{color:var(--point);font-family:'Space Grotesk',sans-serif;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;margin-top:.2rem;display:block;font-weight:700;}
+  .tool .desc{color:var(--fg-2);font-size:.92rem;line-height:1.6;margin-top:.7rem;}
+
+  /* Closing */
+  .closing{text-align:center;}
+  .closing .display{font-size:clamp(2.4rem,5.2vw,4.8rem);}
+
+  /* Scrollbar */
+  .slide::-webkit-scrollbar{width:6px;}
+  .slide::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.18);border-radius:8px;}
+
+  /* Responsive */
+  @media (max-width:780px){
+    .slide{padding:90px 5vw 70px;}
+    .grid-2,.cover{grid-template-columns:1fr;gap:1.6rem;}
+    .grid-3,.grid-4,.tools{grid-template-columns:1fr 1fr;}
+    .compare{grid-template-columns:1fr;}
+    .compare .arrow{transform:rotate(90deg);height:30px;}
+    .cover .right{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:1.4rem;}
+    .timeline{grid-template-columns:90px 1fr;}
+    .title-block .sub{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Fixed top-left title -->
+<div class="topbar">
+  <div class="title-block">
+    <span class="mark"></span>
+    <span class="ttl">AI 하이엔드 웹 포트폴리오 마스터클래스</span>
+    <span class="sub">RoundTable · 180min</span>
+  </div>
+  <div class="title-block">
+    <span class="sub" style="border:none;padding:0;margin:0;">Lecturer · 장준혁</span>
+  </div>
+</div>
+
+<div class="progress"><div class="bar" id="progressBar"></div></div>
+
+<div class="bottombar">
+  <div class="hint">
+    <span class="kbd">←</span><span class="kbd">→</span>
+    <span class="kbd">Space</span>
+    <span style="margin-left:.6rem;">NAVIGATE</span>
+  </div>
+  <div class="counter"><b id="curIdx">01</b> / <span id="totIdx">26</span></div>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- 1. Cover -->
+  <section class="slide active">
+    <div class="cover">
+      <div class="left">
+        <div class="eyebrow">RoundTable · Masterclass · 2026</div>
+        <h1 class="display">
+          AI <span class="accent">하이엔드</span><br>
+          웹 포트폴리오<br>
+          <span class="hl">마스터클래스</span>
+        </h1>
+        <p class="subtitle">
+          비전공자를 위한 단 한 번의 강의.<br>
+          막막한 자소서를, <b>3시간 만에</b> 나만의 인터랙티브 웹사이트로 퍼블리싱합니다.
+        </p>
+        <div class="tags">
+          <span class="pill accent">#AI_Augmentation</span>
+          <span class="pill">#Editorial_Layout</span>
+          <span class="pill">#Vibe_Coding</span>
+          <span class="pill">#180min</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="block"><span class="label">Lecturer</span><span class="val">장준혁 · RoundTable CTO</span></div>
+        <div class="block"><span class="label">Duration</span><span class="val">180 minutes · Live Class</span></div>
+        <div class="block"><span class="label">Output</span><span class="val">개인 도메인 URL을 가진 라이브 웹 포트폴리오</span></div>
+        <div class="block"><span class="label">Stack</span><span class="val">Gemini AI Studio · GitHub Pages</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Catchphrase -->
+  <section class="slide">
+    <div class="eyebrow">The Promise</div>
+    <h2 class="display">
+      “막막한 자소서,<br>
+      <span class="accent">3시간</span> 만에 나만의<br>
+      하이엔드 웹 포트폴리오로<br>
+      <span class="hl">퍼블리싱</span>하다.”
+    </h2>
+    <p class="subtitle">
+      뻔한 노션 템플릿도, PPT 캡처도 아닙니다.<br>
+      <b>나만의 도메인 URL을 가진 인터랙티브 웹사이트</b>를 손에 쥐고 강의장을 나섭니다.
+    </p>
+  </section>
+
+  <!-- 3. About Lecturer -->
+  <section class="slide">
+    <div class="grid-2">
+      <div>
+        <div class="eyebrow">Lecturer</div>
+        <h2 class="display">장준혁<br><span class="muted" style="font-size:0.45em;font-weight:500;letter-spacing:-0.01em;">Junhyuk Jang</span></h2>
+        <p class="subtitle">
+          교육 비영리 스타트업 <b>RoundTable</b>의 CTO이자,<br>
+          여러분과 같은 현역 대학생입니다.
+        </p>
+        <div class="tags">
+          <span class="pill accent">#RoundTable_CTO</span>
+          <span class="pill">#현역_대학생</span>
+          <span class="pill">#AI_월35만원</span>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <span class="num">01 / PERSONA</span>
+          <h3 class="h3">월 35만 원을 AI에 태우는 CTO</h3>
+          <p class="body" style="margin-top:.6rem;">실무에서 AI를 가장 깊게 다뤄본 사람의 관점으로,<br>‘대체’가 아닌 ‘<span class="hl">증강</span>’의 활용법을 전합니다.</p>
+        </div>
+        <div class="card">
+          <span class="num">02 / EMPATHY</span>
+          <h3 class="h3">같은 고민을 하는 대학생</h3>
+          <p class="body" style="margin-top:.6rem;">비전공자 친구가 “나도 할 수 있겠다”고 느낄 때까지,<br>심리적 장벽을 함께 무너뜨립니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Target -->
+  <section class="slide">
+    <div class="eyebrow">Who This Is For</div>
+    <h2 class="h2" style="margin-bottom:2rem;">이 강의는, <span class="point">이런 분</span>을 위해 설계되었습니다.</h2>
+    <div class="grid-3">
+      <div class="card">
+        <span class="num">PROFILE · 01</span>
+        <h3 class="h3">개발 / 디자인 지식이 전무한 비전공자</h3>
+        <p class="body" style="margin-top:.8rem;">코드 한 줄 써본 적 없는 대학생 · 취업준비생을 위해 처음부터 끝까지 손잡고 갑니다.</p>
+      </div>
+      <div class="card">
+        <span class="num">PROFILE · 02</span>
+        <h3 class="h3">자소서는 있는데, 포트폴리오가 막막한 분</h3>
+        <p class="body" style="margin-top:.8rem;">텍스트 재료는 있지만 ‘어떻게 보여줄지’ 막힌 사람을 위한 빌드업 시트가 준비되어 있습니다.</p>
+      </div>
+      <div class="card">
+        <span class="num">PROFILE · 03</span>
+        <h3 class="h3">템플릿을 벗어나 <span class="point">나만의 인터랙티브 웹</span>을 갖고 싶은 분</h3>
+        <p class="body" style="margin-top:.8rem;">노션·PPT 캡처가 아닌, 스크롤·호버가 살아 있는 에디토리얼 웹사이트를 원하는 사람.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Program Spec -->
+  <section class="slide">
+    <div class="eyebrow">Program Spec</div>
+    <h2 class="h2" style="margin-bottom:2rem;">단 한 번의 강의, <span class="hl">180분</span>의 빌드업.</h2>
+    <div class="grid-4">
+      <div class="card">
+        <span class="num">DURATION</span>
+        <div class="big-num" style="margin-top:.4rem;">180’</div>
+        <p class="body" style="margin-top:.4rem;">총 3시간 · 단일 세션</p>
+      </div>
+      <div class="card">
+        <span class="num">FORMAT</span>
+        <h3 class="h3" style="margin-top:.4rem;">Hands-on Live</h3>
+        <p class="body" style="margin-top:.4rem;">강의 + 실시간 실습 + 1:1 트러블슈팅</p>
+      </div>
+      <div class="card">
+        <span class="num">REQUIRED</span>
+        <h3 class="h3" style="margin-top:.4rem;">노트북 · 구글 계정 · 자소서</h3>
+        <p class="body" style="margin-top:.4rem;">기존 텍스트(Word/PDF) 한 부 필수 지참</p>
+      </div>
+      <div class="card">
+        <span class="num">DELIVERABLE</span>
+        <h3 class="h3" style="margin-top:.4rem;">Live URL</h3>
+        <p class="body" style="margin-top:.4rem;">개인 도메인을 가진 라이브 웹사이트</p>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="row" style="margin-top:.8rem;">
+      <span class="pill">Gemini AI Studio · 텍스트 고도화</span>
+      <span class="pill">Gemini AI Studio · 바이브 코딩</span>
+      <span class="pill">GitHub Pages · 무료 배포</span>
+    </div>
+  </section>
+
+  <!-- 6. USP -->
+  <section class="slide">
+    <div class="eyebrow">Why RoundTable</div>
+    <h2 class="h2" style="margin-bottom:2rem;">시중의 ‘AI 강의’와 <span class="point">무엇이 다른가</span>.</h2>
+    <div class="grid-3">
+      <div class="card">
+        <span class="num">USP · 01</span>
+        <h3 class="h3">압도적 공감 + 실무 전문성</h3>
+        <p class="body" style="margin-top:.7rem;">
+          <b>“월 35만 원을 AI에 태우는 CTO”</b>의 실무성과,<br>
+          <b>“같은 고민을 하는 대학생”</b>의 동질감.<br>
+          두 페르소나로 심리적 장벽을 허뭅니다.
+        </p>
+      </div>
+      <div class="card">
+        <span class="num">USP · 02</span>
+        <h3 class="h3">관점의 전환 : Automation → <span class="point">Augmentation</span></h3>
+        <p class="body" style="margin-top:.7rem;">
+          글자 수 맞추기·오탈자 검사로 끝나는 ‘대체재’가 아니라,<br>
+          비전공자의 기획을 하이엔드 프로덕트로 끌어올리는 <b>증강 파트너</b>로 AI를 다룹니다.
+        </p>
+      </div>
+      <div class="card">
+        <span class="num">USP · 03</span>
+        <h3 class="h3">실무형 <span class="point">투트랙 연쇄 프롬프팅</span></h3>
+        <p class="body" style="margin-top:.7rem;">
+          1회성 명령이 아닌,<br>
+          <b>3-STEP 텍스트 고도화 → 4-STEP 바이브 코딩</b>으로 이어지는 완벽한 실무 파이프라인.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Mindset Shift -->
+  <section class="slide">
+    <div class="eyebrow">Mindset Shift</div>
+    <h2 class="h2" style="margin-bottom:2rem;">AI는 <span class="muted">대체재</span>가 아닌, <span class="hl">증강 파트너</span>입니다.</h2>
+    <div class="compare">
+      <div class="col bad">
+        <span class="micro">AUTOMATION · 흔한 방식</span>
+        <h4 style="margin-top:.6rem;">AI에게 ‘대신’ 시킨다</h4>
+        <ul class="editorial" style="margin-top:.8rem;">
+          <li>글자 수 맞추기</li>
+          <li>오탈자 검사</li>
+          <li>이력서 자동 생성</li>
+          <li>1회성 명령어 입력</li>
+        </ul>
+        <p style="margin-top:.9rem;color:var(--muted);font-weight:500;">결과 : 누구나 만드는 비슷한 결과물</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="col good">
+        <span class="micro" style="color:var(--point-deep);">AUGMENTATION · 우리의 방식</span>
+        <h4 style="margin-top:.6rem;">AI와 ‘함께’ 빌드업한다</h4>
+        <ul class="editorial" style="margin-top:.8rem;">
+          <li>날것의 경험을 <b>케이스 스터디</b>로 정제</li>
+          <li>텍스트를 <b>에디토리얼 레이아웃</b>으로 조립</li>
+          <li>코드 한 줄 없이 <b>인터랙티브 웹</b>으로 건축</li>
+          <li>연쇄 프롬프팅으로 <b>점진적 고도화</b></li>
+        </ul>
+        <p style="margin-top:.9rem;color:var(--fg);font-weight:700;">결과 : <span class="point">하이엔드, 나만의 결과물</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Two-Track Structure -->
+  <section class="slide">
+    <div class="eyebrow">Two-Track Structure</div>
+    <h2 class="h2" style="margin-bottom:1.4rem;">실무형 <span class="hl">투트랙</span> 연쇄 프롬프팅.</h2>
+    <p class="body" style="max-width:920px;margin-bottom:2rem;">
+      텍스트와 코드를 분리한 두 트랙으로 진행합니다. <b>3-STEP에서 콘텐츠 밀도</b>를 끝까지 끌어올린 뒤, <b>4-STEP에서 에디토리얼 웹</b>을 건축합니다.
+    </p>
+    <div class="grid-2">
+      <div class="card" style="border-color:var(--point);">
+        <span class="step-badge">TRACK 01 · TEXT</span>
+        <h3 class="h3" style="margin-top:1rem;">3-STEP 텍스트 고도화</h3>
+        <p class="body" style="margin-top:.6rem;">Gemini Pro로 자소서를 인사담당자가 매료될 <b>케이스 스터디 텍스트</b>로 정제합니다.</p>
+        <div class="divider"></div>
+        <ul class="editorial">
+          <li>STEP 1 · 에디토리얼 프로필 구조화</li>
+          <li>STEP 2 · 케이스 스터디 딥 다이브</li>
+          <li>STEP 3 · 콘텐츠 완결성 폴리싱</li>
+        </ul>
+      </div>
+      <div class="card" style="border-color:var(--fg);">
+        <span class="step-badge" style="background:var(--fg);border-color:var(--fg);color:#fff;">TRACK 02 · CODE</span>
+        <h3 class="h3" style="margin-top:1rem;">4-STEP 바이브 코딩</h3>
+        <p class="body" style="margin-top:.6rem;">Gemini AI Studio로 텍스트를 <b>단일 HTML 에디토리얼 웹</b>으로 건축합니다.</p>
+        <div class="divider"></div>
+        <ul class="editorial">
+          <li>STEP 1 · 글로벌 디자인 시스템 & Hero</li>
+          <li>STEP 2 · 프로젝트 케이스 스터디 섹션</li>
+          <li>STEP 3 · 인터랙션 & Contact 마감</li>
+          <li>STEP 4 · 하이엔드 인터랙션 & 반응형</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. DAW Framework -->
+  <section class="slide">
+    <div class="eyebrow">Core Methodology</div>
+    <h2 class="h2" style="margin-bottom:1.6rem;"><span class="point">DAW</span> Framework.</h2>
+    <p class="body" style="max-width:920px;margin-bottom:2rem;">기존 텍스트를 <b>해체(Deconstruct)</b>하고, 에디토리얼 형식으로 <b>조립(Assemble)</b>하여, 인터랙티브하게 <b>웹화(Webify)</b>하는 사고방식.</p>
+    <div class="grid-3">
+      <div class="card">
+        <span class="num">D · DECONSTRUCT</span>
+        <h3 class="h3">해체</h3>
+        <p class="body" style="margin-top:.7rem;">자소서·이력서·회고록에 흩어진 경험을 직무 카테고리 단위로 분해합니다.</p>
+      </div>
+      <div class="card">
+        <span class="num">A · ASSEMBLE</span>
+        <h3 class="h3">조립</h3>
+        <p class="body" style="margin-top:.7rem;">STAR 기반 케이스 스터디로, 잡지처럼 읽히는 에디토리얼 구조로 재조립합니다.</p>
+      </div>
+      <div class="card">
+        <span class="num">W · WEBIFY</span>
+        <h3 class="h3">웹화</h3>
+        <p class="body" style="margin-top:.7rem;">스크롤·호버·반응형이 살아 있는 인터랙티브 웹사이트로 변환합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Curriculum Overview (이전 11번) -->
+  <section class="slide">
+    <div class="eyebrow">Curriculum · 180 min</div>
+    <h2 class="h2" style="margin-bottom:2rem;">전체 흐름 한눈에 보기.</h2>
+    <div class="timeline">
+      <div class="t-time">00:00 – 00:20</div>
+      <div class="t-body"><div class="t-title">Intro · 오프닝 & 마인드셋 <span class="micro" style="margin-left:.6rem;">20’</span></div>
+        <div class="t-desc">강사 소개 · 하이엔드 웹의 필요성 · AI를 보는 새로운 관점 · 실습 환경 세팅</div></div>
+
+      <div class="t-time">00:20 – 01:05</div>
+      <div class="t-body"><div class="t-title">Part 1 · [3-STEP] 실무형 텍스트 고도화 <span class="micro" style="margin-left:.6rem;">45’</span></div>
+        <div class="t-desc">Gemini Pro로 날것의 이력 → 에디토리얼 프로필 보드 → 케이스 스터디 → 마스터 텍스트</div></div>
+
+      <div class="t-time">01:05 – 01:15</div>
+      <div class="t-body"><div class="t-title">Break · 1부 결과물 개별 점검 <span class="micro" style="margin-left:.6rem;">10’</span></div></div>
+
+      <div class="t-time">01:15 – 02:20</div>
+      <div class="t-body"><div class="t-title">Part 2 · [4-STEP] 하이엔드 바이브 코딩 <span class="micro" style="margin-left:.6rem;">65’</span></div>
+        <div class="t-desc">Gemini AI Studio로 디자인 시스템 → 프로젝트 섹션 → 인터랙션 → 반응형 마감</div></div>
+
+      <div class="t-time">02:20 – 02:45</div>
+      <div class="t-body"><div class="t-title">Part 3 · 세상에 띄우는 나만의 URL <span class="micro" style="margin-left:.6rem;">25’</span></div>
+        <div class="t-desc">GitHub Pages로 무료 배포 · 1:1 트러블슈팅 · 모바일 접속 테스트</div></div>
+
+      <div class="t-time">02:45 – 03:00</div>
+      <div class="t-body"><div class="t-title">Outro · 랩업 & 갤러리 워크 <span class="micro" style="margin-left:.6rem;">15’</span></div>
+        <div class="t-desc">URL 상호 공유 · 유지보수 가이드 · 만족도 조사 · Q&A</div></div>
+    </div>
+  </section>
+
+  <!-- 11. INTRO -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">PART · INTRO</span><span>00:00 – 00:20 · 20’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5vw,4.6rem);">오프닝 &<br><span class="hl">마인드셋 세팅</span></h2>
+    <div class="grid-2" style="margin-top:2rem;">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">진행 내용</h3>
+        <ul class="editorial">
+          <li>강사 소개 : “CTO이자 대학생인 제가 AI에 월 35만 원을 쓰는 이유”</li>
+          <li>뻔한 노션 / PPT의 한계와 하이엔드 ‘웹’ 포트폴리오의 필요성</li>
+          <li>AI를 바라보는 새로운 관점 (대체가 아닌 업그레이드)</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">핵심 활동 / 산출물</h3>
+        <ul class="editorial">
+          <li>수강생 동기부여 및 아이스브레이킹</li>
+          <li>실습 환경(Gemini AI Studio · GitHub) 기본 세팅</li>
+          <li>“오늘 끝에 내 손에 무엇이 남는지” 명확화</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. PART 1 Overview -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">PART 1 · TEXT TRACK</span><span>00:20 – 01:05 · 45’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5vw,4.8rem);">
+      <span class="accent">3-STEP</span><br>
+      실무형 텍스트 고도화
+    </h2>
+    <p class="subtitle" style="max-width:920px;">
+      파편화된 자소서 데이터를 <b>인사담당자가 매료될 케이스 스터디 텍스트</b>로 정제합니다.<br>
+      각 STEP의 출력값이 다음 STEP의 입력값이 되는 <b>연쇄 빌드업</b> 방식.
+    </p>
+    <div class="grid-3" style="margin-top:2.2rem;">
+      <div class="card">
+        <span class="num">STEP 01</span>
+        <h3 class="h3">에디토리얼 프로필 보드</h3>
+        <p class="body" style="margin-top:.6rem;">날것의 이력 → 직무 강점이 한눈에 보이는 구조</p>
+      </div>
+      <div class="card">
+        <span class="num">STEP 02</span>
+        <h3 class="h3">케이스 스터디 딥 다이브</h3>
+        <p class="body" style="margin-top:.6rem;">파편화된 경험 → STAR 기반 테크 리포트</p>
+      </div>
+      <div class="card">
+        <span class="num">STEP 03</span>
+        <h3 class="h3">콘텐츠 완결성 폴리싱</h3>
+        <p class="body" style="margin-top:.6rem;">웹 스크롤 흐름에 맞춘 마스터 텍스트</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. 3-STEP / STEP 1 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">3-STEP · 01</span><span>EDITORIAL PROFILE BOARD</span></div>
+    <h2 class="h2" style="margin-bottom:1.4rem;">개인 포지셔닝 & <span class="hl">입체적 프로필 구조화</span></h2>
+    <div class="grid-2">
+      <div>
+        <p class="body" style="margin-bottom:1rem;">
+          <b>역할 부여</b> · 시니어 HR 디렉터 + UX 라이터<br>
+          <b>입력</b> · 학력 / 경력 / 대외활동 / 스킬 / 희망 직무
+        </p>
+        <div class="quote">
+          “단순 나열식 정보를, 직무 역량이 돋보이는 체계적 카테고리로 재조립할 것.<br>
+          추상적 자소서 표현 대신, 주도적인 비즈니스 톤앤매너 유지.”
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <span class="num">OUTPUT · 01</span>
+          <h3 class="h3">Hero 영역 카피라이팅</h3>
+          <ul class="editorial" style="margin-top:.6rem;">
+            <li>메인 카피 (15자 이내)</li>
+            <li>서브 카피 (2줄 이내)</li>
+            <li>퍼스널 태그 3개 (#데이터기반_PM 등)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="num">OUTPUT · 02</span>
+          <h3 class="h3">에디토리얼 프로필 보드</h3>
+          <ul class="editorial" style="margin-top:.6rem;">
+            <li>Education / Career / Projects / Skills</li>
+            <li>타임라인 순 · 제목·기간·핵심 아웃풋 정렬</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="num">OUTPUT · 03</span>
+          <h3 class="h3">Professional Intro</h3>
+          <p class="body" style="margin-top:.5rem;">직무적 정체성 + 일을 대하는 차별화된 관점, 3~4문장 비즈니스 톤.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. 3-STEP / STEP 2 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">3-STEP · 02</span><span>DEEP-DIVE CASE STUDY</span></div>
+    <h2 class="h2" style="margin-bottom:1.4rem;">프로젝트 <span class="hl">케이스 스터디 딥 다이브</span></h2>
+    <p class="body" style="max-width:920px;margin-bottom:1.6rem;">
+      자소서 줄글·공모전 회고를 <b>현업 실무진이 매료될 고밀도 케이스 스터디 텍스트</b>로 고도화합니다.
+    </p>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">작성 원칙</h3>
+        <ul class="editorial">
+          <li>‘무엇을 했다’가 아닌, <b>‘어떤 고민·의사결정으로 한계를 극복했는가’</b></li>
+          <li>구체적 동작 원리 · API · 상태관리 · 툴 활용을 실무 단어로</li>
+          <li>실패와 회고까지 담아 <b>성숙한 주니어</b>의 모습 증명</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">출력 양식 (각 프로젝트별)</h3>
+        <ul class="editorial">
+          <li><b>1.</b> Executive Summary</li>
+          <li><b>2.</b> Background & Problem</li>
+          <li><b>3.</b> Core Action & Implementation</li>
+          <li><b>4.</b> Key Metrics & Business Impact</li>
+          <li><b>5.</b> Retrospective & Next Action</li>
+        </ul>
+      </div>
+    </div>
+    <div class="divider" style="margin-top:1.4rem;"></div>
+    <p class="micro" style="margin-top:.4rem;">SUGGESTED · 최소 1개 ~ 최대 3개의 프로젝트를 동일 구조로 빌드업</p>
+  </section>
+
+  <!-- 15. 3-STEP / STEP 3 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">3-STEP · 03</span><span>EDITORIAL FLOW POLISHING</span></div>
+    <h2 class="h2" style="margin-bottom:1.4rem;">에디토리얼 흐름 설계 & <span class="hl">마스터 텍스트 폴리싱</span></h2>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">수정 가이드라인</h3>
+        <ul class="editorial">
+          <li>인용구·강조 키워드·서브타이틀로 <b>시선 환기 장치</b> 배치</li>
+          <li>스크롤·탭에 적합한 <b>개조식 단락</b>으로 정돈</li>
+          <li>전달 메시지의 <b>선명함과 신뢰감</b> 우선의 비즈니스 에세이 톤</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">최종 산출물</h3>
+        <ul class="editorial">
+          <li><b>GNB + Hero Layout Text</b> · 메뉴 / 메인·서브 카피 / 키워드 하이라이트</li>
+          <li><b>Profile Detail Board</b> · 소개글 + 이력 그리드 정렬</li>
+          <li><b>Structured Project Case Studies</b> · 메타+본문 분할 구조</li>
+          <li><b>Closing CTA Message</b> · 마지막 제안 + 연락처</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-top:1.6rem;max-width:920px;">
+      “한 글자도 생략하지 말고 온전히 완성된 <b>최종 마스터 텍스트</b>를 손에 쥐고 Part 2로 이동.”
+    </div>
+  </section>
+
+  <!-- 16. BREAK -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">BREAK</span><span>01:05 – 01:15 · 10’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5.2vw,5rem);">Break Time<br><span class="muted" style="font-weight:500;">1부 결과물 개별 점검</span></h2>
+    <p class="subtitle" style="max-width:760px;">
+      손에 쥔 <b>마스터 텍스트</b>를 한번 더 읽으며 호흡을 가다듬는 시간.<br>
+      Part 2 ‘바이브 코딩’ 트랙으로 넘어갈 준비를 합니다.
+    </p>
+    <div class="tags" style="margin-top:1.6rem;">
+      <span class="pill">텍스트 개별 점검</span>
+      <span class="pill">강사 라운드 체크</span>
+      <span class="pill accent">Gemini AI Studio 로그인 준비</span>
+    </div>
+  </section>
+
+  <!-- 17. PART 2 Overview -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">PART 2 · CODE TRACK</span><span>01:15 – 02:20 · 65’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5vw,4.8rem);">
+      <span class="accent">4-STEP</span><br>
+      하이엔드 바이브 코딩
+    </h2>
+    <p class="subtitle" style="max-width:920px;">
+      Gemini AI Studio로 <b>단일 HTML 파일</b>의 에디토리얼 포트폴리오를 건축합니다.<br>
+      대용량 실무 텍스트의 <b>임의 축소·생략을 완벽히 방지</b>하는 연쇄 프롬프트 설계.
+    </p>
+    <div class="grid-4" style="margin-top:2rem;">
+      <div class="card"><span class="num">STEP 01</span><h3 class="h3">디자인 시스템 & Hero</h3></div>
+      <div class="card"><span class="num">STEP 02</span><h3 class="h3">케이스 스터디 섹션</h3></div>
+      <div class="card"><span class="num">STEP 03</span><h3 class="h3">인터랙션 & Contact</h3></div>
+      <div class="card"><span class="num">STEP 04</span><h3 class="h3">하이엔드 인터랙션·반응형</h3></div>
+    </div>
+  </section>
+
+  <!-- 18. 4-STEP / STEP 1 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">4-STEP · 01</span><span>DESIGN SYSTEM · HERO · PROFILE</span></div>
+    <h2 class="h2" style="margin-bottom:1.2rem;">글로벌 <span class="hl">디자인 시스템</span> & 상단 레이아웃 구축</h2>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">디자인 세팅 규칙</h3>
+        <ul class="editorial">
+          <li>Tailwind CSS CDN · Pretendard / Noto Sans KR</li>
+          <li>원하는 배경색 + 포인트 컬러로 강조</li>
+          <li>오프화이트 · 무채색 그레이로 위계</li>
+          <li>얇고 세련된 <b>커스텀 스크롤바</b></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">구현 섹션</h3>
+        <ul class="editorial">
+          <li><b>GNB</b> · Sticky + Glassmorphism (backdrop-blur)</li>
+          <li><b>Hero</b> · 100vh 풀스크린 · Display 타이포그래피</li>
+          <li><b>Profile</b> · Split Grid (긴 소개글 ↔ 이력 카드)</li>
+        </ul>
+        <p class="micro" style="margin-top:1rem;color:var(--point);">BINDING · 3-STEP에서 도출한 Hero 카피 / 프로필 보드 / Intro 데이터를 그대로 주입</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19. 4-STEP / STEP 2 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">4-STEP · 02</span><span>DEEP-DIVE PROJECT SECTION</span></div>
+    <h2 class="h2" style="margin-bottom:1.2rem;">딥 다이브 <span class="hl">케이스 스터디</span> 섹션 결합</h2>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">레이아웃 요구사항</h3>
+        <ul class="editorial">
+          <li><b>텍스트 유실 방지</b> · 한 줄도 요약·생략 금지</li>
+          <li><b>에디토리얼 분할</b> · 35% Meta(Sticky) / 65% Body(Scroll)</li>
+          <li>좌측 Meta · 제목·역할·기간·스택 + <b>Key Metric 빅 넘버</b></li>
+          <li>우측 Body · 5단 구조가 술술 읽히도록 leading-relaxed</li>
+          <li>기술 스택 · 둥근 보더 <b>뱃지(Badge)</b>로 시각화</li>
+        </ul>
+      </div>
+      <div class="card" style="padding:1.2rem;">
+        <div style="display:grid;grid-template-columns:35% 65%;gap:.7rem;min-height:240px;">
+          <div style="border:1px solid var(--point);background:var(--point-soft);border-radius:10px;padding:.9rem;">
+            <div class="micro" style="color:var(--point-deep);">META</div>
+            <div style="font-weight:800;margin-top:.4rem;font-size:.95rem;color:var(--fg);">Project Name</div>
+            <div style="color:var(--muted);font-size:.74rem;margin-top:.2rem;">Role · 80% · 3 weeks</div>
+            <div style="margin-top:.8rem;display:flex;gap:.3rem;flex-wrap:wrap;">
+              <span style="font-size:.65rem;border:1px solid var(--line-strong);padding:.15rem .45rem;border-radius:999px;color:var(--fg-2);">React</span>
+              <span style="font-size:.65rem;border:1px solid var(--line-strong);padding:.15rem .45rem;border-radius:999px;color:var(--fg-2);">Zustand</span>
+            </div>
+            <div style="margin-top:.9rem;font-family:'Space Grotesk';font-size:1.8rem;color:var(--point);font-weight:700;">+312%</div>
+            <div class="micro" style="font-size:.62rem;">key metric</div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:10px;padding:.9rem;">
+            <div class="micro">BODY · 5 SECTIONS</div>
+            <div style="margin-top:.6rem;font-size:.78rem;color:var(--fg-2);line-height:1.85;">
+              1. Summary<br>2. Background & Problem<br>3. Core Action<br>4. Metrics & Impact<br>5. Retrospective
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20. 4-STEP / STEP 3 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">4-STEP · 03</span><span>INTERACTION · CONTACT</span></div>
+    <h2 class="h2" style="margin-bottom:1.2rem;">가독성 인터랙션 & <span class="hl">Contact 마감</span></h2>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">인터랙티브 가독성 장치</h3>
+        <ul class="editorial">
+          <li>각 프로젝트 본문 상단에 <b>Anchor Tab</b> 배치</li>
+          <li>[Background · Action · Result · Retrospective] 바로가기</li>
+          <li>바닐라 JS로 <b>Smooth Scroll</b> 부드럽게 구현</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">Footer / Contact CTA</h3>
+        <ul class="editorial">
+          <li>섹션 전체를 <b>고대비 반전</b>으로 주목도 200%</li>
+          <li><b>Send Email</b> 압도적 크기 CTA 버튼 (mailto 연결)</li>
+          <li>Copyright · 노션 원본 · GitHub / LinkedIn 정렬</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-top:1.4rem;max-width:920px;">
+      “포트폴리오의 종착지 = 채용 담당자의 첫 액션. 마지막 1px까지 설득력 있게.”
+    </div>
+  </section>
+
+  <!-- 21. 4-STEP / STEP 4 -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:.8rem;"><span class="point">4-STEP · 04</span><span>HIGH-END INTERACTION · RESPONSIVE</span></div>
+    <h2 class="h2" style="margin-bottom:1.2rem;">생명력을 불어넣는 <span class="hl">하이엔드 인터랙션</span></h2>
+    <div class="grid-2">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">필수 인터랙션 (Vanilla JS)</h3>
+        <ul class="editorial">
+          <li><b>Scroll Reveal</b> · 25px y-axis 페이드업 + 0.1s stagger</li>
+          <li><b>Card Hover</b> · 보더 그라데이션 + translate-y(-4px)</li>
+          <li><b>Scroll Progress Bar</b> · GNB 아래 얇은 포인트 컬러 바</li>
+          <li><b>GNB Reactivity</b> · 스크롤 시 Glassmorphism 활성화</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">반응형 검수 규칙</h3>
+        <ul class="editorial">
+          <li>md 미만 · Split Grid → <b>flex-col</b>로 풀림</li>
+          <li>모바일 · Sticky 비활성 + 자연 흐름으로 대체</li>
+          <li>패딩 / 폰트 사이즈 모바일 유동 클래스 전면 적용</li>
+        </ul>
+        <p class="micro" style="margin-top:1rem;color:var(--point);">PRO TIP · 출력이 끊기면 “이어서 작성해 줘” 시연 필수</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22. PART 3 / DEPLOY -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">PART 3 · DEPLOY</span><span>02:20 – 02:45 · 25’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5vw,4.6rem);">세상에 띄우는<br><span class="hl">나만의 URL</span></h2>
+    <div class="grid-2" style="margin-top:1.6rem;">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">진행 내용</h3>
+        <ul class="editorial">
+          <li>비전공자를 위한 ‘서버 · 호스팅’ 개념 쉽게 이해</li>
+          <li><b>GitHub Pages</b> · 코드 자산까지 함께 남는 무료 배포</li>
+          <li>에러 발생 수강생 1:1 트러블슈팅</li>
+          <li>모바일 디바이스에서 직접 접속 테스트</li>
+        </ul>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;border-color:var(--point);background:var(--point-soft);">
+        <span class="num">FINAL OUTPUT</span>
+        <h3 class="h3" style="margin-top:.5rem;">개인 고유 도메인(URL) 라이브 배포 완료</h3>
+        <p class="body" style="margin-top:.7rem;">
+          단톡방·이력서·LinkedIn 어디에 붙여도 자랑스러운 <b>나만의 웹사이트 주소</b>를 손에 넣는 순간.
+        </p>
+        <div class="tags" style="margin-top:1rem;">
+          <span class="pill accent">GitHub Pages</span>
+          <span class="pill">Free Hosting</span>
+          <span class="pill">Mobile Test</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 23. OUTRO -->
+  <section class="slide">
+    <div class="meta-row" style="margin-bottom:1rem;"><span class="point">OUTRO · WRAP-UP</span><span>02:45 – 03:00 · 15’</span></div>
+    <h2 class="display" style="font-size:clamp(2.4rem,5vw,4.4rem);">랩업 &<br><span class="hl">갤러리 워크</span></h2>
+    <div class="grid-2" style="margin-top:1.6rem;">
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">진행 내용</h3>
+        <ul class="editorial">
+          <li>단톡방에 서로의 <b>URL 공유</b> 및 상호 피드백</li>
+          <li>완성 이후 <b>유지보수 방법</b> · 텍스트 수정 요령 안내</li>
+          <li>핵심 메시지 · “본질은 기술이 아닌, 여러분의 문제 해결 경험”</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="h3" style="margin-bottom:.8rem;">마무리</h3>
+        <ul class="editorial">
+          <li>수강생 만족도 조사</li>
+          <li>Q&A 자유 시간</li>
+          <li>네트워킹 / 후속 자료 안내</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 24. Resource Kit -->
+  <section class="slide">
+    <div class="eyebrow">Bootstrap Kit</div>
+    <h2 class="h2" style="margin-bottom:1.2rem;">수강생 제공 <span class="hl">[RoundTable 포트폴리오 부트스트랩 키트]</span></h2>
+    <p class="body" style="max-width:920px;margin-bottom:2rem;">
+      현장에서 <b>복사-붙여넣기만으로 최상의 결과물</b>이 나오도록 설계된 노션 페이지 리소스 묶음.
+    </p>
+    <div class="grid-4">
+      <div class="tool">
+        <span class="role">RESOURCE · 01</span>
+        <div class="nm">3-STEP 텍스트 고도화 프롬프트 워크북</div>
+        <p class="desc">날것의 이력을 마스터 텍스트로 빌드업하는 단계별 프롬프트.</p>
+      </div>
+      <div class="tool">
+        <span class="role">RESOURCE · 02</span>
+        <div class="nm">4-STEP 바이브 코딩 연쇄 프롬프트 워크북</div>
+        <p class="desc">Gemini AI Studio에 그대로 붙여넣는 단계별 코드 빌드업 시트.</p>
+      </div>
+      <div class="tool">
+        <span class="role">RESOURCE · 03</span>
+        <div class="nm">트러블슈팅 응급처치 50선 치트시트</div>
+        <p class="desc">디자인 깨짐 · 애니메이션 수정 등 현장 빈출 이슈 해결법.</p>
+      </div>
+      <div class="tool">
+        <span class="role">RESOURCE · 04</span>
+        <div class="nm">포트폴리오 레퍼런스 사이트 10선</div>
+        <p class="desc">에디토리얼 톤·인터랙션 영감을 위한 큐레이션 리스트.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 25. Core Message -->
+  <section class="slide closing">
+    <div class="eyebrow" style="text-align:center;">Final Message</div>
+    <h2 class="display" style="margin:0 auto;max-width:1100px;">
+      결국 본질은 기술이 아닌,<br>
+      여러분의 <span class="hl">문제 해결 경험</span>입니다.
+    </h2>
+    <p class="subtitle" style="margin:2rem auto 0;max-width:780px;text-align:center;">
+      AI도, 코드도, 디자인도 — 모두 여러분의 이야기를 <b>증폭(Augment)</b>시키기 위한 도구일 뿐.<br>
+      오늘의 결과물은 ‘기술 학습’이 아니라 <b>여러분이라는 사람의 증거물</b>입니다.
+    </p>
+  </section>
+
+  <!-- 26. Thank You / Q&A -->
+  <section class="slide closing">
+    <div class="eyebrow" style="text-align:center;">Thank You</div>
+    <h2 class="display" style="margin:0 auto;text-align:center;max-width:1100px;">
+      <span class="muted">Now, Build Your</span><br>
+      <span class="hl">Own Editorial Web.</span>
+    </h2>
+    <p class="subtitle" style="margin:2rem auto 0;max-width:780px;text-align:center;">
+      Q&A · 네트워킹 · 완성 사이트 공유<br>
+      <span class="point">RoundTable · AI High-end Web Portfolio Masterclass</span>
+    </p>
+    <div style="display:flex;justify-content:center;gap:.6rem;margin-top:2rem;flex-wrap:wrap;">
+      <span class="pill">Lecturer · 장준혁</span>
+      <span class="pill accent">RoundTable · 2026</span>
+      <span class="pill">cristianojun0305@gmail.com</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let idx = 0;
+  const cur = document.getElementById('curIdx');
+  const tot = document.getElementById('totIdx');
+  const bar = document.getElementById('progressBar');
+  tot.textContent = String(total).padStart(2,'0');
+
+  function update(){
+    slides.forEach((s,i)=> s.classList.toggle('active', i===idx));
+    cur.textContent = String(idx+1).padStart(2,'0');
+    bar.style.width = ((idx)/(total-1)*100) + '%';
+  }
+  function next(){ if(idx<total-1){ idx++; update(); } }
+  function prev(){ if(idx>0){ idx--; update(); } }
+
+  document.addEventListener('keydown', e=>{
+    if(['ArrowRight','ArrowDown','PageDown','Space',' '].includes(e.key)){
+      e.preventDefault(); next();
+    } else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){
+      e.preventDefault(); prev();
+    } else if(e.key === 'Home'){
+      e.preventDefault(); idx=0; update();
+    } else if(e.key === 'End'){
+      e.preventDefault(); idx=total-1; update();
+    }
+  });
+
+  let touchX=0, touchY=0;
+  document.addEventListener('touchstart', e=>{
+    touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){
+      if(dx < 0) next(); else prev();
+    } else if(Math.abs(dy) > 40){
+      if(dy < 0) next(); else prev();
+    }
+  }, {passive:true});
+
+  document.addEventListener('click', e=>{
+    if(e.target.closest('a,button,.topbar,.bottombar')) return;
+    const x = e.clientX, w = window.innerWidth;
+    if(x < w*0.18) prev();
+    else if(x > w*0.82) next();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ROOMSYNC — CASE / KIM TAEYUN / BAUHAUS GRID</title>
+<meta name="description" content="RoomSync 케이스 스터디 — 동아리방 예약 충돌과 노쇼 문제를 푼 PM 프로젝트" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700;900&family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F0F0F0;--text:#000000;--accent:#E63946;--line:#DCDCDC;--muted:#6A6A6A;
+    --cols:6;--gutter:24px;--pad:48px;--ease:cubic-bezier(.7,0,.3,1);
+  }
+  [data-theme="alt"]{--bg:#0F0F0F;--text:#F0F0F0;--accent:#FF4757;--line:#232323;--muted:#8A8A8A}
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+  body{font-family:'Inter','Helvetica Neue','Pretendard',sans-serif;font-size:15px;line-height:1.55;transition:background 250ms var(--ease),color 250ms var(--ease);overflow-x:hidden;word-break:keep-all}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  p,h1,h2,h3,h4,dd,dt,li{word-break:keep-all;overflow-wrap:break-word}
+  .mono{font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+
+  .grid-guides{position:fixed;top:0;bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:1320px;pointer-events:none;z-index:1;padding:0 var(--pad);display:grid;grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter);transition:opacity 250ms var(--ease)}
+  .grid-guides[data-off="true"]{opacity:0}
+  .grid-guides .col{position:relative;height:100%}
+  .grid-guides .col::before,.grid-guides .col::after{content:"";position:absolute;top:0;bottom:0;width:1px;background:var(--line);transform-origin:top;transform:scaleY(0);transition:transform 600ms var(--ease)}
+  .grid-guides .col::before{left:0}
+  .grid-guides .col::after{right:0;display:none}
+  .grid-guides[data-flash="true"] .col::before{transform:scaleY(1)}
+  .grid-guides .col:last-child::after{display:block}
+  .grid-guides[data-flash="true"] .col:last-child::after{transform:scaleY(1)}
+  .grid-guides .col:nth-child(1)::before{transition-delay:0ms}
+  .grid-guides .col:nth-child(2)::before{transition-delay:40ms}
+  .grid-guides .col:nth-child(3)::before{transition-delay:80ms}
+  .grid-guides .col:nth-child(4)::before{transition-delay:120ms}
+  .grid-guides .col:nth-child(5)::before{transition-delay:160ms}
+  .grid-guides .col:nth-child(6)::before{transition-delay:200ms}
+  .grid-guides .col:last-child::after{transition-delay:240ms}
+
+  .progress{position:fixed;top:0;left:0;height:2px;width:0%;background:var(--accent);z-index:100;transition:width 80ms linear}
+
+  .frame{position:relative;z-index:2;padding:0 var(--pad);max-width:1320px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);column-gap:var(--gutter)}
+
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:90;padding:18px var(--pad);pointer-events:none}
+  .topbar .inner{max-width:1320px;margin:0 auto;width:100%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .topbar .brand,.topbar .right{pointer-events:auto}
+  .brand{display:flex;align-items:center;gap:10px;min-height:44px}
+  .brand .sq{width:10px;height:10px;background:var(--accent)}
+  .brand .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .right a.back,.right a.gallery{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px}
+  .right a.gallery{border:1px solid var(--text)}
+  .right a.gallery:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .right a.back:hover{color:var(--accent)}
+
+  .theme-toggle{position:relative;width:44px;height:44px;border:0;background:transparent;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+  .theme-toggle .sq{width:18px;height:18px;background:var(--accent);transition:all 250ms var(--ease)}
+  [data-theme="alt"] .theme-toggle .sq{background:transparent;box-shadow:inset 0 0 0 2px var(--accent)}
+  .theme-toggle:hover::after{content:attr(data-tip);position:absolute;top:42px;right:0;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:var(--text);color:var(--bg);padding:5px 8px;white-space:nowrap}
+
+  .corner{position:fixed;z-index:40;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text);pointer-events:none}
+  .corner.bl{bottom:18px;left:var(--pad)}
+  .corner.br{bottom:18px;right:var(--pad)}
+
+  /* HERO */
+  .hero{padding-top:120px;padding-bottom:40px}
+  .hero .crumb{grid-column:1 / span 6;display:flex;align-items:center;gap:10px;margin-bottom:34px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .hero .crumb .sq{width:10px;height:10px;background:var(--accent)}
+  .hero .title{grid-column:1 / span 6;display:flex;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:40px}
+  .hero .title h1{font-family:'Hanken Grotesk','Helvetica Neue',sans-serif;font-weight:900;font-size:clamp(44px,11vw,160px);letter-spacing:-.03em;line-height:.88;text-transform:uppercase;word-break:break-word;overflow-wrap:anywhere;max-width:100%}
+  .hero .title h1 .letter{display:inline-block;transform:translateY(60px);opacity:0;transition:transform 700ms var(--ease),opacity 700ms var(--ease)}
+  .hero .title h1.in .letter{transform:translateY(0);opacity:1}
+  .hero .title .tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding-bottom:14px}
+
+  .hero .plate{grid-column:1 / span 6;position:relative;overflow:hidden;aspect-ratio:16/9;background:#000}
+  .hero .plate img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 1200ms var(--ease)}
+  .hero .plate.in img{transform:scale(1)}
+  .hero .plate .mark{position:absolute;top:0;right:0;width:24px;height:24px;background:var(--accent)}
+  .hero .plate figcaption{position:absolute;left:10px;bottom:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#F0F0F0;mix-blend-mode:difference}
+
+  /* META BAR */
+  .metabar{padding:36px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:60px}
+  .metabar dl{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+  .metabar dt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .metabar dd{font-size:15px}
+
+  /* SECTIONS */
+  .sec{padding:90px 0;border-top:1px solid var(--line);position:relative}
+  .sec-head{grid-column:1 / span 6;display:flex;align-items:center;gap:14px;margin-bottom:48px}
+  .sec-head .num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .sec-head .sq{width:24px;height:24px;background:var(--accent);opacity:0;transform:scale(0);transition:opacity 350ms var(--ease),transform 500ms cubic-bezier(.34,1.56,.64,1)}
+  .sec.in .sec-head .sq{opacity:1;transform:scale(1);transition-delay:400ms}
+  .sec-head h2{font-family:'Hanken Grotesk','Helvetica Neue',sans-serif;font-weight:900;font-size:48px;letter-spacing:-.02em;text-transform:uppercase}
+
+  .body{grid-column:1 / span 3}
+  .body p{font-size:15px;line-height:1.65;margin-bottom:14px;transform:translateY(24px);opacity:0;transition:transform 500ms var(--ease),opacity 500ms var(--ease)}
+  .sec.in .body p{transform:none;opacity:1}
+  .sec.in .body p:nth-child(2){transition-delay:80ms}
+  .sec.in .body p:nth-child(3){transition-delay:160ms}
+  .sec.in .body p:nth-child(4){transition-delay:240ms}
+
+  .ph{position:relative;overflow:hidden;aspect-ratio:4/5;background:#000;clip-path:inset(0 100% 0 0);transition:clip-path 700ms var(--ease)}
+  .sec.in .ph{clip-path:inset(0 0 0 0)}
+  .ph img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 1200ms var(--ease)}
+  .sec.in .ph img{transform:scale(1)}
+  .ph .mark{position:absolute;top:0;right:0;width:16px;height:16px;background:var(--accent)}
+  .ph figcaption{position:absolute;left:8px;bottom:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#F0F0F0;mix-blend-mode:difference}
+
+  /* placement */
+  .s-problem .body{grid-column:1 / span 6}
+  .s-research .body{grid-column:1 / span 3}
+  .s-research .ph{grid-column:4 / span 3;aspect-ratio:4/5}
+  .s-mvp .body{grid-column:1 / span 6}
+  .s-mvp .grid-list{grid-column:1 / span 6;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gutter);margin-top:20px}
+  .s-mvp .grid-list .it{border-top:1px solid var(--text);padding-top:14px}
+  .s-mvp .grid-list .it .n{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--muted)}
+  .s-mvp .grid-list .it h4{font-family:'Hanken Grotesk',sans-serif;font-weight:900;font-size:22px;letter-spacing:-.02em;text-transform:uppercase;margin:8px 0 6px}
+
+  .s-exec .ph{grid-column:1 / span 3;aspect-ratio:4/5}
+  .s-exec .body{grid-column:4 / span 3}
+
+  .s-result .ph{grid-column:2 / span 4;aspect-ratio:16/9}
+  .s-result .metrics{grid-column:1 / span 6;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gutter);margin-top:40px}
+  .s-result .metric{position:relative;padding:24px;background:var(--accent);color:#fff}
+  .s-result .metric .k{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.9}
+  .s-result .metric .v{font-family:'Hanken Grotesk',sans-serif;font-weight:900;font-size:54px;letter-spacing:-.02em;line-height:1;margin-top:14px}
+  .s-result .metric .u{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-top:10px;opacity:.95}
+
+  /* NEXT */
+  .next{padding:80px 0 120px;border-top:1px solid var(--line)}
+  .next .grid{align-items:end}
+  .next .l{grid-column:1 / span 4}
+  .next .l h2{font-family:'Hanken Grotesk',sans-serif;font-weight:900;font-size:clamp(48px,7vw,96px);letter-spacing:-.03em;line-height:.95;text-transform:uppercase}
+  .next .r{grid-column:5 / span 2;text-align:right}
+  .next a.b{display:inline-flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--text)}
+  .next a.b:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .next a.b .sq{width:10px;height:10px;background:var(--accent)}
+  .next a.b:hover .sq{background:#fff}
+
+  footer{padding:30px var(--pad) 60px;border-top:1px solid var(--line);position:relative;z-index:2}
+  footer .inner{max-width:1320px;margin:0 auto;width:100%;display:flex;justify-content:space-between;align-items:center}
+  footer .l,footer .r{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+    .hero .title h1 .letter,.body p,.ph{transform:none !important;opacity:1 !important;clip-path:none !important}
+    .sec .sec-head .sq{opacity:1 !important;transform:scale(1) !important}
+    .grid-guides .col::before,.grid-guides .col::after{transform:scaleY(1) !important}
+    .ph img,.hero .plate img{transform:scale(1) !important}
+  }
+
+  @media (max-width:900px){
+    :root{--pad:24px;--gutter:14px}
+    .hero{padding-top:160px}
+    .metabar dl{grid-template-columns:repeat(2,1fr)}
+    .s-research .body,.s-research .ph,.s-exec .body,.s-exec .ph,.s-result .ph{grid-column:1 / -1}
+    .s-mvp .grid-list,.s-result .metrics{grid-template-columns:1fr}
+    .next .l,.next .r{grid-column:1 / -1;text-align:left}
+    .grid-guides{display:none}
+  }
+  @media (max-width:520px){
+    :root{--pad:16px}
+    .hero{padding-top:190px}
+    .metabar dl{grid-template-columns:1fr}
+    .corner.br{display:none}
+    footer .inner{flex-direction:column;gap:8px;align-items:flex-start}
+    .s-result .metric .v{font-size:44px}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="grid-guides" id="guides" aria-hidden="true">
+  <span class="col"></span><span class="col"></span><span class="col"></span>
+  <span class="col"></span><span class="col"></span><span class="col"></span>
+</div>
+
+<div class="topbar">
+  <div class="inner">
+    <div class="brand"><span class="sq"></span><span class="lbl">KIM / CASE — ROOMSYNC</span></div>
+    <div class="right">
+      <a class="gallery" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+      <a class="back" href="index.html">← INDEX</a>
+      <button class="theme-toggle" id="themeBtn" data-tip="DAY / NIGHT" aria-label="theme toggle"><span class="sq"></span></button>
+    </div>
+  </div>
+</div>
+
+<div class="corner bl mono">P/D/01</div>
+<div class="corner br mono">CASE STUDY / 2023</div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero frame grid" id="hero">
+    <div class="crumb"><span class="sq"></span><span>HOME / PROJECTS / CASE 01</span></div>
+    <div class="title">
+      <h1 id="wm">ROOMSYNC</h1>
+      <span class="tag">2023.07 — 2023.11 · PM / SCRUM MASTER</span>
+    </div>
+    <figure class="plate" id="plate">
+      <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync team" />
+      <span class="mark"></span>
+      <figcaption>FIG.01 / TEAM / 2023</figcaption>
+    </figure>
+
+    <div class="metabar" style="grid-column:1 / span 6">
+      <dl>
+        <dt>Role</dt><dd>PM · Scrum Master · Service Planner</dd>
+        <dt>Team</dt><dd>3 (PM 1 · 백엔드 2)</dd>
+        <dt>Period</dt><dd>2023.07 – 2023.11 (5 mo)</dd>
+        <dt>Stack</dt><dd>Notion · Figma · Jira · Scrum</dd>
+      </dl>
+    </div>
+  </section>
+
+  <!-- 01 PROBLEM -->
+  <section class="sec frame s-problem" id="s1">
+    <div class="grid">
+      <div class="sec-head"><span class="num">01 / PROBLEM</span><span class="sq"></span><h2>문제 정의</h2></div>
+    </div>
+    <div class="grid">
+      <div class="body">
+        <p>한 캠퍼스 안에서 50여 개 동아리가 같은 공용 회의실을 돌려쓰고 있었지만, 예약은 종이 노트와 단톡방으로 수기 관리되고 있었다. 같은 시간대를 두 팀이 잡거나, 잡아 놓고 나타나지 않는 일이 반복적으로 발생했다.</p>
+        <p>공용 회의실 한 곳이 막히면 회의 자체가 미뤄지고, 책임 소재가 모호해 동아리 간 갈등으로 번졌다. 문제는 도구가 아니라 ‘지금 누가 잡고 있는가’가 보이지 않는 데에 있었다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 RESEARCH -->
+  <section class="sec frame s-research" id="s2">
+    <div class="grid">
+      <div class="sec-head"><span class="num">02 / RESEARCH</span><span class="sq"></span><h2>리서치</h2></div>
+    </div>
+    <div class="grid">
+      <div class="body">
+        <p>먼저 동아리 회장단을 대상으로 구글폼 설문을 돌렸다. 가장 자주 반복된 답은 “누가 지금 쓰고 있는지 실시간으로 보고 싶다”였다. 노쇼는 게으름이 아니라, 다음 사람이 보고 있다는 감각의 부재 때문이었다.</p>
+        <p>설문 답변과 동아리방 운영 현황을 함께 정리한 결과, 충돌의 패턴은 대부분 ‘이미 누가 잡은 줄 모르고 잡는’ 종류였다. 결론은 명확했다: 새 규칙보다 ‘실시간 현황’이 먼저였다.</p>
+        <p>리서치를 통과한 핵심 가설은 단순했다. <strong>공개된 실시간 예약 화면</strong>이 있다면, 도구 자체보다 서로 보고 있다는 사실이 노쇼를 줄일 것이다.</p>
+      </div>
+      <figure class="ph">
+        <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="User interview" />
+        <span class="mark"></span>
+        <figcaption>FIG.02 / INTERVIEW / 2023</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 03 MVP -->
+  <section class="sec frame s-mvp" id="s3">
+    <div class="grid">
+      <div class="sec-head"><span class="num">03 / MVP</span><span class="sq"></span><h2>MVP 결정</h2></div>
+    </div>
+    <div class="grid">
+      <div class="body">
+        <p>백엔드 인원 2명에 일정도 빠듯했다. 욕심을 줄여, ‘지금 누가 잡고 있는지가 한 화면에서 보이는 것’만 1차 범위로 정의했다. 푸시·이메일 알림은 2차로 미뤘다.</p>
+        <p>이 결정을 위해 화면 단위로 API 명세 초안을 직접 그렸고, Jira에서 백로그를 잘게 쪼개 스크럼 마스터로서 2주 스프린트를 운영했다.</p>
+      </div>
+      <div class="grid-list">
+        <div class="it"><div class="n">01</div><h4>예약 / 취소</h4><p>슬롯 단위로 한 번에 하나의 동아리만 잡히도록 락을 걸었다.</p></div>
+        <div class="it"><div class="n">02</div><h4>실시간 뷰</h4><p>오늘·이번 주 슬롯이 한 화면에서 갱신되어 ‘누가 쓰는 중’이 보인다.</p></div>
+        <div class="it"><div class="n">03</div><h4>알림 (2차)</h4><p>출시 시점엔 제외하고, 1차 운영 데이터를 본 뒤 도입하기로 미뤘다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 EXECUTION -->
+  <section class="sec frame s-exec" id="s4">
+    <div class="grid">
+      <div class="sec-head"><span class="num">04 / EXECUTION</span><span class="sq"></span><h2>실행</h2></div>
+    </div>
+    <div class="grid">
+      <figure class="ph">
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="PM working" />
+        <span class="mark"></span>
+        <figcaption>FIG.03 / EXEC / 2023</figcaption>
+      </figure>
+      <div class="body">
+        <p>스크럼 마스터로서 2주 단위 스프린트를 잡고, 화면별 API 명세 초안과 인수 기준을 매 스프린트 시작 전에 백엔드 2명과 같이 다듬었다.</p>
+        <p>중간에 ‘알림까지 1차에 넣을지’가 다시 올라왔지만, 일정과 인원을 보고 다시 한 번 ‘실시간 뷰만’으로 범위를 지켰다. 빼는 결정을 한 것이 출시 일정을 살렸다.</p>
+        <p>출시 직전엔 회장단을 다시 모아 화면을 함께 보며 시나리오를 점검했고, 단톡방 안내 문구·온보딩 가이드까지 한 호흡으로 준비해 한 학기 안에 배포했다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 RESULT -->
+  <section class="sec frame s-result" id="s5">
+    <div class="grid">
+      <div class="sec-head"><span class="num">05 / RESULT</span><span class="sq"></span><h2>결과</h2></div>
+    </div>
+    <div class="grid">
+      <figure class="ph">
+        <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="Lecture / share-out" />
+        <span class="mark"></span>
+        <figcaption>FIG.04 / SHARE-OUT / 2023</figcaption>
+      </figure>
+      <div class="metrics">
+        <div class="metric"><div class="k">No-show</div><div class="v">-60<span style="font-size:30px">%</span></div><div class="u">출시 1개월 시점</div></div>
+        <div class="metric"><div class="k">Adoption</div><div class="v">30</div><div class="u">동아리 / 출시 1개월</div></div>
+        <div class="metric"><div class="k">Scope</div><div class="v">50<span style="font-size:30px">+</span></div><div class="u">학내 대상 동아리</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEXT -->
+  <section class="next frame">
+    <div class="grid">
+      <div class="l"><h2>Next case →</h2></div>
+      <div class="r"><a class="b" href="index.html"><span class="sq"></span><span class="mono">BACK TO INDEX</span></a></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <div class="l">© 2026 KIM TAEYUN · CASE / ROOMSYNC</div>
+    <div class="r">PRESS [G] TO TOGGLE GRID</div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const root = document.documentElement;
+  if(localStorage.getItem('tk-theme') === 'alt') root.setAttribute('data-theme','alt');
+  document.getElementById('themeBtn').addEventListener('click', ()=>{
+    const cur = root.getAttribute('data-theme') === 'alt' ? 'alt' : 'day';
+    const next = cur === 'alt' ? 'day' : 'alt';
+    if(next === 'alt') root.setAttribute('data-theme','alt'); else root.removeAttribute('data-theme');
+    localStorage.setItem('tk-theme', next);
+  });
+
+  const guides = document.getElementById('guides');
+  requestAnimationFrame(()=> guides.setAttribute('data-flash','true'));
+  window.addEventListener('keydown', e=>{
+    if(e.key === 'g' || e.key === 'G'){
+      const off = guides.getAttribute('data-off') === 'true';
+      guides.setAttribute('data-off', off?'false':'true');
+    }
+  });
+
+  const bar = document.getElementById('progress');
+  const onScroll = ()=>{
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    bar.style.width = (max>0 ? (h.scrollTop/max)*100 : 0).toFixed(2)+'%';
+  };
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  const wm = document.getElementById('wm');
+  if(wm){
+    const t = wm.textContent.trim(); wm.textContent='';
+    [...t].forEach((ch,i)=>{
+      const s = document.createElement('span');
+      s.className='letter'; s.textContent = ch===' '?' ':ch;
+      s.style.transitionDelay = (i*80)+'ms';
+      wm.appendChild(s);
+    });
+    requestAnimationFrame(()=> wm.classList.add('in'));
+    setTimeout(()=> document.getElementById('plate').classList.add('in'), 200);
+  }
+
+  if(!reduce){
+    const io = new IntersectionObserver(entries=>{
+      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+    },{threshold:0.16});
+    document.querySelectorAll('.sec').forEach(el=> io.observe(el));
+  } else {
+    document.querySelectorAll('.sec').forEach(el=> el.classList.add('in'));
+  }
+})();
+</script>
+</body>
+</html>

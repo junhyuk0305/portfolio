@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 하이엔드 웹 포트폴리오 마스터클래스 · 발표용 슬라이드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --surface: #F7F7F7;
+    --surface-2: #ECECEC;
+    --text: #0A0A0A;
+    --muted: #6B6B6B;
+    --hairline: #D4D4D4;
+    --accent: #2563EB;
+    --accent-soft: rgba(37, 99, 235, 0.08);
+    --blue: #2563EB;
+    --orange: #EA580C;
+    --green: #16A34A;
+    --red: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .accent { color: var(--accent); }
+  .muted { color: var(--muted); }
+
+  /* Slide container */
+  .deck { position: fixed; inset: 0; }
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    padding: 60px 80px 80px 80px;
+    overflow-y: auto;
+    animation: fadeIn 250ms ease-out;
+  }
+  .slide.active { display: flex; flex-direction: column; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Top bar */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 36px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 24px;
+    font-size: 12px; color: var(--muted);
+    z-index: 50; letter-spacing: 0.02em;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0));
+    pointer-events: none;
+  }
+  .topbar .left { font-family: 'JetBrains Mono', monospace; }
+  .topbar .right { font-family: 'JetBrains Mono', monospace; }
+  .topbar .right strong { color: var(--text); font-weight: 500; }
+
+  /* Progress bar */
+  .progress {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 3px; background: var(--hairline);
+    z-index: 50;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    transition: width 250ms ease-out;
+  }
+
+  /* Bottom hint */
+  .hint {
+    position: fixed; bottom: 16px; right: 24px;
+    font-size: 11px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 50; opacity: 0.6;
+  }
+  .hint kbd {
+    display: inline-block; padding: 2px 6px;
+    border: 1px solid var(--hairline); border-radius: 4px;
+    background: var(--surface); margin: 0 2px;
+    font-size: 10px;
+  }
+
+  /* Slide content blocks */
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 16px;
+  }
+  .title {
+    font-size: 56px; font-weight: 700;
+    line-height: 1.05; letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .title-xl {
+    font-size: 88px; font-weight: 700;
+    line-height: 1.0; letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+  .subtitle {
+    font-size: 22px; color: var(--muted);
+    line-height: 1.5; font-weight: 400;
+    margin-bottom: 36px;
+  }
+  .h2 {
+    font-size: 36px; font-weight: 600;
+    line-height: 1.2; letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  .body {
+    font-size: 17px; line-height: 1.65; color: var(--text);
+  }
+  .caption {
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: 12px; padding: 24px;
+  }
+  .card-tinted { background: var(--accent-soft); border-color: var(--accent); }
+
+  /* Grid utilities */
+  .row { display: flex; gap: 24px; }
+  .col { flex: 1; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* Code block */
+  pre.code {
+    background: #F4F4F5; border: 1px solid var(--hairline);
+    border-radius: 8px; padding: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; line-height: 1.55;
+    color: #1A1A1A; overflow: auto; max-height: 540px;
+    position: relative; white-space: pre-wrap; word-break: break-word;
+  }
+  .copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--accent); color: white;
+    padding: 6px 12px; border: none; border-radius: 6px;
+    font-size: 11px; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500; letter-spacing: 0.02em;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); color: #052E10; }
+
+  /* STAR / Block tags */
+  .star-tag { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .tag-s { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .tag-t { background: rgba(251,146,60,0.15); color: var(--orange); }
+  .tag-a { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-r { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-default { background: var(--surface-2); color: var(--muted); }
+
+  /* Pill */
+  .pill {
+    display: inline-block; padding: 6px 14px;
+    border: 1px solid var(--hairline); border-radius: 999px;
+    font-size: 12px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pill-accent { border-color: var(--accent); color: var(--accent); }
+
+  /* Table */
+  table.matrix {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px;
+  }
+  table.matrix th, table.matrix td {
+    border: 1px solid var(--hairline);
+    padding: 10px 12px; text-align: left;
+  }
+  table.matrix th {
+    background: var(--surface);
+    color: var(--muted); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  table.matrix td.accent-cell { color: var(--accent); font-weight: 500; }
+
+  /* Diagram block */
+  .diagram-box {
+    background: var(--surface); border: 1px solid var(--hairline);
+    border-radius: 8px; padding: 16px 20px;
+    text-align: center; flex: 1;
+  }
+  .arrow { font-size: 20px; color: var(--accent); align-self: center; padding: 0 4px; }
+
+  /* Speaker notes */
+  .notes {
+    display: none;
+    background: rgba(37, 99, 235, 0.06);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin-top: auto;
+    font-size: 14px; line-height: 1.65;
+    color: #1F2937; white-space: pre-line;
+    border-radius: 0 8px 8px 0;
+    max-height: 280px; overflow-y: auto;
+  }
+  body.notes-on .notes { display: block; }
+  .notes-label {
+    font-size: 10px; letter-spacing: 0.2em;
+    color: var(--accent); font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+
+  /* Chapter cover */
+  .chapter-cover { justify-content: center; align-items: flex-start; }
+  .chapter-num {
+    font-size: 14px; letter-spacing: 0.2em;
+    color: var(--accent); font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 24px;
+  }
+  .chapter-title {
+    font-size: 120px; font-weight: 700;
+    line-height: 0.95; letter-spacing: -0.04em;
+  }
+
+  /* Highlight box */
+  .hl-box {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 8px; padding: 14px 18px;
+    font-size: 14px; line-height: 1.55;
+  }
+
+  /* Persona card */
+  .persona-mono {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--accent); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 700; color: white;
+  }
+
+  /* Mock hero */
+  .mock-hero {
+    background: linear-gradient(180deg, var(--surface), var(--surface-2));
+    border-radius: 16px; padding: 40px;
+    border: 1px solid var(--hairline);
+  }
+  .mock-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .mock-card { background: var(--bg); border: 1px solid var(--hairline); border-radius: 8px; padding: 14px; font-size: 12px; }
+
+  /* Metric */
+  .metric-big {
+    font-size: 48px; font-weight: 700; line-height: 1;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+  }
+  .metric-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="left">RoundTable · AI 포트폴리오 마스터클래스</span>
+  <span class="right"><strong id="slideNum">01</strong> / <span id="slideTotal">41</span></span>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ====================================================== -->
+<!-- PART 0 · INTRO -->
+<!-- ====================================================== -->
+
+<!-- SLIDE 01 -->
+<section class="slide chapter-cover">
+  <div style="margin-top: 40px;">
+    <div class="chapter-num">ROUNDTABLE · LIVE CLASS · 180MIN</div>
+    <div class="title-xl">AI 하이엔드 웹<br>포트폴리오<br>마스터클래스.</div>
+    <div class="subtitle" style="max-width: 720px; margin-top: 32px;">3시간 만에, 자소서에서 라이브 웹사이트까지.</div>
+    <div style="margin-top: 60px; display: flex; gap: 16px;">
+      <span class="pill">강사 장준혁</span>
+      <span class="pill">RoundTable CTO</span>
+      <span class="pill pill-accent">Gemini AI Studio × GitHub Pages</span>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 02 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 02 · THE END STATE</div>
+  <div class="title">오늘 만들 결과물 미리보기.</div>
+  <div class="subtitle">PM 지망생 김태윤이 강의를 끝내고 손에 든 사이트.</div>
+  <div class="grid-2" style="margin-top: 12px; gap: 20px;">
+    <div>
+      <div class="caption mono" style="margin-bottom: 10px;">MAIN PAGE · #main</div>
+      <div style="border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; background: #0A0A0A;">
+        <img src="slide_main.png" alt="포트폴리오 메인 페이지" style="width: 100%; height: auto; display: block;" />
+      </div>
+    </div>
+    <div>
+      <div class="caption mono" style="margin-bottom: 10px;">PROJECT DETAIL · #project-1</div>
+      <div style="border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; background: #0A0A0A;">
+        <img src="slide_detail.png" alt="프로젝트 상세 페이지" style="width: 100%; height: auto; display: block;" />
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 24px; text-align: center;" class="caption mono">→ <span class="accent">https://taeyoonkim-portfolio.github.io</span></div>
+</section>
+
+<!-- SLIDE 03 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 03 · WHY WEB</div>
+  <div class="title">왜 '웹' 포트폴리오인가.</div>
+  <div class="grid-2" style="margin-top: 40px;">
+    <div class="card">
+      <div class="caption" style="font-size: 11px;">EXISTING</div>
+      <div style="font-size: 28px; font-weight: 600; margin-top: 12px; color: var(--muted);">노션 · PPT · PDF</div>
+      <div class="body" style="margin-top: 16px; color: var(--muted);">포트폴리오 = 문서 한 장. 정적이고, 누구나 만드는 형식. 첫인상이 평준화.</div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption" style="font-size: 11px;" class="accent">NOW</div>
+      <div style="font-size: 28px; font-weight: 600; margin-top: 12px;" class="accent">인터랙티브 웹사이트</div>
+      <div class="body" style="margin-top: 16px;">URL 하나만 공유. 검색되고, 모바일에서 열리고, 페이지 전환이 살아 있음. 노션 100장보다 강한 첫인상.</div>
+    </div>
+  </div>
+  <div style="margin-top: 40px; padding: 20px; background: var(--surface); border-radius: 8px; text-align: center;" class="body">
+    그동안 웹 포트폴리오는 <strong>개발 직군의 전유물</strong>이었다. 이제는 비전공자도 <strong class="accent">3시간</strong> 안에 만든다.
+  </div>
+</section>
+
+<!-- SLIDE 04 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 04 · AI MINDSET</div>
+  <div class="title">AI를 보는 두 가지 관점.</div>
+  <div class="grid-2" style="margin-top: 40px;">
+    <div class="card">
+      <div class="caption" style="font-size: 11px; color: var(--muted);">절반만 쓰는 AI</div>
+      <div style="font-size: 32px; font-weight: 700; margin-top: 12px; color: var(--muted);">Automation</div>
+      <div class="body" style="margin-top: 16px;">더 빠르게 · 더 효율적으로<br>기존 업무의 가속.</div>
+      <ul style="margin-top: 16px; padding-left: 20px; color: var(--muted); font-size: 14px; line-height: 1.8;">
+        <li>자소서 맞춤법 검사</li>
+        <li>이메일 요약</li>
+        <li>번역</li>
+      </ul>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption" style="font-size: 11px;" class="accent">전체를 쓰는 AI</div>
+      <div style="font-size: 32px; font-weight: 700; margin-top: 12px;" class="accent">Augmentation</div>
+      <div class="body" style="margin-top: 16px;">전에 못 하던 걸 한다<br>새로운 가능성의 개방.</div>
+      <ul style="margin-top: 16px; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+        <li>디자인 시스템 설계</li>
+        <li>인터랙티브 웹 구축</li>
+        <li>4페이지 라우팅 코드 생성</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top: 36px; text-align: center; padding: 24px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px;">
+    <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.02em;">오늘 3시간은 <span class="accent" style="font-size: 40px;">증강</span>의 영역.</div>
+  </div>
+</section>
+
+<!-- SLIDE 05 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 05 · TODAY'S ROADMAP</div>
+  <div class="title">오늘의 목표: 3-STEP.</div>
+  <div class="grid-3" style="margin-top: 48px;">
+    <div class="card">
+      <div class="caption mono">STEP 01 · 45'</div>
+      <div style="font-size: 28px; font-weight: 700; margin-top: 12px;">데이터 정제</div>
+      <div class="body" style="margin-top: 12px; color: var(--muted);">자소서를 디자인 가능한 키로</div>
+      <div style="margin-top: 24px;"><span class="star-tag tag-default">메가 프롬프트 ①②③</span></div>
+    </div>
+    <div class="card">
+      <div class="caption mono">STEP 02 · 65'</div>
+      <div style="font-size: 28px; font-weight: 700; margin-top: 12px;">바이브 코딩</div>
+      <div class="body" style="margin-top: 12px; color: var(--muted);">디자인 템플릿 + 본문으로 단일 HTML</div>
+      <div style="margin-top: 24px;"><span class="star-tag tag-default">메가 프롬프트 ④</span></div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">STEP 03 · 25'</div>
+      <div style="font-size: 28px; font-weight: 700; margin-top: 12px;">배포</div>
+      <div class="body" style="margin-top: 12px;">HTML을 라이브 URL로</div>
+      <div style="margin-top: 24px;"><span class="star-tag" style="background:var(--accent);color:white;">GitHub Pages</span></div>
+    </div>
+  </div>
+  <div style="margin-top: 40px; padding: 18px; background: var(--surface); border-radius: 8px; text-align: center;" class="mono caption">
+    자소서 → 브랜드 키 + 디자인 선택 + 본문 → 단일 HTML → 라이브 URL
+  </div>
+</section>
+
+<!-- SLIDE 05.5 · 강사 소개 (INSTRUCTOR) -->
+<section class="slide">
+  <div class="eyebrow">SLIDE · INSTRUCTOR</div>
+  <div class="title">강사 소개.</div>
+  <div class="subtitle">교육 비영리 스타트업 <strong style="color:var(--text);">라운드테이블</strong>의 CTO · 장준혁.</div>
+  <div class="grid-2" style="margin-top: 28px;">
+    <div class="card">
+      <div class="caption mono">PROFILE</div>
+      <div style="font-size: 22px; font-weight: 700; margin-top: 10px;">장준혁 · CTO</div>
+      <div class="body" style="margin-top: 12px; font-size: 14px;">
+        교육 비영리 스타트업 <strong>라운드테이블</strong>에서 실제 서비스를 직접 설계·개발합니다.
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="pill pill-accent">Claude</span>
+        <span class="pill pill-accent">Gemini</span>
+        <span class="pill">AI Stack</span>
+      </div>
+      <div style="margin-top: 18px; padding: 14px; background: var(--surface); border-radius: 8px; display: flex; align-items: center; gap: 14px;">
+        <div class="metric-big" style="font-size: 34px;">₩36만</div>
+        <div>
+          <div style="font-weight: 600; font-size: 14px;">월 AI 도구 지출</div>
+          <div class="caption">Claude · Gemini 등 — 매일 쓰는 도구에 직접 투자</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">ROUNDTABLE</div>
+      <div style="font-size: 22px; font-weight: 700; margin-top: 10px;">생애주기별 교육 프로그램</div>
+      <div class="body" style="margin-top: 12px; font-size: 14px;">
+        생애주기별 교육 콘텐츠와 워크숍을 기획·운영하는 비영리 스타트업.
+      </div>
+      <ul style="margin-top: 14px; padding-left: 20px; font-size: 14px; line-height: 1.85;">
+        <li>생애주기별 교육 프로그램 제공</li>
+        <li>오프라인 워크숍 진행</li>
+        <li>현재 실제 서비스 직접 개발 중</li>
+      </ul>
+      <div style="margin-top: 16px; padding: 14px; background: rgba(255,255,255,0.6); border: 1px dashed var(--accent); border-radius: 8px;">
+        <div class="caption mono accent">COMING SOON · 2026 하반기</div>
+        <div style="font-weight: 600; font-size: 15px; margin-top: 6px;">대학생 동아리를 위한 서비스 런칭 준비 중</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 24px; text-align: center;" class="body">
+    오늘 강의는 <strong>현장에서 매일 쓰는 도구·프롬프트</strong>를 그대로 가져왔습니다.
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- PART 1 · 데이터 정제 -->
+<!-- ====================================================== -->
+
+<!-- SLIDE 06 -->
+<section class="slide chapter-cover">
+  <div style="margin-top: 40px;">
+    <div class="chapter-num">PART 1 / 03 · 45분</div>
+    <div class="chapter-title">STEP 1.<br>데이터<br>정제.</div>
+    <div class="subtitle" style="margin-top: 36px; max-width: 720px;">자소서 한 장을 세 가지 자산으로 분리한다.</div>
+    <div style="margin-top: 40px; display: flex; gap: 16px;">
+      <span class="pill">브랜드 키 1장</span>
+      <span class="pill">디자인 템플릿 1종</span>
+      <span class="pill">본문 7블록 ×3</span>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 07 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 07 · WHAT TO BRING</div>
+  <div class="title">준비물 확인.</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card">
+      <div class="caption mono">자산 1</div>
+      <div style="font-size: 24px; font-weight: 600; margin-top: 8px;">500자 자기소개</div>
+      <div style="background: var(--bg); padding: 16px; margin-top: 16px; border-radius: 6px; font-size: 14px; line-height: 1.7;" class="muted">
+        "비즈니스적 관점과 개발적 이해도를 바탕으로 <strong style="color:var(--text);">병목을 해결하고 목표를 달성하는 기획자</strong>입니다. 데이터를 기반으로 가설을 세우고, 고객의 목소리를 직접 듣는 것을 두려워하지 않습니다."
+      </div>
+      <div class="caption" style="margin-top: 8px;">— PM 김태윤 자소서 발췌</div>
+    </div>
+    <div class="card">
+      <div class="caption mono">자산 2</div>
+      <div style="font-size: 24px; font-weight: 600; margin-top: 8px;">포트폴리오용 경험 정리</div>
+      <div style="background: var(--bg); padding: 16px; margin-top: 16px; border-radius: 6px; font-size: 13px; line-height: 1.65;" class="muted">
+        프로젝트 1~3건 (각 250~400자). 줄글로 정리되어 있어도 OK.<br><br>
+        예: <strong style="color:var(--text);">RoomSync</strong> · 학내 50개 동아리 공용 회의실 수기 예약 → MVP 런칭 → 노쇼율 60% 감소
+      </div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 24px;">
+    🆘 둘 다 없으신 분 → 강사 견본 4종 (PM 김태윤 / 마케터 박서연 / HR 최민호 / FE 정수민) 중 선택. 오늘 강의 전체 예시는 <strong>김태윤</strong>으로 따라갑니다.
+  </div>
+</section>
+
+<!-- SLIDE 08 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 08 · WHY REFINE</div>
+  <div class="title">"그냥 넣으면 어떻게 되나요?"</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card" style="border-color:var(--hairline);">
+      <div class="caption mono" style="color:var(--muted);">BAD</div>
+      <div style="font-size: 20px; font-weight: 600; margin-top: 8px; color: var(--muted);">자소서 통째 → AI</div>
+      <div style="margin-top: 20px;">
+        <div style="background:#E5E5E5;height:60px;border-radius:4px;"></div>
+        <div style="background:#E5E5E5;height:30px;border-radius:4px;margin-top:8px;"></div>
+        <div style="background:#E5E5E5;height:30px;border-radius:4px;margin-top:8px;width:80%;"></div>
+      </div>
+      <div class="body" style="margin-top: 20px; color: var(--muted); font-size: 14px;">결과물은 나옵니다. 다만 <strong style="color:var(--text);">'내 의도'</strong>는 아닙니다.</div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">GOOD</div>
+      <div style="font-size: 20px; font-weight: 600; margin-top: 8px;">자소서 → 정제 → 브랜드 키 + 디자인 → AI</div>
+      <div style="margin-top: 20px; display:flex; gap: 8px; align-items: center;">
+        <div style="background:var(--accent);width:60px;height:60px;border-radius:8px;"></div>
+        <div style="flex:1;">
+          <div style="background:#0A0A0A;height:14px;border-radius:2px;"></div>
+          <div style="background:rgba(10,10,10,0.55);height:10px;border-radius:2px;margin-top:6px;"></div>
+        </div>
+      </div>
+      <div class="body" style="margin-top: 20px; font-size: 14px;">정제 한 단계가 결과물의 <strong>격</strong>을 결정합니다.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 09 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 09 · IDENTITY OF A 500-CHAR INTRO</div>
+  <div class="title">500자 자소서의 정체.</div>
+  <div class="card" style="margin-top: 32px;">
+    <div class="body" style="line-height: 1.9;">
+      <span style="background:rgba(96,165,250,0.25);padding:2px 4px;">비즈니스적 관점과 개발적 이해도를 바탕으로 병목을 해결하고 목표를 달성하는 기획자입니다.</span>
+      <span style="background:rgba(251,146,60,0.25);padding:2px 4px;">데이터를 기반으로 가설을 세우고, 고객의 목소리를 직접 듣는 것을 두려워하지 않습니다.</span>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="hl-box" style="background:rgba(96,165,250,0.1);border-color:var(--blue);">
+      <div style="font-weight:600;color:var(--blue);font-size:13px;">🟦 브랜딩 차원 (약 60%)</div>
+      <div style="margin-top:8px;font-size:14px;">"나는 어떤 사람인가" · 정체성 정의 · Hero 카피의 재료</div>
+    </div>
+    <div class="hl-box" style="background:rgba(251,146,60,0.1);border-color:var(--orange);">
+      <div style="font-weight:600;color:var(--orange);font-size:13px;">🟧 핵심 경험 (약 40%)</div>
+      <div style="margin-top:8px;font-size:14px;">"그걸 증명하는 사실" · 브랜딩의 근거 · 메트릭의 재료</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 10 · UIUX CONSTITUTION</div>
+  <div class="title">500자 자소서 = UIUX의 헌법.</div>
+  <div style="margin-top: 32px; display: flex; gap: 24px; align-items: center;">
+    <div class="card" style="flex: 1;">
+      <div class="caption mono">INPUT</div>
+      <div style="margin-top: 12px; font-size: 15px; line-height: 1.6;" class="muted">"비즈니스와 개발을 잇는, 병목을 해결하는 기획자…"</div>
+    </div>
+    <div class="arrow">→</div>
+    <div style="flex: 2; display: flex; flex-direction: column; gap: 12px;">
+      <div class="card">
+        <div class="caption">무드 키워드</div>
+        <div style="margin-top: 8px;">
+          <span class="pill">분석적인</span>
+          <span class="pill">신뢰감</span>
+          <span class="pill">구조적인</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="caption">Hero 메인 카피</div>
+        <div style="margin-top: 8px; font-size: 22px; font-weight: 700;" class="accent">"병목을 푸는 기획자"</div>
+      </div>
+      <div class="card card-tinted">
+        <div class="caption" class="accent">추천 디자인 카테고리</div>
+        <div style="margin-top: 8px; font-size: 18px; font-weight: 600;">#01 Whitespace Cathedral</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; text-align: center;" class="body">디자인을 정하는 건 <strong>취향이 아니라 자소서</strong>입니다.</div>
+</section>
+
+<!-- SLIDE 11 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 11 · 1:1 MAPPING</div>
+  <div class="title">'매핑'이란 무엇인가.</div>
+  <div class="subtitle">자소서 한 줄 → 디자인 의사결정 한 셋.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card">
+      <div class="caption mono">자소서 첫 문장</div>
+      <div style="margin-top: 16px; font-size: 17px; line-height: 1.65; font-style: italic;">"비즈니스적 관점과 개발적 이해도를 바탕으로 <strong style="color:var(--accent);font-style:normal;">병목을 해결하고 목표를 달성하는 기획자</strong>입니다."</div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">매핑된 결과</div>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <div class="caption">Hero 메인 카피</div>
+          <div style="font-size: 22px; font-weight: 700; margin-top: 4px;">병목을 푸는 기획자</div>
+        </div>
+        <div>
+          <div class="caption">무드 키워드</div>
+          <div style="margin-top: 4px;">분석적인 / 신뢰감 / 구조적인</div>
+        </div>
+        <div>
+          <div class="caption">추천 디자인</div>
+          <div style="font-size: 17px; font-weight: 600; margin-top: 4px;">#01 Whitespace Cathedral</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; text-align: center;" class="body">사람이 하면 30분, AI에게 시키면 <strong class="accent">30초</strong>. 단, 프롬프트가 정확해야.</div>
+</section>
+
+<!-- SLIDE 12 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 12 · MEGA PROMPT ①</div>
+  <div class="title">자소서 → 초경량 브랜드 키.</div>
+  <div class="subtitle">컬러 Hex·폰트는 일부러 뺐다. 디자인 템플릿이 책임진다.</div>
+  <pre class="code" style="margin-top: 16px;"><button class="copy-btn" onclick="copyCode(this)">COPY</button>너는 시니어 브랜드 스트래티지스트야.
+내가 제공하는 500자 자기소개를 분석해서, 다음 단계 디자인 템플릿 선택의
+'필터' 역할을 할 초경량 브랜드 키 한 장만 작성해줘.
+
+[입력: 나의 500자 자기소개]
+(여기에 자소서 전문 붙여넣기)
+
+[출력 양식 — 정확히 6개 블록]
+1. 페르소나 한 줄 (40자 이내)
+2. 브랜드 무드 키워드 3개
+3. Hero 메인 카피 후보 3개 (각 15자 이내)
+4. Hero 서브 카피 후보 2개 (각 2줄 이내)
+5. 퍼스널 태그 3개
+6. 추천 디자인 카테고리 1·2순위 (design.md 20종 중 번호+이름+근거 1줄)
+
+[작성 규칙]
+- 컬러 Hex, 폰트, 레이아웃 절대 결정 금지 (다음 단계 디자인 템플릿 책임).
+- 자소서에 없는 정보 새로 만들지 말 것.
+- 한국어, 비즈니스 톤.</pre>
+</section>
+
+<!-- SLIDE 13 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 13 · LIVE OUTPUT</div>
+  <div class="title">김태윤 브랜드 키 출력 결과.</div>
+  <div class="grid-2" style="margin-top: 20px; gap: 16px;">
+    <div class="card">
+      <div class="caption mono">① 페르소나</div>
+      <div style="margin-top: 8px; font-size: 16px;">"비즈니스와 개발을 잇는 데이터 기반 PM"</div>
+    </div>
+    <div class="card">
+      <div class="caption mono">② 무드 3</div>
+      <div style="margin-top: 8px;">
+        <span class="pill">분석적인</span>
+        <span class="pill">신뢰감</span>
+        <span class="pill">구조적인</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="caption mono">③ Hero 메인 카피</div>
+      <div style="margin-top: 8px; font-size: 14px; line-height: 1.8;">
+        ① <strong>병목을 푸는 기획자</strong><br>
+        ② 데이터로 증명하는 PM<br>
+        ③ 코드와 비즈니스 사이
+      </div>
+    </div>
+    <div class="card">
+      <div class="caption mono">④ Hero 서브 카피</div>
+      <div style="margin-top: 8px; font-size: 13px; line-height: 1.7;" class="muted">
+        데이터로 가설을 세우고, 사용자의 목소리로 검증합니다.<br>개발자와 같은 언어를 쓰는 PM입니다.
+      </div>
+    </div>
+    <div class="card">
+      <div class="caption mono">⑤ 퍼스널 태그</div>
+      <div style="margin-top: 8px;">
+        <span class="pill">#데이터기반_PM</span>
+        <span class="pill">#API명세_가능</span>
+        <span class="pill">#스크럼_리드</span>
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">⑥ 추천 디자인</div>
+      <div style="margin-top: 8px; font-size: 15px;">
+        <strong>1순위 #01 Whitespace Cathedral</strong><br>
+        <span class="caption">분석적·신뢰감 무드와 미니멀 텍스트 중심이 직무 정체성과 일치</span><br><br>
+        2순위 #09 Linear Dark Tech<br>
+        <span class="caption">엔지니어링 신호 강화에 유리</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 14 · DESIGN PRINCIPLE</div>
+  <div class="title">왜 명세서를 가볍게 갔는가.</div>
+  <div class="subtitle">명세서 = 필터 / 디자인 템플릿 = 마스터.</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card" style="border-color:var(--hairline);">
+      <div class="caption mono" style="color:var(--muted);">❌ 기존 방식</div>
+      <div style="font-size: 20px; font-weight: 600; margin-top: 12px; color: var(--muted);">8블록 명세서 (컬러·폰트 결정) ↔ 디자인 템플릿 (또 결정)</div>
+      <div style="margin-top: 16px; padding: 12px; background: rgba(248,113,113,0.1); border-radius: 6px; font-size: 13px;" class="muted">
+        ⚠️ 두 자산이 컬러·폰트를 동시에 결정 → 충돌<br>
+        → 학생이 디자인 디렉터 역할을 떠맡음<br>
+        → 비전공자에게 가장 큰 함정
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">✅ 새 방식</div>
+      <div style="font-size: 20px; font-weight: 600; margin-top: 12px;">6블록 키 (톤만) → 디자인 템플릿 (모두 책임)</div>
+      <div style="margin-top: 16px; padding: 12px; background: rgba(74,222,128,0.1); border-radius: 6px; font-size: 13px;">
+        ✅ 명세서는 '20종 중 1종' 필터 역할만<br>
+        ✅ 디자인 시스템은 검증된 템플릿이 100% 책임<br>
+        ✅ 학생 인지 부하 ↓ / 결과물 격 ↑
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 15 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 15 · EXERCISE 1 · 5MIN</div>
+  <div class="title">20종 갤러리에서 1종 선택.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card">
+      <div class="caption mono">본인 브랜드 키 (SLIDE 12 출력)</div>
+      <div style="margin-top: 12px; font-size: 14px;">⑥ 추천 디자인 1순위 · 2순위</div>
+      <div style="margin-top: 12px; padding: 10px; background: var(--bg); border-radius: 4px; font-size: 13px;" class="muted">예: 1순위 #01 · 2순위 #09</div>
+    </div>
+    <div class="card">
+      <div class="caption mono">design.md 20종 갤러리</div>
+      <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">01</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">02</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">03</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">04</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">05</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">06</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">07</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">08</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">…</div>
+        <div class="mock-card" style="text-align:center;font-size:10px;padding:8px 4px;">20</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 20px;">
+    <div class="caption mono">진행 가이드</div>
+    <ol style="margin-top: 12px; padding-left: 24px; font-size: 14px; line-height: 1.9;">
+      <li>명세서 6번 1순위 번호를 design.md에서 펼친다</li>
+      <li>해당 디자인 프롬프트의 무드·레퍼런스를 본인과 비교</li>
+      <li>결이 맞으면 채택 / 어색하면 2순위 / 그것도 아니면 다음 슬라이드의 매트릭스로 직접 매칭</li>
+    </ol>
+  </div>
+  <div class="hl-box" style="margin-top: 16px;">
+    김태윤: 1순위 <strong>#01 Whitespace Cathedral</strong> 그대로 채택 → '미니멀·텍스트 중심', 분석적 PM과 정확히 맞음.
+  </div>
+</section>
+
+<!-- SLIDE 16 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 16 · MATCHING MATRIX</div>
+  <div class="title">디자인 매칭 매트릭스 사용법.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div>
+      <table class="matrix" style="font-size: 12px;">
+        <thead><tr><th>무드 \\ 컬러</th><th>모노크롬</th><th>뉴트럴</th><th>비비드</th><th>다크</th></tr></thead>
+        <tbody>
+          <tr><td>차분·신뢰감</td><td class="accent-cell">#01, #02</td><td>#03</td><td>—</td><td>#11</td></tr>
+          <tr><td>구조적·시스템</td><td>#04</td><td>—</td><td>—</td><td>#09</td></tr>
+          <tr><td>저널리스틱</td><td>#02, #07</td><td>#05</td><td>—</td><td>—</td></tr>
+          <tr><td>너드·해커</td><td>—</td><td>—</td><td>—</td><td>#09, #10, #11</td></tr>
+          <tr><td>실험·거칠음</td><td>—</td><td>—</td><td>#12, #13</td><td>—</td></tr>
+          <tr><td>친근·협업적</td><td>—</td><td>#15</td><td>#15</td><td>—</td></tr>
+          <tr><td>활기·미래</td><td>—</td><td>—</td><td>#16</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="caption mono">빠른 의사결정 3 질문</div>
+      <ol style="margin-top: 12px; padding-left: 24px; font-size: 14px; line-height: 1.9;">
+        <li><strong>이미지 자료가 있는가?</strong><br><span class="caption">있음 → #03·#06·#08·#18 / 없음 → #01·#02·#07·#09·#11·#17</span></li>
+        <li><strong>첫인상은 무게감 vs 친근감?</strong><br><span class="caption">무게감 → #14·#17·#18 / 친근감 → #03·#15·#16</span></li>
+        <li><strong>개발·기술직 신호가 필요한가?</strong><br><span class="caption">필요 → #09·#10·#11·#20 / 불필요 → 나머지</span></li>
+      </ol>
+      <div class="hl-box" style="margin-top: 16px; font-size: 12px;">
+        김태윤: 이미지 X / 무게감 / 기술 신호 절반 → <strong>#01</strong>로 자연스럽게 떨어짐.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 17 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 17 · FACE vs BODY</div>
+  <div class="title">경험 정리, 왜 다시 정제하나.</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card" style="opacity:0.7;">
+      <div style="font-size:48px; text-align:center;">😊</div>
+      <div style="font-size: 22px; font-weight: 600; margin-top: 12px; text-align:center;">얼굴 (브랜딩)</div>
+      <div class="body" style="margin-top: 12px; text-align: center;" class="muted">
+        브랜드 키 + 디자인 템플릿<br><span class="caption">→ 완성</span>
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div style="font-size:48px; text-align:center;">💪</div>
+      <div style="font-size: 22px; font-weight: 600; margin-top: 12px; text-align:center;">몸통 (콘텐츠)</div>
+      <div class="body" style="margin-top: 12px; text-align: center;">
+        프로젝트 본문 텍스트<br><span class="caption">→ 지금부터 작업</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; text-align: center; font-size: 22px; font-weight: 600;">사이트의 <strong class="accent">80%</strong>는 결국 프로젝트 본문이 채운다.</div>
+  <div style="margin-top: 24px; padding: 18px; background: var(--surface); border-radius: 8px; font-size: 14px;" class="muted">
+    가져오신 경험 정리본, 사실 그대로는 못 씁니다. 줄글로 돼 있어서 웹 스크롤 흐름이랑 안 맞고, 인사담당자는 솔직히 그 줄글을 끝까지 읽지 않습니다.
+  </div>
+</section>
+
+<!-- SLIDE 18 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 18 · STAR FRAMEWORK</div>
+  <div class="title">STAR 프레임워크.</div>
+  <div class="grid-4" style="margin-top: 32px; gap: 16px;">
+    <div class="card" style="border-color: var(--blue);">
+      <span class="star-tag tag-s">S — Situation</span>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px;">상황</div>
+      <div class="caption" style="margin-top: 8px;">시장·조직·사용자 맥락</div>
+    </div>
+    <div class="card" style="border-color: var(--orange);">
+      <span class="star-tag tag-t">T — Task</span>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px;">과제</div>
+      <div class="caption" style="margin-top: 8px;">내가 풀어야 했던 문제</div>
+    </div>
+    <div class="card" style="border-color: var(--green);">
+      <span class="star-tag tag-a">A — Action</span>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px;">행동</div>
+      <div class="caption" style="margin-top: 8px;">방법론 + 사용 툴</div>
+    </div>
+    <div class="card" style="border-color: var(--red);">
+      <span class="star-tag tag-r">R — Result</span>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px;">성과</div>
+      <div class="caption" style="margin-top: 8px;">정량적 지표 + 정성적 변화</div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; text-align: center; font-size: 16px;" class="muted">
+    면접관·인사담당자가 머릿속에서 자동으로 던지는 <strong style="color:var(--text);">4가지 질문</strong>.
+  </div>
+</section>
+
+<!-- SLIDE 19 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 19 · STAR EXAMPLE</div>
+  <div class="title">김태윤 RoomSync — Before / After.</div>
+  <div class="grid-2" style="margin-top: 20px;">
+    <div class="card">
+      <div class="caption mono">BEFORE — 줄글 원본</div>
+      <div style="margin-top: 12px; font-size: 13px; line-height: 1.7;" class="muted">
+        학내 50여 개 동아리가 공용 회의실을 수기로 예약하면서 겹침 사고가 빈번히 발생했습니다. 저는 팀을 꾸려 구글 폼 설문으로 '실시간 예약 현황 확인'이 가장 큰 니즈임을 데이터로 확인했고… (중략)… 한 달 만에 학내 30개 동아리가 가입했고, 노쇼 비율이 60% 감소하는 성과를 냈습니다.
+      </div>
+    </div>
+    <div class="card">
+      <div class="caption mono">AFTER — STAR 4블록</div>
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+        <div><span class="star-tag tag-s">S</span> <span style="margin-left:8px;">학내 50개 동아리 수기 예약 → 겹침 빈발</span></div>
+        <div><span class="star-tag tag-t">T</span> <span style="margin-left:8px;">백엔드 2인과 짧은 기간에 실시간 MVP 출시</span></div>
+        <div><span class="star-tag tag-a">A</span> <span style="margin-left:8px;">설문 검증 + MVP 스코프 + Jira 스크럼 리드</span></div>
+        <div><span class="star-tag tag-r">R</span> <span style="margin-left:8px;"><strong>한 달 30개 가입 / 노쇼율 60% 감소</strong></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 24px; text-align: center;">
+    같은 정보, 다른 구조 — <strong>한 글자도 안 줄였다</strong>.
+  </div>
+</section>
+
+<!-- SLIDE 20 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 20 · MEGA PROMPT ②</div>
+  <div class="title">경험 원본 → STAR 변환.</div>
+  <div class="subtitle">정보 손실 금지 강제 — 수치·고유명사·맥락 한 글자도 누락 X.</div>
+  <pre class="code" style="margin-top: 16px;"><button class="copy-btn" onclick="copyCode(this)">COPY</button>너는 글로벌 빅테크 채용 디렉터이자, 후보자의 경험을 면접관이 가장 매력적으로
+읽도록 정제해 온 커리어 코치야.
+
+내가 제공하는 [경험 원본 텍스트]를 STAR 프레임워크 4블록으로 재정렬해줘.
+원본의 모든 정보(수치, 고유명사, 맥락, 사용 툴)는 한 글자도 누락하지 말고,
+오직 '구조'만 STAR로 바꿔.
+
+[입력: 경험 원본]
+(여기에 프로젝트 회고나 자소서 줄글 그대로 1~3개 붙여넣기)
+
+[출력 양식 — 프로젝트마다 정확히 이 구조로]
+■ [프로젝트 제목 — 직관적이고 가치 중심]
+- 기간:
+- 역할:
+- 사용 툴 / 기술:
+
+🟦 Situation (상황) — 시장/조직/사용자 맥락, 구체적 수치 포함 2~3문장
+🟧 Task (해결할 과제) — 내가 풀어야 했던 문제, 1~2문장 단호하게
+🟩 Action (나의 행동) — 우선순위 순으로 3~4개 (개조식), 툴/방법론 명시
+🟥 Result (성과) — 정량 지표 + Before/After + 정성적 변화
+
+[작성 규칙]
+- 모든 출력 한국어, 비즈니스 톤.
+- 원본에 없는 수치 임의 생성 금지.
+- 출력 양식의 이모지·번호·순서 그대로 유지.</pre>
+</section>
+
+<!-- SLIDE 21 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 21 · STAR ↔ UI MAPPING</div>
+  <div class="title">STAR 4블록 = UI 4구획.</div>
+  <table class="matrix" style="margin-top: 28px;">
+    <thead><tr><th>STAR</th><th>매핑되는 UI 블록</th><th>시각 처리</th><th>비주얼 무게</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="star-tag tag-s">Situation</span></td>
+        <td><strong>[B] Background</strong> 인용 박스</td>
+        <td>회색 박스 + 키 데이터 큰 숫자</td>
+        <td class="muted">작게</td>
+      </tr>
+      <tr>
+        <td><span class="star-tag tag-t">Task</span></td>
+        <td><strong>[C] Challenge</strong> 헤드라인</td>
+        <td>액센트 컬러 한 줄 카피</td>
+        <td class="accent-cell">크게</td>
+      </tr>
+      <tr>
+        <td><span class="star-tag tag-a">Action</span></td>
+        <td><strong>[D] Approach</strong> 3단 카드</td>
+        <td>가로 카드 3장 + 툴 태그</td>
+        <td>중간</td>
+      </tr>
+      <tr>
+        <td><span class="star-tag tag-r">Result</span></td>
+        <td><strong>[E] Impact</strong> 메트릭</td>
+        <td>Before/After 큰 숫자 카운터</td>
+        <td class="accent-cell"><strong>가장 크게</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="margin-top: 28px; text-align: center;" class="body">3개 프로젝트가 같은 4구획으로 깔리면 그 자체가 <strong>'시스템'</strong>으로 보인다.</div>
+</section>
+
+<!-- SLIDE 22 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 22 · MEGA PROMPT ③</div>
+  <div class="title">STAR → 본문 7블록 변환.</div>
+  <div class="subtitle">한 번의 변환으로 프로젝트 상세 페이지 1장이 통째로 완성.</div>
+  <pre class="code" style="margin-top: 16px;"><button class="copy-btn" onclick="copyCode(this)">COPY</button>너는 Awwwards 수상 경력의 인터랙티브 디자이너이자 시니어 UX 라이터야.
+방금 STAR로 정리된 프로젝트 텍스트를, '프로젝트 상세 페이지 1장'에 그대로 얹을 수 있는
+웹 카피 블록 세트로 변환해줘.
+
+[입력: STAR 정리 결과] (앞 단계 ②에서 받은 4블록 통째로 — 1~3개 프로젝트)
+
+[출력 양식 — 프로젝트마다 정확히 이 7블록]
+[A] 페이지 헤더 — 한 줄 요약(20자) + 메타데이터(기간/역할/스킬/기여도)
+[B] Background — 회색 인용 박스 1~2문장 + 옆에 띄울 키 데이터 1개
+[C] Challenge — 액센트 컬러 헤드라인(15자) + 서브 문장 1줄
+[D] Approach — 3단 카드 (단계명 10자 + 본문 2문장 + 툴 태그 2~3개)
+[E] Impact — Before/After 핵심 지표 3개 (큰 숫자 출력용)
+[F] Retrospective — 인사이트 2~3문장 (성숙한 톤, 다음 액션)
+[G] 메인 페이지 카드용 요약 — 카드 카피 40자 + 키워드 3개 해시태그
+
+[작성 규칙]
+- 한국어, 비즈니스 톤. 미사여구·감탄형 어미 금지.
+- STAR에 없는 정보 새로 만들지 말 것. 톤·구조만 바꿀 것.
+- [A]~[G] 라벨 순서 그대로 유지.</pre>
+</section>
+
+<!-- SLIDE 23 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 23 · PART 1 WRAP-UP</div>
+  <div class="title">손에 든 자산 3장.</div>
+  <div class="subtitle">이 세 가지가 Part 2에서 단일 HTML로 합쳐진다.</div>
+  <div class="grid-3" style="margin-top: 32px;">
+    <div class="card">
+      <div class="caption mono">자산 1</div>
+      <div style="font-size: 22px; font-weight: 700; margin-top: 12px;">브랜드 키 1장</div>
+      <div class="caption" style="margin-top: 12px;">페르소나 · 무드 3 · Hero 카피 · 태그 · 추천 디자인</div>
+    </div>
+    <div class="card">
+      <div class="caption mono">자산 2</div>
+      <div style="font-size: 22px; font-weight: 700; margin-top: 12px;">선택 디자인 1종</div>
+      <div class="caption" style="margin-top: 12px;">예: <strong style="color:var(--text);">#01 Whitespace Cathedral</strong> + 프롬프트 전문</div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">자산 3</div>
+      <div style="font-size: 22px; font-weight: 700; margin-top: 12px;">본문 7블록 ×3</div>
+      <div class="caption" style="margin-top: 12px;">[A]~[G] 7블록 × 프로젝트 3개</div>
+    </div>
+  </div>
+  <div style="margin-top: 40px; padding: 20px; background: var(--surface); border-radius: 8px; text-align: center;" class="mono body">
+    잠깐 쉬고 Part 2 — 바이브 코딩으로 만납니다.
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- PART 2 · 바이브 코딩 -->
+<!-- ====================================================== -->
+
+<!-- SLIDE 24 -->
+<section class="slide chapter-cover">
+  <div style="margin-top: 40px;">
+    <div class="chapter-num">PART 2 / 03 · 65분</div>
+    <div class="chapter-title">STEP 2.<br>바이브<br>코딩.</div>
+    <div class="subtitle" style="margin-top: 36px; max-width: 720px;">Part 1 자산 3장 → 단일 HTML 한 파일.</div>
+  </div>
+</section>
+
+<!-- SLIDE 25 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 25 · HOW THE WEB WORKS</div>
+  <div class="title">웹이 화면에 보이는 원리.</div>
+  <div style="margin-top: 48px; display: flex; gap: 16px; align-items: center;">
+    <div class="diagram-box">
+      <div style="font-size: 36px;">💻</div>
+      <div style="font-size: 14px; margin-top: 12px; font-weight: 600;">내 노트북</div>
+      <div class="caption mono" style="margin-top: 6px;">index.html</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="diagram-box">
+      <div style="font-size: 36px;">🌐</div>
+      <div style="font-size: 14px; margin-top: 12px; font-weight: 600;">브라우저</div>
+      <div class="caption" style="margin-top: 6px;">코드 해석</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="diagram-box card-tinted">
+      <div style="font-size: 36px;">🖼️</div>
+      <div style="font-size: 14px; margin-top: 12px; font-weight: 600;">화면 픽셀</div>
+      <div class="caption accent" style="margin-top: 6px;">렌더링</div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 40px;">
+    GitHub Pages = 이 index.html 파일을 24시간 인터넷에 띄워주는 서비스
+  </div>
+  <div style="margin-top: 28px; text-align: center; font-size: 20px;" class="body">결국 우리가 만드는 건 <strong>.html 파일 하나</strong>.</div>
+</section>
+
+<!-- SLIDE 26 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 26 · HTML CSS JS</div>
+  <div class="title">HTML · CSS · JS 역할 분담.</div>
+  <div class="grid-3" style="margin-top: 40px;">
+    <div class="card">
+      <div style="font-size: 36px; text-align: center;">🦴</div>
+      <div style="font-size: 24px; font-weight: 700; margin-top: 16px; text-align: center;">HTML</div>
+      <div class="caption" style="text-align: center; margin-top: 4px;">뼈대 · 구조</div>
+      <div class="body" style="margin-top: 16px; font-size: 14px;">어디에 무엇이 있는가<br>제목, 문단, 버튼, 이미지</div>
+    </div>
+    <div class="card">
+      <div style="font-size: 36px; text-align: center;">👔</div>
+      <div style="font-size: 24px; font-weight: 700; margin-top: 16px; text-align: center;">CSS</div>
+      <div class="caption" style="text-align: center; margin-top: 4px;">옷 · 디자인</div>
+      <div class="body" style="margin-top: 16px; font-size: 14px;">어떻게 보이는가<br>색, 폰트, 여백, 레이아웃</div>
+    </div>
+    <div class="card">
+      <div style="font-size: 36px; text-align: center;">⚡</div>
+      <div style="font-size: 24px; font-weight: 700; margin-top: 16px; text-align: center;">JS</div>
+      <div class="caption" style="text-align: center; margin-top: 4px;">행동 · 인터랙션</div>
+      <div class="body" style="margin-top: 16px; font-size: 14px;">어떻게 반응하는가<br>버튼 클릭, 페이지 전환, 애니메이션</div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 32px; text-align: center;">
+    단일 index.html 안에 셋이 모두 <strong>인라인</strong>으로 들어간다 — GitHub Pages 업로드를 가장 쉽게 만들기 위해.
+  </div>
+</section>
+
+<!-- SLIDE 27 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 27 · 4-PAGE STRUCTURE</div>
+  <div class="title">우리가 만들 4페이지 구조.</div>
+  <div style="margin-top: 28px;">
+    <div class="card" style="background: var(--accent-soft); border-color: var(--accent);">
+      <div class="caption mono accent">MAIN PAGE · #main</div>
+      <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <span class="pill pill-accent">Hero</span>
+        <span class="pill pill-accent">About</span>
+        <span class="pill pill-accent">프로젝트 카드 ×3</span>
+        <span class="pill pill-accent">Contact</span>
+      </div>
+    </div>
+    <div style="text-align: center; margin: 16px 0; font-size: 24px;" class="accent">↓ 카드 클릭 시 라우팅</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="caption mono">#project-1</div>
+        <div style="font-size: 12px; margin-top: 10px; line-height: 1.9;">
+          [A] 헤더<br>[B] Background<br>[C] Challenge<br>[D] Approach<br>[E] Impact<br>[F] Retrospective
+        </div>
+      </div>
+      <div class="card">
+        <div class="caption mono">#project-2</div>
+        <div style="font-size: 12px; margin-top: 10px; line-height: 1.9;">
+          [A] 헤더<br>[B] Background<br>[C] Challenge<br>[D] Approach<br>[E] Impact<br>[F] Retrospective
+        </div>
+      </div>
+      <div class="card">
+        <div class="caption mono">#project-3</div>
+        <div style="font-size: 12px; margin-top: 10px; line-height: 1.9;">
+          [A] 헤더<br>[B] Background<br>[C] Challenge<br>[D] Approach<br>[E] Impact<br>[F] Retrospective
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 24px;">
+    한 파일, 4페이지 경험 — 단일 index.html 안에서 JS로 섹션 show/hide + URL 해시 라우팅 + 브라우저 뒤로가기 정상 동작
+  </div>
+</section>
+
+<!-- SLIDE 28 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 28 · MEGA PROMPT ④</div>
+  <div class="title">4페이지 개발 명세 (디자인 템플릿 임베드).</div>
+  <pre class="code" style="margin-top: 16px;"><button class="copy-btn" onclick="copyCode(this)">COPY</button>너는 시니어 프론트엔드 엔지니어야.
+다음 세 가지를 결합해서 단일 index.html 한 파일을 만들어줘.
+
+═══════════════════════════════════════
+[A] 디자인 템플릿 — 컬러·폰트·레이아웃·인터랙션 100% 이 결을 따른다
+═══════════════════════════════════════
+(여기에 design.md에서 고른 1종 디자인 프롬프트 전문을 통째로 붙여넣기)
+
+═══════════════════════════════════════
+[B] 4페이지 구조
+═══════════════════════════════════════
+1) MAIN PAGE (#main): Hero + About + 프로젝트 카드 3 + Contact
+2) PROJECT DETAIL (#project-1, #project-2, #project-3) ×3장:
+   [A]헤더 → [B]Background → [C]Challenge → [D]Approach → [E]Impact → [F]Retrospective
+- 단일 HTML 안 JS 라우팅 + URL 해시 + 뒤로가기 지원
+
+═══════════════════════════════════════
+[C] 본문 데이터 (모든 텍스트 100% 한국어)
+═══════════════════════════════════════
+- Hero 메인/서브 카피, 퍼스널 태그, About 본문
+- 프로젝트 1~3 각각의 [A]~[G] 7블록 통째로
+
+═══════════════════════════════════════
+[D] 코드 출력 규칙
+═══════════════════════════════════════
+- 단일 HTML 1개, 외부 CSS/JS 분리 금지
+- Tailwind CDN + Google Fonts CDN
+- 줄임표("..." / "// 이하 동일") 금지
+- 길어 끊기면 "이어서 작성해 줘"로 받도록</pre>
+</section>
+
+<!-- SLIDE 29 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 29 · LINE-BY-LINE</div>
+  <div class="title">개발 명세 프롬프트 4구역 해설.</div>
+  <table class="matrix" style="margin-top: 28px;">
+    <thead><tr><th>구역</th><th>역할</th><th>왜 필요한가</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong class="accent">[A] 디자인 템플릿</strong></td>
+        <td>design.md 1종 프롬프트 통째 임베드</td>
+        <td>디자인 시스템 책임을 검증된 템플릿에 100% 위임</td>
+      </tr>
+      <tr>
+        <td><strong>[B] 4페이지 구조</strong></td>
+        <td>MAIN 1장 + DETAIL 3장 + 해시 라우팅 강제</td>
+        <td>AI가 빠뜨릴 수 있는 구조를 명시적으로 선언</td>
+      </tr>
+      <tr>
+        <td><strong class="accent">[C] 본문 데이터</strong></td>
+        <td>Hero 카피 + About + 7블록 ×3</td>
+        <td>콘텐츠를 데이터로 깔끔히 주입 (디자인과 분리)</td>
+      </tr>
+      <tr>
+        <td><strong>[D] 출력 규칙</strong></td>
+        <td>단일 HTML / 한국어 / 줄임표 금지 / 이어쓰기</td>
+        <td>AI의 가장 흔한 실패(중간 생략)를 사전 차단</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="hl-box" style="margin-top: 24px;">
+    핵심은 [A]와 [C]가 <strong>완전히 분리</strong>돼 있다는 점. 디자인은 [A]가, 콘텐츠는 [C]가 책임. 둘이 안 섞임.
+  </div>
+</section>
+
+<!-- SLIDE 30 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 30 · RUN IT</div>
+  <div class="title">Gemini AI Studio에서 실행.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card" style="background: var(--surface);">
+      <div class="caption mono">aistudio.google.com</div>
+      <div style="margin-top: 16px; padding: 16px; background: #FFFFFF; border: 1px solid var(--hairline); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; color: var(--muted);">
+        > 너는 시니어 프론트엔드 엔지니어야.<br>
+        > 다음 세 가지를 결합해서 단일 index.html…<br>
+        > <span class="accent">[프롬프트 ④ 통째 붙여넣기]</span>
+      </div>
+      <button style="margin-top: 12px; padding: 8px 18px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600;">▶ Run</button>
+    </div>
+    <div class="card">
+      <div class="caption mono">우측 패널 — 사전 확인</div>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 14px; font-size: 14px;">
+        <div>✅ Model: <strong>최신 Gemini Pro 계열</strong></div>
+        <div>✅ Output length: <strong class="accent">최대치</strong> ⚠️</div>
+        <div>✅ Safety settings: <strong>Block none</strong></div>
+        <div>✅ Temperature: 0.7~1.0</div>
+      </div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 28px; background: rgba(248,113,113,0.08); border-color: var(--red);">
+    ⚠️ Output length가 짧으면 우리 단일 HTML 코드가 중간에 잘립니다. 반드시 <strong>최대치</strong> 확인.
+  </div>
+  <div style="margin-top: 20px; text-align: center;" class="caption">실행 후 1~3분 대기 → 결과 출력</div>
+</section>
+
+<!-- SLIDE 31 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 31 · COMMON PROBLEMS</div>
+  <div class="title">자주 나오는 문제 3종 + 대응.</div>
+  <div class="grid-3" style="margin-top: 24px;">
+    <div class="card" style="border-color: var(--red);">
+      <div style="font-size: 32px;">🔴</div>
+      <div style="font-size: 18px; font-weight: 700; margin-top: 12px;">1. 출력이 중간에 끊김</div>
+      <div class="caption" style="margin-top: 8px;">증상: HTML 코드가 &lt;/main&gt; 직전에 멈춤</div>
+      <div style="margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px;">이어서 작성해 줘</div>
+    </div>
+    <div class="card" style="border-color: var(--orange);">
+      <div style="font-size: 32px;">🟡</div>
+      <div style="font-size: 18px; font-weight: 700; margin-top: 12px;">2. 한국어가 영어로 나옴</div>
+      <div class="caption" style="margin-top: 8px;">증상: "Projects", "About" 영어 라벨</div>
+      <div style="margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">모든 사용자 노출 텍스트를<br>한국어로 다시 출력해 줘.<br>영문 라벨도 의역.</div>
+    </div>
+    <div class="card" style="border-color: var(--green);">
+      <div style="font-size: 32px;">🟢</div>
+      <div style="font-size: 18px; font-weight: 700; margin-top: 12px;">3. 인터랙션 누락</div>
+      <div class="caption" style="margin-top: 8px;">증상: 카드 클릭해도 페이지 전환 X</div>
+      <div style="margin-top: 16px; padding: 12px; background: var(--bg); border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">JS 해시 라우팅이 빠짐.<br>#main ↔ #project-n<br>페이지 전환 추가해 줘.</div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; text-align: center;" class="caption">이 3종은 한 번씩 다 만나신다고 보시면 됩니다. 당황하지 말고 한 줄짜리 후속 프롬프트로 해결.</div>
+</section>
+
+<!-- SLIDE 32 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 32 · EXERCISE 2</div>
+  <div class="title">미세 수정 명령어 5종 패턴.</div>
+  <table class="matrix" style="margin-top: 28px;">
+    <thead><tr><th>의도</th><th>프롬프트 예시</th></tr></thead>
+    <tbody>
+      <tr><td><strong>컬러 변경</strong></td><td class="mono" style="font-size:12px;">[E] Impact 섹션의 큰 숫자 색을 #2563EB로 바꿔 줘</td></tr>
+      <tr><td><strong>레이아웃 변경</strong></td><td class="mono" style="font-size:12px;">메인 페이지의 프로젝트 카드를 1열에서 가로 3열로 바꿔 줘</td></tr>
+      <tr><td><strong>텍스트 수정</strong></td><td class="mono" style="font-size:12px;">프로젝트 1의 [C] Challenge 헤드라인을 "병목을 끊는 한 줄"로 바꿔 줘</td></tr>
+      <tr><td><strong>인터랙션 추가</strong></td><td class="mono" style="font-size:12px;">메인 페이지 카드에 호버 시 4px 위로 떠오르는 모션 추가</td></tr>
+      <tr><td><strong>모바일 보정</strong></td><td class="mono" style="font-size:12px;">모바일 360px 이하에서 Hero 카피 폰트를 한 단계 축소</td></tr>
+    </tbody>
+  </table>
+  <div class="hl-box" style="margin-top: 24px;">
+    한 번에 한 가지만 요청. '컬러도 바꾸고 레이아웃도 바꾸고…' 이렇게 한 번에 던지면 AI가 헷갈립니다.
+  </div>
+</section>
+
+<!-- SLIDE 33 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 33 · MOBILE CHECK</div>
+  <div class="title">모바일 확인 (Chrome DevTools).</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card">
+      <div class="caption mono">Step 1. DevTools 열기</div>
+      <div class="body" style="margin-top: 12px; font-size: 14px;">
+        Chrome 브라우저에서<br>
+        Windows: <kbd style="background:var(--surface-2);padding:2px 6px;border-radius:3px;border:1px solid var(--hairline);">F12</kbd><br>
+        Mac: <kbd style="background:var(--surface-2);padding:2px 6px;border-radius:3px;border:1px solid var(--hairline);">Cmd + Opt + I</kbd>
+      </div>
+    </div>
+    <div class="card">
+      <div class="caption mono">Step 2. 디바이스 토글</div>
+      <div class="body" style="margin-top: 12px; font-size: 14px;">
+        DevTools 좌상단 📱 아이콘 클릭<br>
+        디바이스 선택: <strong>iPhone 14 Pro</strong> / <strong>갤럭시 S20+</strong>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 20px;">
+    <div class="caption mono">자주 깨지는 부분 체크</div>
+    <ul style="margin-top: 12px; padding-left: 24px; font-size: 14px; line-height: 1.9;">
+      <li>Hero 메인 카피가 두 줄로 잘리는가</li>
+      <li>프로젝트 카드가 화면 밖으로 튀어나오는가</li>
+      <li>Impact 메트릭의 큰 숫자가 옆 카드와 겹치는가</li>
+      <li>버튼·링크의 탭 영역이 충분히 큰가 (최소 44×44px)</li>
+    </ul>
+  </div>
+  <div class="hl-box" style="margin-top: 20px;">
+    깨지는 부분 발견 → SLIDE 32의 <strong>5번 모바일 보정 패턴</strong>으로 수정
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- PART 3 · 배포 -->
+<!-- ====================================================== -->
+
+<!-- SLIDE 34 -->
+<section class="slide chapter-cover">
+  <div style="margin-top: 40px;">
+    <div class="chapter-num">PART 3 / 03 · 25분</div>
+    <div class="chapter-title">STEP 3.<br>배포.</div>
+    <div class="subtitle" style="margin-top: 36px; max-width: 720px;">내 노트북의 index.html → 세상의 URL.</div>
+  </div>
+</section>
+
+<!-- SLIDE 35 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 35 · HOSTING METAPHOR</div>
+  <div class="title">서버·호스팅 개념.</div>
+  <div class="subtitle">24시간 켜져 있는 남의 컴퓨터.</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card">
+      <div style="font-size: 36px; text-align: center;">💻</div>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px; text-align: center;">내 노트북</div>
+      <div class="body" style="margin-top: 12px; text-align: center; font-size: 14px;" class="muted">꺼지면 사이트도 꺼짐<br>나만 볼 수 있음</div>
+    </div>
+    <div class="card card-tinted">
+      <div style="font-size: 36px; text-align: center;">🏢</div>
+      <div style="font-size: 18px; font-weight: 600; margin-top: 12px; text-align: center;">서버 (= 24시간 켜진 남의 컴퓨터)</div>
+      <div class="body" style="margin-top: 12px; text-align: center; font-size: 14px;">언제나 켜져 있음<br>URL로 누구나 접속</div>
+    </div>
+  </div>
+  <div style="margin-top: 28px; text-align: center;" class="body">
+    호스팅 = 내 index.html을 <strong>저 서버에 올려 두는 것</strong>.
+  </div>
+  <div class="hl-box" style="margin-top: 24px;">
+    <strong>정적 호스팅</strong> (HTML/CSS/JS만) vs 동적 호스팅 (DB·서버 코드 포함) — 포트폴리오는 정적이면 충분. <strong>무료.</strong>
+  </div>
+</section>
+
+<!-- SLIDE 36 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 36 · GITHUB PAGES FLOW</div>
+  <div class="title">GitHub Pages 흐름.</div>
+  <div style="margin-top: 40px; display: flex; gap: 12px; align-items: center;">
+    <div class="diagram-box" style="font-size: 12px;">
+      <div style="font-size: 28px;">💻</div>
+      <div style="font-weight: 600; margin-top: 8px;">내 노트북</div>
+      <div class="caption mono" style="margin-top: 4px;">index.html</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="diagram-box" style="font-size: 12px;">
+      <div style="font-size: 28px;">📦</div>
+      <div style="font-weight: 600; margin-top: 8px;">GitHub<br>Repository</div>
+      <div class="caption" style="margin-top: 4px;">파일 업로드</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="diagram-box" style="font-size: 12px;">
+      <div style="font-size: 28px;">🌐</div>
+      <div style="font-weight: 600; margin-top: 8px;">GitHub<br>Pages</div>
+      <div class="caption" style="margin-top: 4px;">Settings 활성화</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="diagram-box card-tinted" style="font-size: 12px;">
+      <div style="font-size: 28px;">🚀</div>
+      <div style="font-weight: 600; margin-top: 8px;">전 세계 누구나</div>
+      <div class="caption mono accent" style="margin-top: 4px;">https://<br>(아이디).github.io</div>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 32px;">
+    <strong>코드 저장소가 그대로 웹사이트가 된다</strong> — GitHub Pages만의 강점.<br>
+    <span class="caption">+ 버전 관리 자동 + 코드 자산으로 남음 = '개발자스러운 포트폴리오'</span>
+  </div>
+</section>
+
+<!-- SLIDE 37 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 37 · EXERCISE 3 · 15MIN</div>
+  <div class="title">GitHub Pages Step-by-Step.</div>
+  <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+    <div class="card">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="persona-mono" style="width: 36px; height: 36px; font-size: 14px;">1</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">GitHub 회원가입·로그인</div>
+          <div class="caption" style="margin-top: 4px;">github.com → Sign up. <strong style="color:var(--red);">사용자명이 곧 URL이 됩니다.</strong> 예: taeyoonkim → https://taeyoonkim.github.io</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="persona-mono" style="width: 36px; height: 36px; font-size: 14px;">2</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">New Repository 생성</div>
+          <div class="caption" style="margin-top: 4px;">우측 상단 + → New repository. Repository name: <strong class="accent mono">(사용자명).github.io</strong> ← 정확히 이 규칙. Public 체크 → Create.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="persona-mono" style="width: 36px; height: 36px; font-size: 14px;">3</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">index.html 업로드</div>
+          <div class="caption" style="margin-top: 4px;">Add file → Upload files → Gemini에서 받은 <strong class="mono">index.html</strong> 드래그앤드롭 → Commit changes.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="persona-mono" style="width: 36px; height: 36px; font-size: 14px;">4</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">Pages 활성화</div>
+          <div class="caption" style="margin-top: 4px;">상단 Settings → 좌측 Pages → Source: Deploy from a branch → Branch: <strong class="mono">main</strong> / 폴더 <strong class="mono">/ (root)</strong> → Save.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="persona-mono" style="width: 36px; height: 36px; font-size: 14px;">5</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600;">라이브 확인</div>
+          <div class="caption" style="margin-top: 4px;">1~2분 대기 → Settings → Pages 화면에 <strong class="accent mono">초록색 URL 박스</strong> 출현 → 클릭하면 본인 사이트가 진짜로 열림 🎉</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 38 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 38 · MOBILE QR + TROUBLESHOOT</div>
+  <div class="title">모바일 QR 접속 + 트러블슈팅.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div style="width: 160px; height: 160px; background: #0A0A0A; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 80px;">📱</div>
+      <div class="caption mono" style="margin-top: 16px;">본인 URL을 QR로 변환</div>
+      <div class="caption" style="margin-top: 4px;">qrcode.kr 또는 Chrome 주소창 우측 QR 아이콘</div>
+    </div>
+    <div>
+      <table class="matrix" style="font-size: 12px;">
+        <thead><tr><th>증상</th><th>원인 + 해결</th></tr></thead>
+        <tbody>
+          <tr><td><strong>404 Not Found</strong></td><td>Pages 빌드 진행 중 → 2분 대기 후 새로고침</td></tr>
+          <tr><td><strong>흰 화면만 뜸</strong></td><td>파일명이 정확히 <span class="mono">index.html</span>인지 확인 (대소문자)</td></tr>
+          <tr><td><strong>CSS 빠짐</strong></td><td>Tailwind CDN 링크 잘림 → &lt;script src=…&gt; 확인</td></tr>
+          <tr><td><strong>폰트 깨짐</strong></td><td>Google Fonts CDN 누락 → &lt;link&gt; 태그 재추가</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="hl-box" style="margin-top: 28px;">
+    URL을 QR로 만들어 핸드폰으로 직접 열어 보세요. 친구·면접관도 결국 <strong>모바일에서 먼저</strong> 열어 봅니다.
+  </div>
+</section>
+
+<!-- ====================================================== -->
+<!-- OUTRO -->
+<!-- ====================================================== -->
+
+<!-- SLIDE 39 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 39 · GALLERY WALK</div>
+  <div class="title">서로 URL 공유하기.</div>
+  <div class="subtitle">옆 사람의 사이트를 직접 열어 보고, 그 반응이 가장 정확한 피드백입니다.</div>
+  <div class="grid-2" style="margin-top: 32px;">
+    <div class="card">
+      <div class="caption mono">단톡방 / 구글 시트</div>
+      <div style="margin-top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 2;" class="muted">
+        김태윤 · https://taeyoonkim.github.io<br>
+        박서연 · https://seoyeonpark.github.io<br>
+        최민호 · https://minhochoi.github.io<br>
+        정수민 · https://suminjung.github.io<br>
+        … (모든 수강생 URL)
+      </div>
+    </div>
+    <div class="card card-tinted">
+      <div class="caption mono accent">상호 피드백 3 질문</div>
+      <ol style="margin-top: 16px; padding-left: 24px; font-size: 15px; line-height: 1.9;">
+        <li>첫인상이 이 사람의 정체성과 일치하는가?</li>
+        <li>모바일에서도 멀쩡한가?</li>
+        <li>프로젝트 카드 클릭하면 내용이 잘 읽히는가?</li>
+      </ol>
+    </div>
+  </div>
+  <div style="margin-top: 28px; text-align: center;" class="body">한 사람당 1분 · 옆 옆 사람까지 3명 보고 본인에게 받은 피드백 1줄 메모.</div>
+</section>
+
+<!-- SLIDE 40 -->
+<section class="slide">
+  <div class="eyebrow">SLIDE 40 · WRAP-UP</div>
+  <div class="title">유지보수 가이드 + 마무리.</div>
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card">
+      <div class="caption mono">강의 후 유지보수 4가지</div>
+      <ol style="margin-top: 16px; padding-left: 24px; font-size: 13px; line-height: 1.85;">
+        <li><strong>텍스트 수정</strong> · GitHub 웹 에디터에서 index.html 직접 편집 → Commit (1분 후 반영)</li>
+        <li><strong>디자인 수정</strong> · 같은 Gemini 세션에서 부분 수정 프롬프트 (SLIDE 32 5종 패턴)</li>
+        <li><strong>프로젝트 추가</strong> · "프로젝트 4를 추가해 줘. 7블록: ..." → 자동으로 #project-4 라우팅 생성</li>
+        <li><strong>도메인 연결</strong> · 가비아·후이즈 도메인 구매 → Settings → Pages → Custom domain</li>
+      </ol>
+    </div>
+    <div class="card card-tinted" style="display: flex; flex-direction: column; justify-content: center;">
+      <div class="caption mono accent">CLOSING</div>
+      <div class="body" style="margin-top: 16px; font-size: 18px; line-height: 1.6;">
+        결국 본질은 <strong>기술이 아니라</strong><br>
+        여러분의 <strong>문제 해결 경험</strong>입니다.<br><br>
+        오늘 만든 사이트는<br>
+        그 경험을 가장 잘 보여주는<br>
+        <strong class="accent">그릇</strong>일 뿐입니다.<br><br>
+        그릇이 완성됐으니,<br>
+        이제 여러분의 콘텐츠로 채워나가 주세요.
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; text-align: center; padding: 20px; background: var(--surface); border-radius: 8px;">
+    <div class="caption mono">만족도 조사 QR · Q&amp;A · 네트워킹</div>
+    <div style="margin-top: 12px; font-size: 18px; font-weight: 600;">수고하셨습니다 🙌</div>
+  </div>
+</section>
+
+</div>
+
+<div class="progress"><div class="progress-fill" id="progressFill" style="width: 2.5%;"></div></div>
+
+<div class="hint">
+  <kbd>←</kbd> <kbd>→</kbd> 슬라이드 이동
+  <span style="margin-left: 12px;"><kbd>F</kbd> 전체화면</span>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const slideNumEl = document.getElementById('slideNum');
+  const slideTotalEl = document.getElementById('slideTotal');
+  const progressFill = document.getElementById('progressFill');
+  let current = 0;
+
+  slideTotalEl.textContent = String(total).padStart(2, '0');
+
+  function show(i) {
+    if (i < 0 || i >= total) return;
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    slideNumEl.textContent = String(current + 1).padStart(2, '0');
+    progressFill.style.width = ((current + 1) / total * 100) + '%';
+    location.hash = 'slide-' + (current + 1);
+    slides[current].scrollTop = 0;
+  }
+
+  // Initial
+  function initFromHash() {
+    const m = location.hash.match(/slide-(\d+)/);
+    const start = m ? Math.max(0, Math.min(total - 1, parseInt(m[1]) - 1)) : 0;
+    slides[start].classList.add('active');
+    current = start;
+    slideNumEl.textContent = String(current + 1).padStart(2, '0');
+    progressFill.style.width = ((current + 1) / total * 100) + '%';
+  }
+  initFromHash();
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    switch (e.key) {
+      case 'ArrowRight':
+      case ' ':
+      case 'PageDown':
+        e.preventDefault();
+        show(current + 1);
+        break;
+      case 'ArrowLeft':
+      case 'PageUp':
+        e.preventDefault();
+        show(current - 1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        show(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        show(total - 1);
+        break;
+      case 'p':
+      case 'P':
+        document.body.classList.toggle('notes-on');
+        break;
+      case 'f':
+      case 'F':
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+        break;
+    }
+  });
+
+  window.addEventListener('hashchange', initFromHash);
+
+  // Copy button
+  function copyCode(btn) {
+    const pre = btn.parentElement;
+    const text = pre.innerText.replace(/^COPY\s*/, '');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'COPIED ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'COPY';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  }
+  window.copyCode = copyCode;
+</script>
+
+</body>
+</html>

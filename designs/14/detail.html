@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ROOMSYNC — CASE STUDY / 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#2A2A28;
+    --text:#F2F2F0;
+    --accent:#FF5800;
+    --secondary:#9C9C99;
+    --line:#9C9C9933;
+    --noise-opacity:0.05;
+  }
+  [data-theme="alt"]{
+    --bg:#F2F2F0;
+    --text:#2A2A28;
+    --accent:#FF5800;
+    --secondary:#6B6B68;
+    --line:#6B6B6833;
+    --noise-opacity:0.03;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important;}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter','Pretendard','Noto Sans KR',sans-serif;font-weight:400;-webkit-font-smoothing:antialiased;transition:background 200ms ease, color 200ms ease;}
+  body{overflow-x:hidden;cursor:none;}
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  @media (hover:none){
+    body{cursor:auto;}
+    .cursor{display:none;}
+    .theme-toggle{cursor:pointer;}
+  }
+
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:9000;
+    opacity:var(--noise-opacity);
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode:overlay;
+  }
+
+  .progress{
+    position:fixed;top:0;left:0;height:4px;width:0%;
+    background:var(--accent);z-index:9100;
+    transition:width 80ms linear;
+  }
+
+  .theme-toggle{
+    position:fixed;top:16px;right:16px;z-index:9200;
+    width:44px;height:44px;
+    background:var(--accent);
+    border:2px solid var(--accent);
+    cursor:none;
+    transition:background 200ms ease;
+  }
+  [data-theme="alt"] .theme-toggle{background:transparent;}
+  .theme-tooltip{
+    position:fixed;top:28px;right:72px;z-index:9200;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.1em;
+    color:var(--text);
+    opacity:0;transition:opacity 200ms ease;
+    pointer-events:none;
+  }
+  .theme-toggle:hover + .theme-tooltip{opacity:1;}
+
+  .cursor{
+    position:fixed;top:0;left:0;width:8px;height:8px;
+    background:var(--text);border-radius:50% !important;
+    pointer-events:none;z-index:9300;
+    transform:translate(-50%,-50%);
+    transition:width 180ms ease, height 180ms ease, background 180ms ease;
+    mix-blend-mode:difference;
+  }
+  .cursor.hover{
+    width:32px;height:32px;
+    background:var(--accent);
+    mix-blend-mode:normal;
+  }
+
+  /* Back nav */
+  .nav-top{
+    position:fixed;top:16px;left:16px;z-index:9000;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:0.15em;
+    color:var(--text);
+    text-transform:uppercase;
+    padding:12px 16px;
+    min-height:44px;display:inline-flex;align-items:center;gap:14px;
+    background:rgba(42,42,40,0.55);
+    backdrop-filter:blur(6px);
+  }
+  [data-theme="alt"] .nav-top{background:rgba(242,242,240,0.6);}
+  .nav-top a{display:inline-flex;align-items:center;}
+  .nav-top a:hover{color:var(--accent);}
+  .nav-top .sep{color:var(--secondary);}
+
+  /* HERO BLOCK */
+  .case-hero{
+    position:relative;
+    width:100vw;height:80vh;
+    overflow:hidden;
+    border-bottom:4px solid var(--accent);
+  }
+  .case-hero-img{
+    position:absolute;inset:0;
+    background-image:url("../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png");
+    background-size:cover;background-position:center;
+    transform:scale(1.15);
+    transition:transform 1800ms ease-out;
+  }
+  .case-hero.in .case-hero-img{transform:scale(1.0);}
+  .case-hero-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 30%, rgba(0,0,0,0.85) 100%);
+  }
+  .case-hero-meta-top{
+    position:absolute;top:88px;left:96px;right:96px;
+    display:flex;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;letter-spacing:0.12em;
+    color:#F2F2F0;
+    text-transform:uppercase;
+    z-index:3;
+  }
+  .case-hero-meta-top .tag{color:var(--accent);}
+
+  .case-hero-name{
+    position:absolute;bottom:48px;left:96px;
+    font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;
+    font-size:150px;line-height:0.8;
+    letter-spacing:-0.05em;
+    color:#F2F2F0;
+    text-transform:uppercase;
+    z-index:3;
+  }
+  .case-hero-name .word{display:block;overflow:hidden;}
+  .case-hero-name .word span{
+    display:inline-block;
+    transform:translateY(100%);
+    transition:transform 700ms cubic-bezier(0.2,0.8,0.2,1);
+  }
+  .case-hero.in .case-hero-name .word span{transform:translateY(0);}
+  .case-hero-name .accent{color:var(--accent);}
+
+  .case-hero-caption{
+    position:absolute;bottom:48px;right:96px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.12em;
+    color:var(--accent);
+    text-transform:uppercase;
+    z-index:3;
+  }
+
+  /* CASE SECTIONS */
+  .case{
+    position:relative;
+    padding:120px 96px;
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:80px;
+    border-bottom:4px solid var(--accent);
+  }
+  .case::before{
+    content:"";
+    position:absolute;top:0;left:376px;width:4px;height:0;
+    background:var(--accent);
+    transition:height 700ms ease-out;
+  }
+  .case.in::before{height:100%;}
+  .case-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;letter-spacing:0.15em;
+    color:var(--accent);
+    text-transform:uppercase;
+  }
+  .case-tag .num{display:block;font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;font-size:72px;color:var(--text);letter-spacing:-0.03em;line-height:1;margin-top:16px;}
+  .case-body h3{
+    font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;
+    font-size:56px;line-height:1;
+    letter-spacing:-0.03em;
+    text-transform:uppercase;
+    margin-bottom:40px;
+  }
+  .case-body h3 em{font-style:normal;color:var(--accent);}
+  .case-body p{
+    font-size:16px;line-height:1.7;
+    color:var(--text);
+    max-width:760px;
+    margin-bottom:24px;
+  }
+  .case-body .lead{
+    font-size:20px;line-height:1.5;
+    color:var(--secondary);
+    margin-bottom:32px;
+    max-width:760px;
+  }
+  .case-body ul{list-style:none;margin:16px 0 32px 0;max-width:760px;}
+  .case-body li{
+    font-size:15px;line-height:1.8;
+    padding:14px 0 14px 24px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    color:var(--text);
+  }
+  .case-body li::before{
+    content:"■";position:absolute;left:0;top:14px;
+    color:var(--accent);font-size:10px;
+  }
+  .case-body li strong{font-family:'JetBrains Mono',monospace;color:var(--accent);margin-right:12px;font-size:12px;letter-spacing:0.1em;}
+
+  /* Inline detail image */
+  .inline-img{
+    margin:32px 0 24px 0;
+    max-width:520px;
+    aspect-ratio:4/3;
+    background-size:cover;background-position:center;
+    position:relative;
+  }
+  .inline-img .cap{
+    position:absolute;bottom:-22px;left:0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.12em;
+    color:var(--secondary);
+    text-transform:uppercase;
+  }
+
+  /* Full-bleed media inside case */
+  .case-media{
+    position:relative;
+    width:100vw;height:50vh;
+    margin-left:calc(-96px - 280px - 80px);
+    margin-top:48px;margin-bottom:0;
+    overflow:hidden;
+    border-top:4px solid var(--accent);
+    border-bottom:4px solid var(--accent);
+  }
+  .case-media .bg{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    transform:scale(1.15);
+    transition:transform 1800ms ease-out;
+  }
+  .case-media.in .bg{transform:scale(1);}
+  .case-media .cap{
+    position:absolute;bottom:24px;left:96px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:0.12em;
+    color:#F2F2F0;
+    text-transform:uppercase;
+    z-index:2;
+  }
+  .case-media .metric{
+    position:absolute;top:32px;right:96px;
+    background:var(--accent);
+    color:#2A2A28;
+    padding:24px 32px;
+    z-index:2;
+  }
+  .case-media .metric .label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:0.15em;
+    text-transform:uppercase;
+    margin-bottom:8px;display:block;
+  }
+  .case-media .metric .value{
+    font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;
+    font-size:56px;line-height:0.9;
+    letter-spacing:-0.03em;
+  }
+
+  /* KEY METRIC BLOCK (full accent) */
+  .metric-block{
+    background:var(--accent);
+    color:#2A2A28;
+    padding:120px 96px;
+    border-bottom:4px solid #2A2A28;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:48px;
+  }
+  .metric-block .label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;letter-spacing:0.15em;
+    text-transform:uppercase;
+    margin-bottom:24px;
+    padding-bottom:12px;
+    border-bottom:2px solid #2A2A28;
+  }
+  .metric-block .value{
+    font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;
+    font-size:88px;line-height:0.9;
+    letter-spacing:-0.04em;
+  }
+  .metric-block .desc{
+    font-size:13px;line-height:1.5;
+    margin-top:16px;
+  }
+
+  /* NEXT */
+  .next{
+    position:relative;
+    width:100vw;height:50vh;
+    overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    border-bottom:4px solid var(--accent);
+  }
+  .next-img{
+    position:absolute;inset:0;
+    background-image:url("../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png");
+    background-size:cover;background-position:center;
+  }
+  .next-overlay{position:absolute;inset:0;background:rgba(42,42,40,0.55);}
+  .next a{
+    position:relative;z-index:2;
+    font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;
+    font-size:88px;line-height:0.95;
+    letter-spacing:-0.04em;
+    text-transform:uppercase;
+    color:#F2F2F0;
+    text-align:center;
+  }
+  .next a:hover{color:var(--accent);}
+  .next a .small{display:block;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.2em;color:var(--accent);margin-bottom:16px;}
+
+  /* FOOTER */
+  .footer{
+    padding:80px 96px 48px;
+    border-top:4px solid var(--accent);
+    display:flex;justify-content:space-between;align-items:flex-end;
+    flex-wrap:wrap;gap:24px;
+  }
+  .footer-left{font-family:'Oswald','Noto Sans KR',sans-serif;font-weight:500;font-size:42px;letter-spacing:-0.02em;text-transform:uppercase;}
+  .footer-left a:hover{color:var(--accent);}
+  .footer-meta{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;color:var(--secondary);text-transform:uppercase;text-align:right;line-height:1.8;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+    .case-hero-img,.case-media .bg{transform:scale(1);}
+    .case-hero-name .word span{transform:none;}
+    .case::before{height:100%;}
+  }
+
+  @media (max-width:900px){
+    .case-hero{height:auto;min-height:520px;padding:120px 0 24px;}
+    .case-hero-name{font-size:72px;left:20px;bottom:24px;right:20px;}
+    .case-hero-meta-top{left:20px;right:20px;top:72px;flex-direction:column;gap:6px;}
+    .case-hero-caption{right:20px;bottom:8px;}
+    .case{grid-template-columns:1fr;padding:56px 24px;gap:24px;}
+    .case::before{display:none;}
+    .case-tag .num{font-size:64px;}
+    .case-body h3{font-size:40px;}
+    .case-body p,.case-body .lead{max-width:100%;}
+    .case-body .lead{font-size:17px;}
+    .case-body ul{max-width:100%;}
+    .case-media{margin-left:-24px;width:100vw;height:40vh;min-height:280px;}
+    .case-media .metric{padding:16px 20px;right:20px;top:20px;}
+    .case-media .metric .value{font-size:48px;}
+    .case-media .cap{left:20px;font-size:10px;}
+    .metric-block{grid-template-columns:1fr;padding:56px 24px;gap:40px;}
+    .metric-block .value{font-size:80px;}
+    .next{height:auto;min-height:280px;padding:80px 20px;}
+    .next a{font-size:56px;}
+    .footer{padding:48px 20px 24px;flex-direction:column;align-items:flex-start;}
+    .footer-meta{text-align:left;}
+    .footer-left{font-size:32px;}
+    .inline-img{max-width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="cursor" id="cursor"></div>
+
+<div class="nav-top">
+  <a href="../../index.html">← 갤러리</a>
+  <span class="sep">/</span>
+  <a href="index.html">INDEX</a>
+</div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
+<div class="theme-tooltip" id="themeTooltip">DARK</div>
+
+<!-- HERO BLOCK -->
+<section class="case-hero" id="caseHero">
+  <div class="case-hero-img"></div>
+  <div class="case-hero-overlay"></div>
+  <div class="case-hero-meta-top">
+    <span><span class="tag">[CASE_01]</span> &nbsp; 학내 동아리방 예약 / PM</span>
+    <span>2023.07—11 · PM · 5개월</span>
+  </div>
+  <h1 class="case-hero-name" id="caseHeroName">
+    <span class="word"><span>ROOM</span></span>
+    <span class="word"><span class="accent">SYNC</span></span>
+  </h1>
+  <div class="case-hero-caption">FILE_HERO.JPG · 2023</div>
+</section>
+
+<!-- 문제 -->
+<section class="case" data-case>
+  <div class="case-tag">[01] // 문제 <span class="num">01</span></div>
+  <div class="case-body">
+    <h3>50여 동아리,<br/>수기 예약이<br/><em>겹친다.</em></h3>
+    <p class="lead">
+      학내 50여 개 동아리가 공용 동아리방을 카톡·노트로 예약하면서
+      이중 예약과 노쇼가 일상이었다. 회장단 설문 결과 가장 큰 페인은
+      "지금 누가 쓰고 있는지" 실시간으로 알 수 없다는 점이었다.
+    </p>
+    <ul>
+      <li><strong>SCALE</strong>대상: 학내 동아리 약 50개 · 공용 동아리방 다수</li>
+      <li><strong>PAIN</strong>수기(카톡/시트) 예약 → 시간 겹침, 노쇼</li>
+      <li><strong>NEED</strong>회장단 설문 1순위 = 실시간 사용 현황</li>
+    </ul>
+    <div class="inline-img" style="background-image:url('../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png');">
+      <span class="cap">FIG.01 · 회장단 설문 / 현장 관찰</span>
+    </div>
+  </div>
+</section>
+
+<!-- 리서치 -->
+<section class="case" data-case>
+  <div class="case-tag">[02] // 리서치 <span class="num">02</span></div>
+  <div class="case-body">
+    <h3>예약 흐름을<br/><em>3가지 시나리오</em>로<br/>정리했다.</h3>
+    <p class="lead">
+      회장단·일반 부원 인터뷰를 통해 "예약 → 사용 → 취소 / 노쇼" 흐름과
+      충돌이 발생하는 시점을 분리해 정의했다. MVP가 반드시 다뤄야 할
+      기능은 예약, 취소, 실시간 사용 현황 뷰 3가지로 좁혔다.
+    </p>
+    <ul>
+      <li><strong>QUAL</strong>회장단·부원 인터뷰로 페인 포인트 정리</li>
+      <li><strong>SCOPE</strong>MVP 범위: 예약 · 취소 · 실시간 현황</li>
+      <li><strong>SPEC</strong>API 명세 초안 작성 → 개발자와 합의</li>
+    </ul>
+
+    <div class="case-media" data-media>
+      <div class="bg" style="background-image:url('../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png');"></div>
+      <span class="cap">FIG.02 · MVP 범위 / API 명세 초안</span>
+    </div>
+  </div>
+</section>
+
+<!-- 실행 -->
+<section class="case" data-case>
+  <div class="case-tag">[03] // 실행 <span class="num">03</span></div>
+  <div class="case-body">
+    <h3>Jira · 스크럼으로<br/><em>1개월</em> 만에 출시.</h3>
+    <p class="lead">
+      Jira로 백로그를 쪼개고 짧은 스프린트로 개발자 2명과 협업했다.
+      Figma로 핵심 화면만 잡고, "노쇼 감소"라는 단일 성공 지표를
+      기준으로 기능 우선순위를 단순화해 1개월 만에 정식 배포했다.
+    </p>
+    <ul>
+      <li><strong>PRIORITY</strong>실시간 현황 뷰 → 예약 → 취소 순서로 출시</li>
+      <li><strong>PROCESS</strong>Jira 백로그 + 스크럼(스프린트 단위)</li>
+      <li><strong>DESIGN</strong>Figma로 핵심 화면 와이어프레임</li>
+      <li><strong>METRIC</strong>성공 지표 = 노쇼율 1개</li>
+    </ul>
+    <div class="inline-img" style="background-image:url('../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png');">
+      <span class="cap">FIG.03 · 스프린트 보드 / 출시 회고</span>
+    </div>
+  </div>
+</section>
+
+<!-- 결과 -->
+<section class="case" data-case>
+  <div class="case-tag">[04] // 결과 <span class="num">04</span></div>
+  <div class="case-body">
+    <h3>30개 동아리 사용,<br/>노쇼<br/><em>−60%.</em></h3>
+    <p class="lead">
+      출시 후 30개 동아리가 RoomSync로 예약을 옮겼고, 가장 큰 페인이었던
+      노쇼가 도입 전 대비 60% 감소했다. 회장단 회의 시간이 줄어 운영
+      부담이 가벼워졌다는 정성 피드백이 이어졌다.
+    </p>
+
+    <div class="case-media" data-media>
+      <div class="bg" style="background-image:url('../png/Gemini_Generated_Image_o20szmo20szmo20s.png');"></div>
+      <div class="metric">
+        <span class="label">노쇼 감소</span>
+        <span class="value">−60%</span>
+      </div>
+      <span class="cap">FIG.04 · 출시 후 회장단 회고</span>
+    </div>
+  </div>
+</section>
+
+<!-- KEY METRIC BLOCK -->
+<section class="metric-block">
+  <div>
+    <div class="label">[M01] 사용 동아리</div>
+    <div class="value">30<span style="font-size:48px;">개</span></div>
+    <div class="desc">출시 후 RoomSync로 예약을<br/>옮긴 학내 동아리 수.</div>
+  </div>
+  <div>
+    <div class="label">[M02] 노쇼</div>
+    <div class="value">−60<span style="font-size:48px;">%</span></div>
+    <div class="desc">실시간 현황 뷰 도입으로<br/>이중 예약/노쇼 감소.</div>
+  </div>
+  <div>
+    <div class="label">[M03] 출시까지</div>
+    <div class="value">1<span style="font-size:48px;">개월</span></div>
+    <div class="desc">MVP 범위 단순화 + 스크럼으로<br/>1개월 만에 정식 배포.</div>
+  </div>
+</section>
+
+<!-- NEXT -->
+<section class="next">
+  <div class="next-img"></div>
+  <div class="next-overlay"></div>
+  <a href="index.html">
+    <span class="small">↗ INDEX로 돌아가기</span>
+    INDEX
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-left"><a href="mailto:taeyoon@example.com">CONTACT ↗</a></div>
+  <div class="footer-meta">
+    © 2026 KIM TAE YUN<br/>
+    CONCRETE MODERNISM / V2 · DETAIL #14
+  </div>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const isTouch = matchMedia('(hover: none)').matches || matchMedia('(pointer: coarse)').matches;
+  if (isTouch){
+    cursor.style.display = 'none';
+    document.body.style.cursor = 'auto';
+    document.querySelectorAll('a, button').forEach(el => el.style.cursor = 'pointer');
+  } else {
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    });
+  }
+
+  const progress = document.getElementById('progress');
+  document.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const tooltip = document.getElementById('themeTooltip');
+  const saved = localStorage.getItem('tk-theme');
+  if (saved) root.setAttribute('data-theme', saved);
+  tooltip.textContent = root.getAttribute('data-theme') === 'alt' ? 'CHALK' : 'DARK';
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'alt' ? 'dark' : 'alt';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('tk-theme', next);
+    tooltip.textContent = next === 'alt' ? 'CHALK' : 'DARK';
+    animateHero();
+  });
+
+  function animateHero(){
+    const ch = document.getElementById('caseHero');
+    ch.classList.remove('in');
+    requestAnimationFrame(() => requestAnimationFrame(() => ch.classList.add('in')));
+  }
+  window.addEventListener('load', () => animateHero());
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('[data-case], [data-media]').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — Case Study / 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow-x: hidden; }
+  :lang(ko), body { word-break: keep-all; overflow-wrap: anywhere; }
+
+  :root {
+    --bg: #FAFAFA;
+    --ink: #1A1A1A;
+    --muted: #6B6B6B;
+    --rule: #E5E5E5;
+    --accent: #2563EB;
+    --hover: #F4F4F4;
+  }
+
+  [data-theme="alt"] {
+    --bg: #0F0F0F;
+    --ink: #F5F5F2;
+    --muted: #888888;
+    --rule: #232323;
+    --accent: #60A5FA;
+    --hover: #1A1A1A;
+  }
+
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.55;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--accent);
+    z-index: 100;
+    transition: width 80ms linear, background-color 250ms ease;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    z-index: 90;
+    min-width: 44px;
+    min-height: 44px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  }
+  .theme-toggle:hover { border-color: var(--ink); }
+
+  /* Gallery back link (distinct from internal back) */
+  .gallery-back {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    transition: background-color 250ms ease, color 250ms ease, border-color 250ms ease;
+  }
+  .gallery-back:hover { border-color: var(--ink); color: var(--accent); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: 24px;
+    max-width: 1280px;
+    padding: 0 56px;
+    margin: 0 auto;
+  }
+
+  /* Top bar */
+  .topbar {
+    border-bottom: 1px solid var(--rule);
+    padding: 20px 0;
+    transition: border-color 250ms ease;
+  }
+  .topbar .grid { align-items: baseline; }
+  .topbar .back {
+    grid-column: 1 / span 6;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    transition: color 200ms ease;
+  }
+  .topbar .back:hover { color: var(--accent); }
+  .topbar .meta {
+    grid-column: 7 / span 6;
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .label .num { color: var(--ink); margin-right: 8px; transition: color 250ms ease; }
+  .label .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+  .label.in .char { opacity: 1; transform: translateY(0); }
+
+  /* Figure */
+  figure.fig {
+    margin: 0;
+    display: block;
+  }
+  figure.fig .frame {
+    border: 1px solid var(--rule);
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 250ms ease;
+  }
+  figure.fig img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.06);
+    transition: transform 1200ms cubic-bezier(.22,.61,.36,1);
+  }
+  figure.fig.in img { transform: scale(1.0); }
+  figure.fig figcaption {
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Header */
+  .case-header {
+    padding: 160px 0 120px;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  .case-header .kicker { grid-column: 1 / span 12; margin-bottom: 48px; }
+  .case-header h1 {
+    grid-column: 1 / span 11;
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 72px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0 0 64px 0;
+    color: var(--ink);
+  }
+  .case-header .meta-row {
+    grid-column: 1 / span 12;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    transition: border-color 250ms ease;
+  }
+  .case-header .meta-row .k {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .case-header .meta-row .v { font-size: 15px; color: var(--ink); }
+
+  /* Hero plate (full-width 16:9 image) */
+  .hero-plate {
+    padding: 80px 0 120px;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  .hero-plate .plate-wrap { grid-column: 1 / span 12; }
+  .hero-plate .frame { aspect-ratio: 16 / 9; }
+
+  /* Body sections */
+  .case-section {
+    padding: 120px 0;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  .case-section .label-wrap { grid-column: 1 / span 3; }
+  .case-section .heading {
+    grid-column: 5 / span 7;
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 32px 0;
+  }
+  .case-section .body {
+    grid-column: 5 / span 7;
+    grid-row: 2;
+  }
+  .case-section .body p {
+    margin: 0 0 20px 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .case-section .body p:last-child { margin-bottom: 0; }
+  .case-section .body .aside {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    transition: border-color 250ms ease;
+  }
+  .case-section .body .inline-fig {
+    margin-top: 40px;
+  }
+  .case-section .body .inline-fig .frame {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Metric pull block */
+  .metric {
+    padding: 160px 0;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  .metric .label-wrap { grid-column: 1 / span 12; margin-bottom: 56px; }
+  .metric .pull {
+    grid-column: 1 / span 12;
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 120px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    color: var(--accent);
+    transition: color 250ms ease;
+  }
+  .metric .pull .sep { color: var(--muted); margin: 0 24px; font-weight: 300; }
+  .metric .legend {
+    grid-column: 1 / span 12;
+    margin-top: 48px;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    transition: border-color 250ms ease;
+  }
+  .metric .legend .k {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .metric .legend .v { font-size: 15px; color: var(--ink); }
+
+  /* Bottom nav */
+  .end {
+    padding: 120px 0;
+  }
+  .end .label-wrap { grid-column: 1 / span 12; margin-bottom: 32px; }
+  .end .nav {
+    grid-column: 1 / span 12;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    border-top: 1px solid var(--rule);
+    padding-top: 32px;
+    transition: border-color 250ms ease;
+  }
+  .end .nav a {
+    display: block;
+    padding: 24px 16px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--rule);
+    transition: background-color 200ms ease, border-color 250ms ease;
+  }
+  .end .nav a:hover { background-color: var(--hover); }
+  .end .nav .role {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .end .nav .text {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .end .nav a:hover .text { color: var(--accent); }
+  .end .nav .disabled { opacity: 0.45; pointer-events: none; }
+
+  /* Footer */
+  footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+    transition: border-color 250ms ease;
+  }
+  footer .grid { align-items: baseline; }
+  footer .left {
+    grid-column: 1 / span 6;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  footer .right {
+    grid-column: 7 / span 6;
+    text-align: right;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Motion */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 500ms ease-out, transform 500ms ease-out;
+    will-change: opacity, transform;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .label .char, figure.fig img {
+      transition: none !important;
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+
+  @media (max-width: 880px) {
+    .grid { padding: 0 24px; column-gap: 16px; }
+
+    .theme-toggle { top: 14px; right: 14px; padding: 10px 12px; font-size: 10px; min-width: 44px; min-height: 44px; }
+    .gallery-back { top: 14px; left: 14px; padding: 10px 10px; font-size: 10px; min-height: 44px; }
+    body { font-size: 15px; }
+    .case-section .body p { font-size: 15px; }
+
+    .topbar .back, .topbar .meta { grid-column: 1 / span 12; text-align: left; }
+    .topbar .meta { margin-top: 6px; }
+
+    .case-header { padding: 96px 0 72px; }
+    .case-header h1 { font-size: 36px; grid-column: 1 / span 12; margin-bottom: 40px; }
+    .case-header .meta-row { grid-template-columns: 1fr 1fr; }
+
+    .hero-plate { padding: 48px 0 72px; }
+
+    .case-section { padding: 72px 0; }
+    .case-section .label-wrap, .case-section .heading, .case-section .body { grid-column: 1 / span 12; }
+    .case-section .label-wrap { margin-bottom: 24px; }
+    .case-section .heading { font-size: 22px; margin-bottom: 20px; }
+    .case-section .body { grid-row: auto; }
+    .case-section .body p { font-size: 15px; }
+
+    .metric { padding: 96px 0; }
+    .metric .pull { font-size: 48px; }
+    .metric .pull .sep { margin: 0 12px; }
+    .metric .legend { grid-template-columns: 1fr; }
+
+    .end { padding: 72px 0; }
+    .end .nav { grid-template-columns: 1fr; }
+    .end .nav .text { font-size: 17px; }
+
+    footer .left, footer .right { grid-column: 1 / span 12; text-align: left; }
+    footer .right { margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<a class="gallery-back" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">LIGHT · 01</button>
+
+<header class="topbar">
+  <div class="grid">
+    <a class="back" href="index.html">← 목록으로</a>
+    <div class="meta">Case Study · 2023</div>
+  </div>
+</header>
+
+<!-- Case header -->
+<section class="case-header reveal">
+  <div class="grid">
+    <div class="kicker">
+      <div class="label split"><span class="num">CASE STUDY</span> / 01</div>
+    </div>
+    <h1>RoomSync<br>동아리방 예약 관리 웹서비스</h1>
+
+    <div class="meta-row">
+      <div>
+        <div class="k">Year</div>
+        <div class="v">2023.07 – 2023.11</div>
+      </div>
+      <div>
+        <div class="k">Role</div>
+        <div class="v">Service Planner · Scrum Master</div>
+      </div>
+      <div>
+        <div class="k">Team</div>
+        <div class="v">기획 1 · 백엔드 2</div>
+      </div>
+      <div>
+        <div class="k">Stack</div>
+        <div class="v">Notion · Figma · Jira</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Hero plate image -->
+<section class="hero-plate reveal">
+  <div class="grid">
+    <div class="plate-wrap">
+      <figure class="fig">
+        <div class="frame"><img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="도서관에서 팀 토론 중인 모습" /></div>
+        <figcaption>FIG. 02 — 회장단 워크숍 · RoomSync 팀 토론</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 01 Context -->
+<section class="case-section reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">01</span> / Context</div>
+    </div>
+    <h2 class="heading">수기 예약이 만들어내는 끊임없는 겹침 사고</h2>
+    <div class="body">
+      <p class="reveal">
+        학내 50여 개 동아리가 공용 회의실을 수기로 예약하면서, 겹침 사고가 빈번하게 반복되고 있었습니다. 회장단이 진행한 구글폼 설문을 통해 '지금 이 시각 어느 방이 비어 있는가'를 즉시 확인하지 못하는 정보 비대칭이 문제의 근원임을 확인했습니다.
+      </p>
+      <p class="reveal">
+        설문에서 '실시간 예약 현황 확인'이 핵심 니즈로 도출되었고, 이 데이터는 이후 MVP 범위를 결정하는 결정적 근거가 되었습니다.
+      </p>
+
+      <div class="inline-fig reveal">
+        <figure class="fig">
+          <div class="frame"><img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="현장 인터뷰" /></div>
+          <figcaption>FIG. 03 — 사용자 보이스 수집 · 회장단 인터뷰</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 Approach -->
+<section class="case-section reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">02</span> / Approach</div>
+    </div>
+    <h2 class="heading">가설을 좁히고, 검증 가능한 단위로 쪼개기</h2>
+    <div class="body">
+      <p class="reveal">
+        '실시간으로 공용 회의실의 사용 현황을 한 화면에서 확인할 수 있다면 노쇼와 겹침이 의미 있게 줄어들 것이다'라는 단일 가설로 수렴시켰습니다. 검증 지표는 노쇼율과 가입 동아리 수 중심으로 한정했습니다.
+      </p>
+      <p class="reveal">
+        Notion에 가설과 지표를 매핑해, 회의에서 "이 기능은 어떤 가설을 검증하는가?"가 즉시 답변 가능하도록 설계했습니다. 덕분에 우선순위 논쟁이 감정이 아닌 데이터로 정리되는 흐름이 만들어졌습니다.
+      </p>
+
+      <div class="inline-fig reveal">
+        <figure class="fig">
+          <div class="frame"><img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="개인 작업 — 명세 작성" /></div>
+          <figcaption>FIG. 04 — 가설 카드와 API 명세 초안 작성</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 Decision -->
+<section class="case-section reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">03</span> / Decision</div>
+    </div>
+    <h2 class="heading">MVP는 예약·취소·실시간 뷰 세 가지로</h2>
+    <div class="body">
+      <p class="reveal">
+        백엔드 2명에 학기 일정상 시간이 부족한 상황이었습니다. 모든 요구사항을 담는 대신, 가장 큰 페인포인트를 해결하는 핵심 기능 — 예약·취소·실시간 뷰만 MVP에 남기고, 알림은 2차 스프린트로 미루는 결정을 내렸습니다.
+      </p>
+      <p class="reveal">
+        리소스 한계를 회장단에 솔직히 공유하고 함께 우선순위를 정리한 결과, 이해관계자 모두가 MVP 범위에 동의한 상태로 개발에 진입할 수 있었습니다. 이는 출시 직전 스코프 크리프를 예방한 결정적인 합의였습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 Execution -->
+<section class="case-section reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">04</span> / Execution</div>
+    </div>
+    <h2 class="heading">API 명세 초안을 직접 그려 소통 비용을 줄이다</h2>
+    <div class="body">
+      <p class="reveal">
+        엔드포인트·요청·응답 스키마의 초안을 기획자가 직접 작성해 백엔드에 전달했습니다. 개발팀은 비즈니스 로직 검증과 데이터 모델 보강에 집중할 수 있었고, '이 화면에서 무엇이 필요한가'를 다시 묻는 미팅이 사실상 사라졌습니다.
+      </p>
+      <p class="reveal">
+        Jira로 백로그를 관리하고 스크럼 마스터 역할을 맡아, 스프린트 회고 결과를 다음 백로그에 반영하는 과정을 통해 팀이 스스로 개선하는 리듬을 만들었습니다.
+      </p>
+      <div class="aside reveal">
+        Artefacts: PRD · API Spec 초안 · Sprint Backlog (Jira)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 Outcome -->
+<section class="case-section reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">05</span> / Outcome</div>
+    </div>
+    <h2 class="heading">출시 30일, 학내 표준이 된 RoomSync</h2>
+    <div class="body">
+      <p class="reveal">
+        런칭 1개월 만에 학내 30개 동아리가 자발적으로 가입했고, 도입 동아리 기준 노쇼율이 출시 전 대비 60% 감소했습니다. 회장단 정기회의에서 RoomSync가 '학내 표준 예약 도구'로 공식 채택되며 도입 동아리 수가 지속 확대되었습니다.
+      </p>
+      <p class="reveal">
+        가장 큰 성과는 숫자 그 자체보다, 한정된 리소스 안에서 '무엇을 만들지 않을 것인가'를 데이터로 결정한 경험이었습니다. 이 의사결정 프레임은 이후의 모든 프로젝트에 그대로 이식되었습니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Metric pull -->
+<section class="metric reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">KEY</span> / Metric</div>
+    </div>
+    <div class="pull">
+      +30<span class="sep">·</span>−60%
+    </div>
+    <div class="legend">
+      <div>
+        <div class="k">+30</div>
+        <div class="v">출시 한 달 만에 가입한 학내 동아리 수</div>
+      </div>
+      <div>
+        <div class="k">−60%</div>
+        <div class="v">도입 동아리 기준 노쇼율 감소폭</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- End / Nav -->
+<section class="end reveal">
+  <div class="grid">
+    <div class="label-wrap">
+      <div class="label split"><span class="num">06</span> / End</div>
+    </div>
+    <div class="nav">
+      <a href="index.html">
+        <div class="role">← Back</div>
+        <div class="text">목록으로 돌아가기</div>
+      </a>
+      <a class="disabled" href="#" aria-disabled="true">
+        <div class="role">Next Case</div>
+        <div class="text">다음 케이스 — Coming soon</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="grid">
+    <div class="left">© 2026 Taeyoon Kim. All rights reserved.</div>
+    <div class="right">taeyoon@example.com</div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    // Theme toggle
+    var toggle = document.getElementById('themeToggle');
+    var root = document.documentElement;
+    var saved = null;
+    try { saved = localStorage.getItem('tk-theme'); } catch (e) {}
+    var current = saved === 'alt' ? 'alt' : 'light';
+    applyTheme(current);
+
+    function applyTheme(t) {
+      if (t === 'alt') {
+        root.setAttribute('data-theme', 'alt');
+        toggle.textContent = 'DARK · 02';
+      } else {
+        root.removeAttribute('data-theme');
+        toggle.textContent = 'LIGHT · 01';
+      }
+    }
+
+    toggle.addEventListener('click', function () {
+      current = (current === 'alt') ? 'light' : 'alt';
+      applyTheme(current);
+      try { localStorage.setItem('tk-theme', current); } catch (e) {}
+    });
+
+    // Progress bar
+    var bar = document.getElementById('progress');
+    function onScroll() {
+      var h = document.documentElement;
+      var scrolled = (h.scrollTop) / Math.max(1, (h.scrollHeight - h.clientHeight));
+      bar.style.width = (scrolled * 100) + '%';
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Text split for section labels
+    var splits = document.querySelectorAll('.label.split');
+    splits.forEach(function (el) {
+      var text = el.textContent;
+      el.textContent = '';
+      var idx = 0;
+      Array.prototype.forEach.call(text, function (ch) {
+        var s = document.createElement('span');
+        s.className = 'char';
+        s.textContent = ch === ' ' ? ' ' : ch;
+        s.style.transitionDelay = (idx * 50) + 'ms';
+        el.appendChild(s);
+        idx++;
+      });
+    });
+
+    // IntersectionObserver reveal
+    var els = document.querySelectorAll('.reveal, .label.split, figure.fig');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (el) { el.classList.add('in'); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach(function (el) { io.observe(el); });
+    }
+  })();
+</script>
+
+</body>
+</html>

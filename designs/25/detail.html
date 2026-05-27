@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>RoomSync — Feature · 김태윤 LIFE Magazine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Source+Sans+3:wght@300;400;600;700&family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EDE3;
+  --text:#1A1A1A;
+  --accent:#8B0000;
+  --muted:#5A4F3F;
+  --rule:rgba(26,26,26,.18);
+  --serif:'Spectral','Noto Serif KR',serif;
+  --serif-kr:'Noto Serif KR','Spectral',serif;
+  --sans:'Source Sans 3','Noto Serif KR',sans-serif;
+}
+[data-theme="alt"]{
+  --bg:#1A1A1A;
+  --text:#F2EDE3;
+  --accent:#FF3344;
+  --muted:#B5A993;
+  --rule:rgba(242,237,227,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100%}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:17px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  transition:background .4s ease, color .4s ease;
+}
+img{max-width:100%;display:block}
+
+.progress{
+  position:fixed;top:0;left:0;height:2px;width:0%;
+  background:var(--accent);z-index:200;transition:width .12s ease-out;
+}
+
+.folio{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);z-index:150;
+  pointer-events:none;
+}
+.folio > *{pointer-events:auto}
+.folio .brand{font-weight:600;color:var(--text);letter-spacing:.32em;font-style:normal}
+.folio .back{
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:var(--text);text-decoration:none;padding:8px 4px;min-height:44px;
+  display:inline-flex;align-items:center;position:relative;
+}
+.folio .back::after{
+  content:"";position:absolute;left:4px;right:4px;bottom:6px;
+  height:1px;background:var(--accent);
+}
+.theme-toggle{
+  background:transparent;border:0;cursor:pointer;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:var(--text);padding:8px 4px;
+  position:relative;min-height:44px;display:inline-flex;align-items:center;
+}
+.theme-toggle::after{
+  content:"";position:absolute;left:4px;right:4px;bottom:6px;
+  height:1px;background:var(--accent);
+}
+.theme-toggle .sep{margin:0 6px;opacity:.55}
+.theme-toggle .on{color:var(--accent)}
+.folio-right{display:flex;gap:18px;align-items:center}
+
+/* spreads */
+.spread{
+  position:relative;
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:110px 48px 70px;
+  border-bottom:1px solid var(--rule);
+  transition:transform .3s ease, opacity .3s ease;
+}
+.spread:last-of-type{border-bottom:0}
+.spread.dimmed{transform:translateY(-16px);opacity:.3}
+
+.photo-frame{
+  position:relative;width:100%;
+  height:70vh;min-height:480px;overflow:hidden;background:#0a0a0a;
+}
+.photo-frame.tall{height:80vh;min-height:560px}
+.photo-frame.portrait{
+  height:auto;aspect-ratio:4/5;max-width:760px;
+  margin:0 auto;background:transparent;
+}
+.photo-frame img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.1);
+  transition:transform 2000ms cubic-bezier(.2,.6,.2,1);
+  will-change:transform;
+}
+.photo-frame.portrait img{height:100%}
+.spread.in .photo-frame img{transform:scale(1.0)}
+.photo-frame .overlay{
+  position:absolute;left:0;right:0;bottom:0;height:40%;
+  background:linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.45) 55%, rgba(0,0,0,0) 100%);
+  pointer-events:none;
+}
+.photo-frame .topmark{
+  position:absolute;top:24px;left:28px;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
+}
+.photo-frame .topmark .red{color:#FF8888;font-weight:600;font-style:normal;letter-spacing:.3em}
+
+.headline-overlay{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:32px 36px 36px;color:#fff;
+}
+.headline-overlay .kicker{
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:#FF8888;margin-bottom:14px;
+}
+.headline-overlay h1, .headline-overlay h2{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:clamp(40px,7vw,84px);line-height:.95;letter-spacing:-.01em;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+.headline-overlay h1.en, .headline-overlay h2.en{
+  font-family:var(--serif);font-weight:800;letter-spacing:-.015em;
+}
+.headline-overlay h2.red{color:#FF5566}
+
+.caption{
+  font-family:var(--serif);font-style:italic;font-size:14px;
+  color:var(--muted);padding:14px 36px 0;
+}
+.caption .by{font-style:normal;font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--text);margin-right:10px}
+
+.body-col{
+  max-width:480px;margin:48px auto 0;padding:0 36px;
+}
+.body-col p{margin-bottom:1.2em;color:var(--text)}
+.body-col p + p{text-indent:1.2em}
+.body-col .drop::first-letter{
+  font-family:var(--serif);font-weight:700;
+  font-size:64px;line-height:.85;float:left;
+  padding:6px 10px 0 0;color:var(--accent);
+}
+.body-col h3{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:22px;line-height:1.3;margin:1.6em 0 .6em;color:var(--text);
+}
+.body-col .meta{
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:var(--muted);margin-bottom:1.4em;letter-spacing:.04em;
+}
+.body-col ul{list-style:none;padding-left:0;margin:.4em 0 1.2em}
+.body-col ul li{
+  position:relative;padding-left:22px;margin-bottom:.5em;
+  font-family:var(--sans);
+}
+.body-col ul li::before{
+  content:"§";position:absolute;left:0;top:0;
+  font-family:var(--serif);font-style:italic;color:var(--accent);font-weight:600;
+}
+
+.split-word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.split-word > span{
+  display:inline-block;transform:translateY(110%);opacity:0;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1), opacity 700ms ease;
+}
+.spread.in .split-word > span{transform:translateY(0);opacity:1}
+
+.pullquote{
+  max-width:760px;margin:64px auto 32px;
+  padding:0 36px 0 64px;position:relative;
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(22px,3vw,32px);line-height:1.35;color:var(--text);
+  transform:translateX(-30px);opacity:0;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1), opacity 700ms ease;
+}
+.pullquote::before{
+  content:"";position:absolute;left:36px;top:.3em;bottom:.3em;
+  width:3px;background:var(--accent);
+  transform:scaleY(0);transform-origin:top;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1) 100ms;
+}
+.spread.in .pullquote{transform:translateX(0);opacity:1}
+.spread.in .pullquote::before{transform:scaleY(1)}
+.pullquote .cite{
+  display:block;margin-top:14px;
+  font-family:var(--serif);font-style:normal;font-weight:600;
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+.spread-meta{
+  max-width:760px;margin:24px auto 0;padding:0 36px;
+  display:flex;flex-wrap:wrap;gap:18px 28px;
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:var(--muted);
+}
+.spread-meta b{font-style:normal;font-weight:600;color:var(--text);letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin-right:6px}
+
+/* feature deck */
+.feature-deck{
+  max-width:760px;margin:0 auto 28px;padding:0 36px;
+}
+.feature-deck .eyebrow{
+  font-family:var(--serif);font-style:italic;font-size:12px;
+  letter-spacing:.32em;text-transform:uppercase;color:var(--accent);
+  margin-bottom:14px;
+}
+.feature-deck .deck-title{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:clamp(32px,4.6vw,56px);line-height:1.05;
+  color:var(--text);letter-spacing:-.01em;
+}
+.feature-deck .standfirst{
+  font-family:var(--serif);font-style:italic;
+  font-size:18px;line-height:1.55;color:var(--muted);
+  margin-top:18px;max-width:620px;
+}
+
+/* final metric spread */
+.metric-spread{
+  position:relative;width:100%;
+  height:88vh;min-height:600px;overflow:hidden;background:#0a0a0a;
+}
+.metric-spread img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.1);
+  transition:transform 2000ms cubic-bezier(.2,.6,.2,1);
+}
+.spread.in .metric-spread img{transform:scale(1.0)}
+.metric-spread .overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.4) 60%, rgba(0,0,0,.5) 100%);
+}
+.metric-spread .topmark{
+  position:absolute;top:24px;left:28px;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
+}
+.metric-spread .result{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  text-align:center;padding:36px;color:#fff;
+}
+.metric-spread .result .kicker{
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  letter-spacing:.32em;text-transform:uppercase;color:#FF8888;margin-bottom:24px;
+}
+.metric-spread .result h2{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:clamp(48px,9vw,128px);line-height:.95;letter-spacing:-.01em;
+  color:#FF3344;
+  text-shadow:0 2px 32px rgba(0,0,0,.55);
+}
+.metric-spread .result h2 .small{
+  display:block;font-size:.45em;color:#fff;font-weight:600;margin-top:18px;letter-spacing:.04em;
+}
+.metric-spread .footnote{
+  position:absolute;left:0;right:0;bottom:24px;
+  text-align:center;color:rgba(255,255,255,.78);
+  font-family:var(--serif);font-style:italic;font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+}
+
+/* back link bottom */
+.back-link{
+  position:fixed;left:28px;bottom:24px;
+  font-family:var(--serif);font-style:italic;font-size:12px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--text);
+  text-decoration:none;padding:10px 4px;min-height:44px;
+  display:inline-flex;align-items:center;z-index:140;
+}
+.back-link::after{
+  content:"";position:absolute;left:4px;right:4px;bottom:6px;
+  height:1px;background:var(--accent);
+}
+
+/* mobile */
+@media (max-width:880px){
+  .spread{padding:110px 24px 70px}
+  .photo-frame{height:62vh;min-height:380px}
+  .photo-frame .topmark{top:18px;left:20px;font-size:10px}
+  .headline-overlay{padding:24px 22px 26px}
+  .caption{padding:14px 22px 0;font-size:13px}
+  .body-col{padding:0 22px;margin-top:36px}
+  .pullquote{padding:0 22px 0 40px}
+  .pullquote::before{left:22px}
+  .spread-meta{padding:0 22px;gap:14px 22px}
+  .feature-deck{padding:0 22px}
+  .folio{padding:12px 16px}
+  .folio-right{gap:12px}
+  .back-link{left:18px;bottom:16px}
+  .metric-spread{height:75vh;min-height:520px}
+}
+@media (max-width:520px){
+  .headline-overlay h1, .headline-overlay h2{font-size:clamp(34px,9vw,52px)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+  .photo-frame img, .metric-spread img{transform:none !important}
+  .split-word > span{transform:none !important;opacity:1 !important}
+  .pullquote{transform:none !important;opacity:1 !important}
+  .pullquote::before{transform:scaleY(1) !important}
+  .spread.dimmed{transform:none !important;opacity:1 !important}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header class="folio">
+  <a class="back" href="index.html">← 갤러리</a>
+  <span class="brand">LIFE — FEATURE</span>
+  <div class="folio-right">
+    <span>p. 054 · ROOMSYNC</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle day or night theme">
+      <span class="opt" data-mode="">DAY</span><span class="sep">·</span><span class="opt" data-mode="alt">NIGHT</span>
+    </button>
+  </div>
+</header>
+
+<!-- LEAD SPREAD -->
+<section class="spread" data-spread="1">
+  <div class="photo-frame tall">
+    <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀"/>
+    <div class="overlay"></div>
+    <div class="topmark"><span class="red">LIFE</span> &nbsp; · &nbsp; FEATURE — ROOMSYNC</div>
+    <div class="headline-overlay">
+      <div class="kicker">2023.07 — 2023.11 · Lead PM, 백엔드 2명</div>
+      <h2 class="en">
+        <span class="split-word"><span>ROOMSYNC.</span></span>
+      </h2>
+      <div style="margin-top:14px;font-family:var(--serif);font-style:italic;font-size:18px;color:rgba(255,255,255,.92);max-width:640px">
+        50여 동아리의 종이 예약표를, 한 달 만에 실시간 화면으로.
+      </div>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    팀 작업실. 백엔드 둘과 함께 잡은 첫 API 명세 초안.
+  </div>
+
+  <div class="feature-deck" style="margin-top:48px">
+    <div class="eyebrow">FEATURE — ROOMSYNC · 1 of 5</div>
+    <div class="deck-title">문제는 ‘방’이 아니라 ‘현황’이었다.</div>
+    <div class="standfirst">학내 동아리방은 한정되어 있고, 50여 동아리의 시간표는 종이와 단톡에 흩어져 있었다. 부딪힘은 시간문제였다.</div>
+  </div>
+
+  <div class="spread-meta">
+    <span><b>Role</b> Lead PM</span>
+    <span><b>Team</b> 백엔드 2명</span>
+    <span><b>Tools</b> Jira · Scrum · Figma · API 명세</span>
+    <span><b>Period</b> 2023.07 – 2023.11</span>
+  </div>
+</section>
+
+<!-- 리서치 -->
+<section class="spread" data-spread="2">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 리서치"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 056 · 리서치</div>
+    <div class="headline-overlay">
+      <div class="kicker">Research — 회장단의 목소리</div>
+      <h2>
+        <span class="split-word"><span>설문</span></span> <span class="split-word"><span>한</span></span> <span class="split-word"><span>장이</span></span> <span class="split-word"><span>범위를</span></span> <span class="split-word"><span>잘랐다.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    회장단 인터뷰. 한 줄의 합의가 ‘만들 것’과 ‘덜어낼 것’을 갈랐다.
+  </div>
+
+  <div class="body-col">
+    <p class="meta">RESEARCH · 회장단 구글폼 설문 · 현장 관찰</p>
+    <p class="drop">회장단을 대상으로 구글폼 설문을 돌렸습니다. 가장 큰 응답은 의외였습니다. 사람들은 ‘예약 기능’이 아니라 ‘지금 방이 비었는가’를 알고 싶어 했습니다. 가장 큰 페인 포인트는 ‘실시간 현황 확인’이었습니다.</p>
+
+    <p>이 한 줄이 제품 범위의 칼이 되었습니다. ‘예약’은 당연한 코어, ‘취소’는 회복 동선, ‘실시간 뷰’는 차별점. 알림은 이번 사이클의 대상이 아니라고 결정했습니다.</p>
+
+    <h3>핵심 인사이트</h3>
+    <ul>
+      <li>충돌의 원인은 정보 부재였다 — 예약 부재가 아니라.</li>
+      <li>‘지금’이라는 시간 축이 모든 화면의 중심에 있어야 했다.</li>
+      <li>알림은 좋지만, 한 달 안에 배포할 수는 없었다.</li>
+    </ul>
+  </div>
+
+  <div class="pullquote">
+    “만들 것을 정하는 일보다, 만들지 않을 것을 정하는 일이 더 어려웠다.”
+    <span class="cite">— PM 노트</span>
+  </div>
+</section>
+
+<!-- 결정 -->
+<section class="spread" data-spread="3">
+  <div class="photo-frame portrait">
+    <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="PM 김태윤"/>
+  </div>
+  <div class="caption" style="text-align:center;padding-top:18px">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    결정의 순간. ‘덜어냄’이 곧 일정이었다.
+  </div>
+
+  <div class="feature-deck" style="margin-top:36px">
+    <div class="eyebrow">DECISION · 3 of 5</div>
+    <div class="deck-title">한 달이라는 마감이 설계를 결정했다.</div>
+    <div class="standfirst">PM이 직접 API 명세 초안을 잡았다. 백엔드 두 명이 동시에 다른 도메인을 잡아당기게 하려면, 인터페이스가 회의보다 먼저 와야 했다.</div>
+  </div>
+
+  <div class="body-col">
+    <h3>MVP 범위 (1차)</h3>
+    <ul>
+      <li>예약 — 시간대 잡기, 충돌 시 즉시 거절</li>
+      <li>취소 — 1탭 취소, 회복 가능한 동선</li>
+      <li>실시간 뷰 — 지금 비어 있는 방의 한눈 보기</li>
+    </ul>
+    <h3>2차로 미룬 것</h3>
+    <ul>
+      <li>알림 — 한 달 안에 안정성을 보장할 수 없음</li>
+    </ul>
+
+    <p style="margin-top:1.6em">스크럼은 1주 단위로 돌렸고, Jira로 백엔드 두 명의 작업을 같은 페이지에 묶었습니다. PM이 그린 API 명세 초안은 매주의 정렬점이었고, ‘무엇을 만들고 있는가’를 회의 없이도 확인할 수 있게 해주었습니다.</p>
+  </div>
+</section>
+
+<!-- 실행 -->
+<section class="spread" data-spread="4">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="실행 단계"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 064 · 실행</div>
+    <div class="headline-overlay">
+      <div class="kicker">Execution — 한 달의 사이클</div>
+      <h2>
+        <span class="split-word"><span>회의가</span></span> <span class="split-word"><span>아니라</span></span> <span class="split-word"><span>명세가</span></span> <span class="split-word"><span>먼저였다.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    스크럼 보드. 같은 페이지 위에서 두 백엔드가 평행하게 달렸다.
+  </div>
+
+  <div class="body-col">
+    <p>1주차에 도메인을 쪼개고, 2주차에 API 명세 초안과 와이어를 동시에 굳혔습니다. 3주차에 핵심 동선을 끝내고, 4주차는 실데이터로 30개 동아리 회장단과 함께 베타를 돌렸습니다.</p>
+
+    <p>막힌 곳은 ‘충돌 정책’이었습니다. 동시에 같은 시간을 잡은 두 요청을 어떻게 처리할 것인가 — 단순한 ‘선착순’이 사용자에게 ‘공정함’으로 느껴지도록 메시지와 타임스탬프를 함께 노출했습니다. UX의 문제가 정책의 문제임을, 이때 배웠습니다.</p>
+
+    <h3>운영 도구</h3>
+    <p style="font-family:var(--serif);font-style:italic;color:var(--muted)">Jira · Scrum (1주 사이클) · Figma · API 명세 초안 · 회장단 베타</p>
+  </div>
+
+  <div class="pullquote">
+    “API 명세는 디자인보다 먼저, 회의보다 먼저였다.”
+    <span class="cite">— PM 노트</span>
+  </div>
+</section>
+
+<!-- 결과 -->
+<section class="spread" data-spread="5">
+  <div class="metric-spread">
+    <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="결과 — 30개 동아리, 노쇼 60% 감소"/>
+    <div class="overlay"></div>
+    <div class="topmark"><span style="color:#FF8888;font-weight:600;letter-spacing:.3em">LIFE</span> &nbsp; · &nbsp; RESULT · PAGE 070</div>
+    <div class="result">
+      <div class="kicker">Result — One Month Later</div>
+      <h2>
+        <span class="split-word"><span>30개</span></span> <span class="split-word"><span>동아리</span></span><br>
+        <span class="split-word"><span>·</span></span> <span class="split-word"><span>노쇼</span></span> <span class="split-word"><span>−60%</span></span>
+        <span class="small">정해진 한 달, 정해진 결과.</span>
+      </h2>
+    </div>
+    <div class="footnote">PHOTO BY 김태윤 · 2023 — END OF FEATURE</div>
+  </div>
+
+  <div class="body-col" style="margin-top:56px">
+    <p>한 달의 MVP 끝에, 30개 동아리가 들어왔고 노쇼는 60% 감소했습니다. 더 많은 동아리를 받기 위해서는 ‘알림’이 다음 마일스톤이 되어야 함을 데이터가 말해주었습니다.</p>
+
+    <p>이 한 달이 가르쳐 준 것은 단순합니다 — 좋은 기획은 ‘더 많이 그리는 일’이 아니라 ‘무엇을 덜어낼지 정하는 일’입니다.</p>
+  </div>
+
+  <div class="spread-meta" style="margin-top:36px">
+    <span><b>Period</b> 2023.07 – 2023.11 (MVP 1개월)</span>
+    <span><b>Adoption</b> 30개 동아리</span>
+    <span><b>Impact</b> 노쇼 −60%</span>
+  </div>
+</section>
+
+<a class="back-link" href="index.html">← 갤러리</a>
+
+<script>
+(function(){
+  var saved = null;
+  try{ saved = localStorage.getItem('tk-theme'); }catch(e){}
+  if(saved === 'alt') document.documentElement.setAttribute('data-theme','alt');
+  var btn = document.getElementById('themeToggle');
+  function paint(){
+    var alt = document.documentElement.getAttribute('data-theme') === 'alt';
+    btn.querySelectorAll('.opt').forEach(function(o){
+      var on = (o.getAttribute('data-mode')||'') === (alt?'alt':'');
+      o.classList.toggle('on', on);
+    });
+  }
+  paint();
+  btn.addEventListener('click', function(){
+    var alt = document.documentElement.getAttribute('data-theme') === 'alt';
+    if(alt){
+      document.documentElement.removeAttribute('data-theme');
+      try{ localStorage.setItem('tk-theme','default'); }catch(e){}
+    }else{
+      document.documentElement.setAttribute('data-theme','alt');
+      try{ localStorage.setItem('tk-theme','alt'); }catch(e){}
+    }
+    paint();
+  });
+
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var p = (h.scrollTop || document.body.scrollTop) / max;
+    bar.style.width = Math.max(0, Math.min(1, p)) * 100 + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var spreads = Array.prototype.slice.call(document.querySelectorAll('.spread'));
+
+  spreads.forEach(function(s){
+    var words = s.querySelectorAll('.split-word > span');
+    words.forEach(function(w, i){
+      w.style.transitionDelay = (i * 100) + 'ms';
+    });
+  });
+
+  if(prm){
+    spreads.forEach(function(s){ s.classList.add('in'); });
+    return;
+  }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && e.intersectionRatio > 0.18){
+        e.target.classList.add('in');
+      }
+    });
+  }, {threshold:[0, .2, .5]});
+  spreads.forEach(function(s){ io.observe(s); });
+
+  var io2 = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var idx = spreads.indexOf(e.target);
+      spreads.forEach(function(s, i){
+        s.classList.toggle('dimmed', i < idx);
+      });
+      if(idx >= 1) spreads[idx-1].classList.remove('dimmed');
+    });
+  }, {threshold:[.55]});
+  spreads.forEach(function(s){ io2.observe(s); });
+})();
+</script>
+</body>
+</html>

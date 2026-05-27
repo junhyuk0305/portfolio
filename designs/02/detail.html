@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — 동아리방을 다시 짜다 · 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500&family=Noto+Serif+KR:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --text: #111111;
+    --muted: #6B6B6B;
+    --rule: #DDDDDD;
+    --serif: 'Source Serif 4', 'Tiempos', 'Noto Serif KR', serif;
+    --sans: 'Inter', 'Pretendard', sans-serif;
+  }
+  [data-theme="alt"] {
+    --bg: #111111;
+    --text: #F5F5F5;
+    --muted: #888888;
+    --rule: #333333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.7;
+    font-weight: 300;
+    transition: background 250ms ease, color 250ms ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  body {
+    padding: 110px 32px 120px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  ::selection { background: var(--text); color: var(--bg); }
+
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--text);
+    z-index: 100;
+    transition: width 80ms linear, background 250ms ease;
+  }
+
+  .backlink {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .backlink:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  .toggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 90;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 250ms ease, border-color 250ms ease;
+    cursor: pointer;
+    background: transparent;
+    letter-spacing: 0.01em;
+  }
+  .toggle:hover { color: var(--text); }
+  .toggle .sep { color: var(--rule); margin: 0 6px; font-style: normal; }
+  .toggle .active { color: var(--text); }
+
+  .topnav {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 56px;
+  }
+  .topnav a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .topnav a:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  .essay-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 1.2;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+  .essay-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+
+  figure {
+    margin: 56px auto;
+    text-align: center;
+  }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: scale(1.04);
+    transition: transform 1400ms ease-out;
+  }
+  figure.in img { transform: scale(1.0); }
+  figure.portrait-small img {
+    width: 240px;
+    height: 300px;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+  figure.wide img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  figcaption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 14px;
+    letter-spacing: 0.01em;
+  }
+
+  .break {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 64px 0;
+    color: var(--muted);
+  }
+  .break .rule {
+    flex: 0 1 120px;
+    height: 1px;
+    background: var(--rule);
+    transition: background 250ms ease;
+  }
+  .break .star {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  h2.section-h {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    letter-spacing: 0.01em;
+  }
+
+  p.essay {
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--text);
+    margin-bottom: 22px;
+    font-weight: 300;
+  }
+  p.essay em { color: var(--text); }
+
+  blockquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 32px;
+    line-height: 1.4;
+    color: var(--text);
+    padding-left: 28px;
+    position: relative;
+    margin: 72px 0;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+  blockquote::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0;
+    width: 1px;
+    height: 0%;
+    background: var(--text);
+    transition: height 400ms ease-out, background 250ms ease;
+  }
+  blockquote.in::before { height: 100%; }
+  blockquote .qtext {
+    opacity: 0;
+    transition: opacity 500ms ease-out 400ms;
+  }
+  blockquote.in .qtext { opacity: 1; }
+
+  .bottomnav {
+    text-align: left;
+    margin-top: 96px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .bottomnav a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 200ms ease, border-color 200ms ease;
+  }
+  .bottomnav a:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  .fade {
+    opacity: 1;
+    transition: opacity 700ms ease-out;
+    transform: translateY(0);
+  }
+  .fade-ready {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .fade.in { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 640px) {
+    html, body { font-size: 16px; }
+    body { padding: 90px 22px 80px; }
+    .essay-title { font-size: 30px; }
+    .essay-sub { font-size: 15px; }
+    p.essay { font-size: 16px; }
+    h2.section-h { font-size: 20px; }
+    blockquote { font-size: 22px; padding-left: 20px; }
+    figure.portrait-small img { width: 100%; max-width: 220px; height: auto; aspect-ratio: 4/5; }
+    .toggle, .backlink { top: 14px; font-size: 13px; padding: 10px 12px; }
+    .toggle { right: 14px; }
+    .backlink { left: 14px; }
+    .topnav { margin-bottom: 40px; }
+  }
+  @media (max-width: 380px) {
+    body { padding: 110px 16px 72px; }
+    .essay-title { font-size: 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+    .fade { opacity: 1; }
+    blockquote::before { height: 100%; }
+    blockquote .qtext { opacity: 1; }
+    figure img { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<a class="backlink" href="../../index.html" aria-label="갤러리로 돌아가기">← 갤러리</a>
+
+<a class="toggle" id="themeToggle" role="button" aria-label="Toggle theme" tabindex="0">
+  <span id="lightLabel" class="active">morning</span><span class="sep">·</span><span id="darkLabel">evening</span>
+</a>
+
+<nav class="topnav fade">
+  <a href="index.html">← essays</a>
+</nav>
+
+<header>
+  <h1 class="essay-title fade">RoomSync — 동아리방을 다시 짜다</h1>
+  <p class="essay-sub fade">— 김태윤, 2023.07–2023.11.</p>
+</header>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 작업" />
+  <figcaption>— 회장단 워크숍, 2023</figcaption>
+</figure>
+
+<section>
+  <h2 class="section-h fade">문제</h2>
+  <p class="essay fade">학내 공용 회의실 한 칸을 50여 동아리가 종이 장부와 단톡방으로 번갈아 점유하던 공간이었다. 같은 시간을 두 팀이 잡는 일이 흔했고, 약속을 잡아두고 나타나지 않는 노쇼도 적지 않았다. 누구의 잘못이라고 짚기 어려운, 정보가 흩어진 데서 오는 마찰이었다.</p>
+</section>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section>
+  <h2 class="section-h fade">리서치</h2>
+  <p class="essay fade">먼저 회장단을 대상으로 구글폼 설문을 돌렸다. 응답에서 반복적으로 떠오른 말은 "예약 가능 여부보다 <em>지금 누가 쓰고 있는지</em>가 더 궁금하다"는 것이었다. 기능 목록을 늘리는 것이 아니라, '실시간 현황' 한 줄을 어떻게 정직하게 보여줄 것인가가 문제의 진짜 모양이었다.</p>
+</section>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 인터뷰" />
+  <figcaption>— 회장단 인터뷰, 2023</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section>
+  <h2 class="section-h fade">결정</h2>
+  <p class="essay fade">백엔드 인력이 두 명뿐이었고, 학기 일정상 가용 시간도 빠듯했다. 그래서 MVP는 셋으로 좁혔다. 예약, 취소, 그리고 실시간 뷰. 알림은 2차 릴리즈로 미뤘다. 덜어내는 결정은 늘 더하는 결정보다 늦게 칭찬받는다는 것을 알고 있었지만, 회장단의 인내심은 첫 출시까지만 우리 편이었다.</p>
+</section>
+
+<figure class="portrait-small fade">
+  <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="기획자 김태윤" />
+  <figcaption>— 기획자 노트, 2023</figcaption>
+</figure>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section>
+  <h2 class="section-h fade">실행</h2>
+  <p class="essay fade">백엔드 두 명과 함께 화면 흐름을 잡은 뒤, 개발팀과의 소통 비용을 줄이기 위해 API 명세 초안을 직접 작성했다. Jira로 백로그를 관리하고 스크럼 마스터 역할을 맡아 스프린트를 돌렸다. 갈등은 거의 없었지만, 사소한 합의 실패가 한 스프린트를 통째로 미루기도 했다.</p>
+</section>
+
+<div class="break fade"><span class="rule"></span><span class="star">*</span><span class="rule"></span></div>
+
+<section>
+  <h2 class="section-h fade">결과</h2>
+  <p class="essay fade">출시 첫 달에 30개 동아리가 가입했고, 노쇼율은 이전 시즌 대비 60% 줄었다. 단톡방으로 흩어져 있던 예약 신호가 한 화면 안으로 모이자, 프로덕트가 사람의 시간을 조금이라도 돌려주었다는 감각이 처음으로 또렷해졌다.</p>
+</section>
+
+<figure class="wide fade">
+  <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="RoomSync 발표 장면" />
+  <figcaption>— 데모데이 발표, 2023</figcaption>
+</figure>
+
+<blockquote class="fade">
+  <span class="qtext">30 동아리 · 노쇼 −60%</span>
+</blockquote>
+
+<nav class="bottomnav fade">
+  <a href="index.html">← back</a>
+</nav>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var toggle = document.getElementById('themeToggle');
+  var lightLabel = document.getElementById('lightLabel');
+  var darkLabel = document.getElementById('darkLabel');
+  function applyTheme(t){
+    if (t === 'alt') {
+      root.setAttribute('data-theme','alt');
+      lightLabel.classList.remove('active');
+      darkLabel.classList.add('active');
+    } else {
+      root.removeAttribute('data-theme');
+      darkLabel.classList.remove('active');
+      lightLabel.classList.add('active');
+    }
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('tk-theme'); } catch(e){}
+  applyTheme(saved === 'alt' ? 'alt' : 'light');
+  toggle.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'alt' ? 'light' : 'alt';
+    applyTheme(next);
+    try { localStorage.setItem('tk-theme', next); } catch(e){}
+  });
+
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    var pct = max > 0 ? (scrolled/max)*100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Mark only below-fold fades as fade-ready so above-fold content stays visible
+  document.querySelectorAll('.fade').forEach(function(el){ var r = el.getBoundingClientRect(); if (r.top > window.innerHeight * 0.85) el.classList.add('fade-ready'); });
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade, figure, blockquote').forEach(function(el){
+      io.observe(el);
+    });
+  } else {
+    document.querySelectorAll('.fade, figure, blockquote').forEach(function(el){
+      el.classList.add('in');
+    });
+  }
+})();
+</script>
+</body>
+</html>

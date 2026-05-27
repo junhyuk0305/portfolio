@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>★ TAEYOON KIM HOMEPAGE ★</title>
+<style>
+  :root {
+    --bg: #EFD27A;
+    --fg: #000000;
+    --splash: #C44848;
+    --stripe-a: #EFD27A;
+    --stripe-b: #000000;
+  }
+  [data-theme="alt"] {
+    --bg: #D88BA0;
+    --fg: #000000;
+    --splash: #4FB3B0;
+    --stripe-a: #D88BA0;
+    --stripe-b: #000000;
+  }
+
+  * {
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    text-rendering: optimizeSpeed;
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+    transition: background-color 200ms ease;
+  }
+  body {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+  .caution-banner, .scroll-progress {
+    margin-left: -48px;
+    margin-right: -48px;
+  }
+  a {
+    color: var(--fg);
+    text-decoration: underline;
+  }
+  a:hover {
+    color: var(--splash);
+  }
+
+  /* SCROLL PROGRESS BAR — 4px solid black, stepped */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 4px;
+    background: #000;
+    z-index: 9999;
+  }
+
+  /* THEME TOGGLE — top-right, brutalist */
+  .theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 20px;
+    z-index: 9998;
+    border: 4px solid #000;
+    background: var(--bg);
+    color: var(--fg);
+    box-shadow: 6px 6px 0 #000;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    cursor: pointer;
+    transform: rotate(2deg);
+  }
+  .theme-toggle:hover { color: var(--splash); }
+
+  .caution-banner {
+    width: 100%;
+    height: 44px;
+    line-height: 44px;
+    border-bottom: 4px solid #000;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--stripe-a) 0 22px,
+      var(--stripe-b) 22px 44px
+    );
+    overflow: hidden;
+    position: relative;
+    max-width: 100vw;
+  }
+  .caution-banner .strip {
+    background: var(--bg);
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+    height: 28px;
+    line-height: 28px;
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 2px;
+    width: 100%;
+    max-width: 100vw;
+  }
+  .caution-banner .strip span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 18s linear infinite;
+  }
+  @keyframes marquee {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .hero {
+    position: relative;
+    margin: 60px 48px 30px 48px;
+    padding: 40px 40px 40px 40px;
+    border: 4px solid #000;
+    background: var(--bg);
+    box-shadow: 6px 6px 0 #000;
+    transform: rotate(-1deg);
+    max-width: 780px;
+  }
+  .hero h1 {
+    position: relative;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 84px;
+    line-height: 1;
+    margin: 0 0 0 0;
+    letter-spacing: -2px;
+    height: auto;
+    max-width: 100%;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    overflow: visible;
+  }
+  /* letter-split */
+  .hero h1 .ltr {
+    display: inline-block;
+    opacity: 0;
+    transform: rotate(-5deg) translateY(10px);
+  }
+  .hero h1 .ltr.in {
+    opacity: 1;
+    transform: rotate(0deg) translateY(0);
+    transition: all 200ms steps(4, end);
+  }
+  /* black-bar sweep mask reveal */
+  .hero h1::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 2;
+    clip-path: inset(0 0 0 0);
+    animation: mask-sweep 900ms steps(6, end) forwards;
+    pointer-events: none;
+  }
+  @keyframes mask-sweep {
+    0%   { clip-path: inset(0 0 0 0); }
+    100% { clip-path: inset(0 100% 0 0); }
+  }
+
+  .hero .sub {
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    font-size: 26px;
+    margin-top: 18px;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+    padding: 4px 0;
+    display: inline-block;
+  }
+  .hero .meta {
+    margin-top: 14px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+  .hero .meta b { background: #000; color: var(--bg); padding: 1px 4px; }
+
+  /* PORTRAIT next to hero */
+  .hero-portrait {
+    position: absolute;
+    right: -30px;
+    top: -50px;
+    width: 200px;
+    transform: rotate(-3deg);
+    z-index: 3;
+  }
+
+  /* BRUTAL IMAGE STYLE */
+  .zerox {
+    display: block;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    background: #fff;
+    width: 100%;
+    height: auto;
+  }
+  .img-wrap {
+    margin: 14px 0 6px 0;
+  }
+  .img-cap {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    border-top: 2px dashed #000;
+    padding-top: 4px;
+  }
+
+  .profile {
+    position: relative;
+    margin: 30px 40px 30px 120px;
+    padding: 24px;
+    border: 4px solid #000;
+    background: var(--bg);
+    box-shadow: 6px 6px 0 #000;
+    transform: rotate(1.5deg);
+    max-width: 720px;
+  }
+  .profile h2 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 30px;
+    margin: 0 0 14px 0;
+    padding-bottom: 6px;
+    border-bottom: 4px double #000;
+    display: inline-block;
+  }
+  .profile p {
+    margin: 10px 0;
+    line-height: 1.55;
+  }
+
+  .section-title {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 48px;
+    margin: 60px 0 24px 50px;
+    padding-bottom: 6px;
+    border-bottom: 4px solid #000;
+    display: inline-block;
+    position: relative;
+  }
+  .section-title::after {
+    content: "";
+    display: block;
+    height: 0;
+    border-bottom: 4px solid #000;
+    margin-top: 4px;
+  }
+
+  .projects {
+    position: relative;
+    padding: 20px 20px 80px 20px;
+  }
+  .project-box {
+    position: relative;
+    border: 4px solid #000;
+    background: var(--bg);
+    box-shadow: 6px 6px 0 #000;
+    padding: 18px 22px;
+    margin: 40px 0;
+    max-width: 720px;
+    display: block;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .project-box:hover { color: var(--fg); }
+  .project-box.p1 { transform: rotate(-2deg); margin-left: 80px; }
+  .project-box.p2 { transform: rotate(3deg);  margin-left: 220px; }
+  .project-box.p3 { transform: rotate(-1deg); margin-left: 50px; }
+
+  .project-box .tag {
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    font-weight: bold;
+    color: var(--splash);
+    font-size: 22px;
+    border-bottom: 2px solid var(--splash);
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+  .project-box h3 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 34px;
+    margin: 6px 0 10px 0;
+    line-height: 1.05;
+    text-decoration: underline;
+  }
+  .project-box table.meta {
+    border-collapse: collapse;
+    margin: 8px 0 12px 0;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+  }
+  .project-box table.meta td {
+    border: 2px solid #000;
+    padding: 2px 8px;
+    background: var(--bg);
+  }
+  .project-box table.meta td.k { background: #000; color: var(--bg); font-weight: bold; }
+  .project-box .desc {
+    margin: 8px 0 14px 0;
+    line-height: 1.5;
+  }
+  .project-box .seedetail {
+    display: inline-block;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 30px;
+    border: 4px solid #000;
+    padding: 8px 18px;
+    background: var(--splash);
+    color: var(--bg);
+    box-shadow: 6px 6px 0 #000;
+    text-decoration: none;
+    margin-top: 8px;
+    transform: rotate(-1.5deg);
+  }
+  .project-box .seedetail:hover {
+    background: var(--bg);
+    color: var(--splash);
+  }
+
+  .construction {
+    position: absolute;
+    right: 30px;
+    top: 280px;
+    width: 240px;
+    transform: rotate(12deg);
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    background:
+      repeating-linear-gradient(
+        -45deg,
+        var(--stripe-a) 0 14px,
+        var(--stripe-b) 14px 28px
+      );
+    padding: 4px;
+    z-index: 5;
+  }
+  .construction .inner {
+    background: var(--bg);
+    border: 4px solid #000;
+    padding: 12px 8px;
+    text-align: center;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  .construction .inner small {
+    display: block;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    margin-top: 4px;
+  }
+
+  .guestbook {
+    position: relative;
+    margin: 60px 60px 60px 80px;
+    padding: 20px;
+    border: 4px solid #000;
+    background: var(--bg);
+    box-shadow: 6px 6px 0 #000;
+    transform: rotate(-0.5deg);
+    max-width: 640px;
+  }
+  .guestbook h2 {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 36px;
+    margin: 0 0 10px 0;
+    border-bottom: 4px double #000;
+    display: inline-block;
+    padding-bottom: 4px;
+  }
+  .guestbook .entry {
+    border: 2px dashed #000;
+    padding: 8px 10px;
+    margin: 10px 0;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    background: var(--bg);
+  }
+  .guestbook .entry b { color: var(--splash); }
+  .guestbook form {
+    border-top: 4px solid #000;
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+  .guestbook input, .guestbook textarea {
+    border: 4px solid #000;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    padding: 4px 6px;
+    box-shadow: 4px 4px 0 #000;
+    margin: 4px 4px 4px 0;
+  }
+  .guestbook button {
+    border: 4px solid #000;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 4px 14px;
+    box-shadow: 4px 4px 0 #000;
+    cursor: pointer;
+  }
+  .guestbook button:hover { color: var(--splash); }
+
+  .skills {
+    margin: 40px 0 0 80px;
+    max-width: 700px;
+  }
+  .skills span {
+    display: inline-block;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    padding: 4px 10px;
+    margin: 6px 8px 6px 0;
+    background: var(--bg);
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+  }
+  .skills span:nth-child(2n) { transform: rotate(-3deg); }
+  .skills span:nth-child(3n) { transform: rotate(2deg); }
+
+  hr.fat {
+    border: none;
+    border-top: 4px solid #000;
+    border-bottom: 4px solid #000;
+    height: 6px;
+    margin: 40px 20px;
+    background: var(--bg);
+  }
+
+  footer {
+    border-top: 4px solid #000;
+    margin-top: 60px;
+    padding: 18px 30px;
+    background: var(--bg);
+    font-family: "Courier New", monospace;
+    font-size: 14px;
+  }
+  footer .counter {
+    display: inline-block;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    background: #000;
+    color: var(--bg);
+    padding: 4px 10px;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-right: 14px;
+  }
+  footer .red { color: var(--splash); font-weight: bold; }
+
+  .floating-arrow {
+    position: absolute;
+    left: 10px;
+    top: 240px;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 60px;
+    transform: rotate(-20deg);
+    color: var(--splash);
+    font-weight: bold;
+  }
+
+  /* GALLERY BACK LINK */
+  .gallery-back {
+    display: inline-block;
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    font-weight: bold;
+    color: var(--fg);
+    background: var(--bg);
+    border: 4px solid #000;
+    box-shadow: 4px 4px 0 #000;
+    font-size: 16px;
+    padding: 10px 16px;
+    margin: 20px 0 0 30px;
+    text-decoration: none;
+    min-height: 44px;
+    line-height: 22px;
+  }
+  .gallery-back:hover { color: var(--splash); }
+
+  /* SCROLL-TRIGGERED snap-in */
+  .snap {
+    opacity: 0;
+    transform: translate(-20px, 0);
+    transition: all 200ms steps(4, end);
+  }
+  .snap.in {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  /* BLINK */
+  .blink {
+    animation: blink-step 1.2s steps(1) infinite;
+  }
+  @keyframes blink-step {
+    0%, 49%   { opacity: 1; }
+    50%, 100% { opacity: 0.2; }
+  }
+
+  @media (max-width: 720px) {
+    body { overflow-x: hidden; padding-left: 16px; padding-right: 16px; }
+    .caution-banner, .scroll-progress { margin-left: -16px; margin-right: -16px; }
+    .gallery-back { margin-left: 12px; font-size: 14px; padding: 10px 12px; }
+    .hero { margin: 60px 0 30px 0; padding: 24px 18px 24px 18px; transform: rotate(0deg); }
+    .hero h1 { font-size: 48px; height: auto; line-height: 1; }
+    .hero h1::before { display: none; }
+    .hero-portrait { position: static; width: 140px; margin-top: 10px; transform: rotate(0deg); }
+    .profile { margin: 30px 16px 30px 16px; transform: rotate(0deg); }
+    .project-box.p1, .project-box.p2, .project-box.p3 {
+      margin-left: 16px; margin-right: 16px;
+      transform: rotate(0deg);
+    }
+    .project-box .seedetail { transform: rotate(0deg); font-size: 22px; min-height: 44px; }
+    .construction { display: none; }
+    .floating-arrow { display: none; }
+    .section-title { font-size: 28px; margin-left: 16px; margin-right: 16px; }
+    .guestbook { margin: 40px 16px; transform: rotate(0deg); }
+    .guestbook button, .guestbook input { min-height: 44px; }
+    .skills { margin: 30px 16px 0 16px; }
+    .skills span { transform: rotate(0deg) !important; }
+    .theme-toggle { top: 60px; right: 8px; font-size: 13px; padding: 8px 12px; transform: rotate(0deg); min-height: 44px; }
+    .caution-banner .strip { font-size: 14px; }
+    .caution-banner .strip span { animation-duration: 28s; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snap { opacity: 1; transform: none; transition: none; }
+    .hero h1 .ltr { opacity: 1; transform: none; }
+    .hero h1::before { animation: none; clip-path: inset(0 100% 0 0); }
+    .blink { animation: none; }
+    .caution-banner .strip span { animation: none; padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<button class="theme-toggle" id="themeToggle" type="button">YELLOW MODE</button>
+
+<div class="caution-banner">
+  <div class="strip">
+    <span>★★ TAEYOON KIM HOMEPAGE ★★ LAST UPDATED: 2026.05.22 ★★&nbsp;</span>
+  </div>
+</div>
+
+<a class="gallery-back" href="../../index.html">← 갤러리</a>
+
+<div class="hero snap">
+  <h1 id="heroName">김태윤</h1>
+  <div class="sub">서비스 기획자 / PM</div>
+  <div class="meta">
+    <b>EMAIL</b> taeyoon@example.com &nbsp; | &nbsp;
+    <b>전공</b> 경영학 / 컴퓨터공학 복수전공 (3.9/4.5)
+  </div>
+  <div class="hero-portrait">
+    <img class="zerox" src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait">
+    <div class="img-cap">[ PHOTO #01 / PORTRAIT.JPG / 2026 ]</div>
+  </div>
+</div>
+
+<div class="floating-arrow blink">↘</div>
+
+<div class="construction">
+  <div class="inner">
+    UNDER<br>CONSTRUCTION!!<br>
+    <small>이 홈페이지는 영원히 공사중입니다</small>
+  </div>
+</div>
+
+<div class="profile snap">
+  <h2>ABOUT ME / 자기소개</h2>
+  <p>비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 경영학과 컴퓨터공학을 복수 전공하며 가설 수립부터 API 명세 작성, 스프린트 관리까지 풀사이클 기획 역량을 다졌습니다.</p>
+  <p>학내 동아리방 예약 서비스 'RoomSync' 기획 당시, 회장단 구글폼 설문으로 '실시간 현황 확인'이라는 핵심 니즈를 데이터로 검증한 뒤 MVP 전략으로 기능을 과감히 추렸고, 30개 동아리 가입과 노쇼율 60% 감소를 만들었습니다. 또한 MAU 50만 커머스 스타트업 인턴십에서는 GA4와 사용성 테스트로 이탈 구간을 진단해 A/B 테스트를 기획했고, 장바구니 전환율을 12%p 끌어올린 B안이 실제 정규 배포로 이어지는 성과를 냈습니다.</p>
+</div>
+
+<div class="skills snap">
+  <span>Notion</span>
+  <span>Figma</span>
+  <span>GA4</span>
+  <span>SQL</span>
+  <span>Agile</span>
+  <span>Jira</span>
+  <span>Amplitude</span>
+</div>
+
+<hr class="fat">
+
+<h2 class="section-title snap">★ PROJECTS ★</h2>
+
+<div class="projects">
+
+  <a href="detail.html" class="project-box p1 snap">
+    <span class="tag">PROJECT #01</span>
+    <h3>RoomSync — 동아리방 예약 서비스</h3>
+    <table class="meta">
+      <tr>
+        <td class="k">made</td><td>2023.07–2023.11</td>
+        <td class="k">type</td><td>서비스 기획 / PM</td>
+      </tr>
+      <tr>
+        <td class="k">status</td><td>done</td>
+        <td class="k">year</td><td>2023</td>
+      </tr>
+    </table>
+    <div class="img-wrap">
+      <img class="zerox" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="team meeting" style="transform: rotate(3deg); max-width: 360px;">
+      <div class="img-cap">[ PHOTO #02 / TEAM_MEETING.JPG / 2023 ]</div>
+    </div>
+    <p class="desc">50여 개 동아리 수기 예약 → 겹침 사고. 회장단 구글폼 설문으로 실시간 현황 확인 니즈 검증. 백엔드 2명과 협업, MVP로 핵심 기능만(예약·취소·실시간 뷰), 알림은 2차. API 명세 직접 초안. Jira·스크럼. <b>30개 동아리, 노쇼 -60%.</b></p>
+    <span class="seedetail">[자세히 보기 →]</span>
+  </a>
+
+  <a href="detail.html" class="project-box p2 snap">
+    <span class="tag">PROJECT #02</span>
+    <h3>A사 커머스 인턴 — 장바구니 전환 +12%p</h3>
+    <table class="meta">
+      <tr>
+        <td class="k">made</td><td>2023.01–2023.06</td>
+        <td class="k">type</td><td>PM 인턴 / 데이터</td>
+      </tr>
+      <tr>
+        <td class="k">status</td><td>shipped</td>
+        <td class="k">year</td><td>2023</td>
+      </tr>
+    </table>
+    <div class="img-wrap">
+      <img class="zerox" src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="interview" style="transform: rotate(1deg); max-width: 360px;">
+      <div class="img-cap">[ PHOTO #03 / USER_INTERVIEW.JPG / 2023 ]</div>
+    </div>
+    <p class="desc">MAU 50만, GA4·앰플리튜드로 상세→장바구니 이탈 45% 확인. 5명 UT로 하단 구매 버튼 텍스트 가림 페인포인트. 투명도·높이 조정 + 무료배송 넛지 A/B. <b>B안 12%p 상승, 정규 배포.</b></p>
+    <span class="seedetail">[자세히 보기 →]</span>
+  </a>
+
+  <a href="detail.html" class="project-box p3 snap">
+    <span class="tag">PROJECT #03</span>
+    <h3>IT 연합 동아리 회장 — 배포율 40→85%</h3>
+    <table class="meta">
+      <tr>
+        <td class="k">made</td><td>2022.03–2022.12</td>
+        <td class="k">type</td><td>리더십 / 운영</td>
+      </tr>
+      <tr>
+        <td class="k">status</td><td>done</td>
+        <td class="k">year</td><td>2022</td>
+      </tr>
+    </table>
+    <div class="img-wrap">
+      <img class="zerox" src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="lecture" style="transform: rotate(-3deg); max-width: 360px;">
+      <div class="img-cap">[ PHOTO #04 / LECTURE_DEMODAY.JPG / 2022 ]</div>
+    </div>
+    <p class="desc">100명 동아리, 직무 교류 부재로 완성률 40%. 직무 교류 세미나 월 1회 도입. <b>완성률 40%→85%.</b></p>
+    <span class="seedetail">[자세히 보기 →]</span>
+  </a>
+
+</div>
+
+<hr class="fat">
+
+<div class="guestbook snap">
+  <h2>GUESTBOOK / 방명록</h2>
+  <div class="entry">
+    <b>[ NOTICE ] :</b> 방명록은 데모용입니다. 실제 메시지는 taeyoon@example.com 으로 보내주세요.
+  </div>
+  <div class="entry">
+    <b>[ SAMPLE ] :</b> "한마디 남겨보세요" — 입력은 alert 데모로 동작합니다.
+  </div>
+  <form onsubmit="event.preventDefault(); alert('아직 공사중입니다.');">
+    <input type="text" placeholder="이름" size="10">
+    <input type="text" placeholder="한마디" size="30">
+    <button type="submit">[ 남기기 ]</button>
+  </form>
+</div>
+
+<footer>
+  <span class="counter">방문자 수: 00042</span>
+  <span>BEST VIEWED IN <b>NETSCAPE NAVIGATOR 4.0</b> @ 800x600 &nbsp;|&nbsp; <span class="red">© 2026 TAEYOON KIM</span> &nbsp;|&nbsp; taeyoon@example.com</span>
+</footer>
+
+<script>
+(function(){
+  // THEME TOGGLE
+  var btn = document.getElementById('themeToggle');
+  var saved = null;
+  try { saved = localStorage.getItem('tk-theme'); } catch(e) {}
+  function applyTheme(t) {
+    if (t === 'alt') {
+      document.documentElement.setAttribute('data-theme', 'alt');
+      btn.textContent = 'PINK MODE';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent = 'YELLOW MODE';
+    }
+  }
+  applyTheme(saved === 'alt' ? 'alt' : 'primary');
+  btn.addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme') === 'alt' ? 'alt' : 'primary';
+    var next = cur === 'alt' ? 'primary' : 'alt';
+    applyTheme(next);
+    try { localStorage.setItem('tk-theme', next); } catch(e) {}
+  });
+
+  // SCROLL PROGRESS — stepped to nearest 5%
+  var bar = document.getElementById('scrollProgress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var p = (h.scrollTop || document.body.scrollTop) / max * 100;
+    var snapped = Math.round(p / 5) * 5;
+    if (snapped > 100) snapped = 100;
+    bar.style.width = snapped + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // INTERSECTION OBSERVER — snap-in
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var snaps = document.querySelectorAll('.snap');
+  if (reduce) {
+    snaps.forEach(function(el){ el.classList.add('in'); });
+  } else if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    snaps.forEach(function(el){ io.observe(el); });
+  } else {
+    snaps.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  // TEXT-SPLIT — hero name per-letter snap-in
+  var heroName = document.getElementById('heroName');
+  if (heroName) {
+    var txt = heroName.textContent;
+    heroName.textContent = '';
+    var letters = [];
+    for (var i = 0; i < txt.length; i++) {
+      var s = document.createElement('span');
+      s.className = 'ltr';
+      s.textContent = txt.charAt(i);
+      heroName.appendChild(s);
+      letters.push(s);
+    }
+    if (reduce) {
+      letters.forEach(function(s){ s.classList.add('in'); });
+    } else {
+      letters.forEach(function(s, idx){
+        setTimeout(function(){ s.classList.add('in'); }, 900 + idx * 100);
+      });
+    }
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — 학내 동아리방 예약 관리 웹서비스 · Kim Taeyoon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500&family=Noto+Serif+KR:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --text: #1A1A1A;
+    --muted: #6A6A6A;
+    --accent: #000000;
+    --hairline: rgba(0,0,0,0.22);
+    --img-filter: none;
+    --img-hover: none;
+    --transition-theme: 400ms ease;
+  }
+  [data-theme="alt"] {
+    --bg: #0F0F0F;
+    --text: #F2F2F2;
+    --muted: #A6A6A6;
+    --accent: #FFFFFF;
+    --hairline: rgba(255,255,255,0.24);
+    --img-filter: none;
+    --img-hover: none;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    font-weight: 300;
+    transition: background var(--transition-theme), color var(--transition-theme);
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--text); color: var(--bg); }
+
+  h1, h2, h3 {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 1px;
+    width: 0%;
+    background: var(--text);
+    z-index: 1000;
+    transition: width 80ms linear, background var(--transition-theme);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 24px; right: 32px;
+    z-index: 1100;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    padding: 10px 18px;
+    border-radius: 999px;
+    transition: opacity 300ms ease, color var(--transition-theme), background var(--transition-theme), border-color var(--transition-theme);
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(6px);
+  }
+  .theme-toggle:hover { opacity: 0.85; }
+  .theme-toggle .sep { color: var(--muted); margin: 0 6px; }
+  .theme-toggle .active { color: var(--text); font-weight: 500; }
+  .theme-toggle .inactive { color: var(--muted); }
+
+  .back-link {
+    position: fixed;
+    top: 24px; left: 32px;
+    z-index: 1100;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    padding: 10px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--transition-theme), background var(--transition-theme), border-color var(--transition-theme);
+    backdrop-filter: blur(6px);
+  }
+  .back-link:hover { color: var(--muted); }
+  .back-link .arrow {
+    display: inline-block;
+    transition: transform 300ms ease;
+  }
+  .back-link:hover .arrow { transform: translateX(-4px); }
+
+  .back-link-secondary {
+    position: fixed;
+    top: 24px; left: 200px;
+    z-index: 1100;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 10px 0;
+    transition: color 300ms ease;
+  }
+  .back-link-secondary:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 88vh;
+    min-height: 640px;
+    overflow: hidden;
+  }
+  .hero-img-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: inset(100% 0 0 0);
+  }
+  .hero-img-wrap.revealed {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 1200ms cubic-bezier(.7,0,.3,1);
+  }
+  .hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--img-filter);
+    transition: filter 1500ms ease, transform 8000ms ease;
+  }
+  .hero-img-wrap.revealed .hero-img {
+    filter: var(--img-hover);
+    transform: scale(1.02);
+  }
+  .hero-overlay {
+    position: absolute;
+    left: 56px;
+    bottom: 56px;
+    color: #FFFFFF;
+    z-index: 2;
+    mix-blend-mode: difference;
+  }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #DDDDDD;
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 700ms ease 1400ms, transform 700ms ease 1400ms;
+  }
+  .hero-img-wrap.revealed ~ .hero-overlay .hero-eyebrow { opacity: 1; transform: translateY(0); }
+  .hero-name {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #FFFFFF;
+    display: flex;
+    gap: 0.06em;
+    flex-wrap: wrap;
+  }
+  .hero-name .word {
+    display: inline-block;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: transform 800ms cubic-bezier(.7,0,.3,1), opacity 800ms ease;
+  }
+  .hero-img-wrap.revealed ~ .hero-overlay .hero-name .word { transform: translateY(0); opacity: 1; }
+  .hero-caption {
+    position: absolute;
+    right: 56px;
+    bottom: 56px;
+    z-index: 2;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: #DDDDDD;
+    mix-blend-mode: difference;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 700ms ease 1600ms;
+  }
+  .hero-img-wrap.revealed ~ .hero-caption { opacity: 1; }
+
+  .section { padding: 160px 80px; }
+
+  /* INTRO BLOCK after hero */
+  .intro-block {
+    max-width: 880px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .intro-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 48px;
+    transition: color var(--transition-theme);
+  }
+  .intro-title {
+    font-size: 56px;
+    line-height: 1.18;
+    margin-bottom: 40px;
+    letter-spacing: -0.02em;
+  }
+  .intro-deck {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 640px;
+    margin: 0 auto;
+    transition: color var(--transition-theme);
+  }
+  .intro-meta {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--hairline);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    text-align: left;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    transition: border-color var(--transition-theme), color var(--transition-theme);
+  }
+  .intro-meta .label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+  .intro-meta .value {
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: color var(--transition-theme);
+  }
+
+  /* MODULES */
+  .module {
+    max-width: 1280px;
+    margin: 0 auto 160px;
+    display: grid;
+    grid-template-columns: 65% 1fr;
+    gap: 80px;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .module.in-view { opacity: 1; transform: translateY(0); }
+  .module.flip { grid-template-columns: 1fr 65%; }
+  .module.flip .img-col { order: 2; }
+  .module.flip .text-col { order: 1; }
+
+  .img-col {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    position: relative;
+  }
+  .img-col img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: var(--img-filter);
+    transition: filter 1500ms ease, transform 2400ms ease;
+  }
+  .module.in-view .img-col img { filter: var(--img-hover); }
+  .img-col:hover img { transform: scale(1.04); }
+  .img-caption {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    transition: color var(--transition-theme);
+  }
+
+  .text-col {
+    padding: 24px 0;
+  }
+  .module-eyebrow {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    margin-bottom: 24px;
+    transition: color var(--transition-theme);
+  }
+  .module-title {
+    font-size: 48px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .module-sub {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    transition: color var(--transition-theme);
+  }
+  .module-body {
+    font-size: 15px;
+    line-height: 1.85;
+    margin-bottom: 24px;
+    max-width: 460px;
+  }
+  .module-body p { margin-bottom: 1.2em; }
+  .module-list {
+    list-style: none;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--hairline);
+    max-width: 460px;
+    transition: border-color var(--transition-theme);
+  }
+  .module-list li {
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 8px 0;
+    color: var(--text);
+    display: flex;
+    gap: 16px;
+    transition: color var(--transition-theme);
+  }
+  .module-list li::before {
+    content: attr(data-num);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 32px;
+    letter-spacing: 0.06em;
+  }
+
+  /* Metric callout (Results module) */
+  .metric-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+    margin-bottom: 24px;
+    max-width: 460px;
+  }
+  .metric {
+    padding: 20px 0;
+    border-top: 1px solid var(--hairline);
+    transition: border-color var(--transition-theme);
+  }
+  .metric-num {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .metric-label {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color var(--transition-theme);
+  }
+
+  /* Closing quote */
+  .closing {
+    max-width: 720px;
+    margin: 80px auto 0;
+    padding: 120px 40px 40px;
+    text-align: center;
+    border-top: 1px solid var(--hairline);
+    transition: border-color var(--transition-theme);
+  }
+  .closing-quote {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-style: italic;
+    font-size: 32px;
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+  }
+  .closing-attr {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color var(--transition-theme);
+  }
+
+  .next-link {
+    text-align: center;
+    padding: 120px 40px 80px;
+  }
+  .next-eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 32px;
+    transition: color var(--transition-theme);
+  }
+  .next-line {
+    font-family: 'DM Serif Display', 'Noto Serif KR', serif;
+    font-size: 56px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .next-line a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 6px;
+    transition: border-color 400ms ease, color var(--transition-theme);
+  }
+  .next-line a:hover { border-bottom-color: var(--text); }
+
+  .footer {
+    padding: 80px 80px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    transition: color var(--transition-theme);
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 700ms cubic-bezier(.7,0,.3,1), transform 700ms cubic-bezier(.7,0,.3,1);
+  }
+  .reveal.in-view { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .section { padding: 100px 32px; }
+    .hero-overlay { left: 24px; bottom: 24px; }
+    .hero-caption { right: 24px; bottom: 24px; }
+    .hero-name { font-size: 52px; }
+    .intro-title { font-size: 36px; }
+    .module, .module.flip {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .module.flip .img-col { order: 1; }
+    .module.flip .text-col { order: 2; }
+    .module-title { font-size: 32px; }
+    .intro-meta { grid-template-columns: 1fr 1fr; }
+    .metric-stack { grid-template-columns: 1fr; }
+    .closing-quote { font-size: 22px; }
+    .next-line { font-size: 32px; }
+    .back-link, .theme-toggle, .back-link-secondary { top: 16px; padding: 8px 14px; font-size: 11px; }
+    .theme-toggle { font-size: 14px; }
+    .back-link { left: 16px; }
+    .back-link-secondary { left: 160px; padding: 8px 0; }
+    .theme-toggle { right: 16px; }
+    .footer { padding: 40px 24px; flex-direction: column; gap: 12px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+    .reveal, .module { opacity: 1 !important; transform: none !important; }
+    .hero-img-wrap { clip-path: inset(0) !important; }
+    .hero-name .word { opacity: 1 !important; transform: none !important; }
+    .hero-img, .img-col img { filter: var(--img-hover) !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<a class="back-link" href="../../index.html"><span class="arrow">←</span> 갤러리</a>
+<a class="back-link-secondary" href="index.html">Index</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span class="active" id="modeAlba">alba</span><span class="sep">/</span><span class="inactive" id="modeNotte">notte</span>
+</button>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-img-wrap" id="heroImgWrap">
+    <img class="hero-img" src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync team session" />
+  </div>
+  <div class="hero-overlay">
+    <div class="hero-eyebrow">Case 01 — Volume Ⅰ</div>
+    <h1 class="hero-name" aria-label="ROOMSYNC">
+      <span class="word">ROOM</span><span class="word">SYNC</span>
+    </h1>
+  </div>
+  <div class="hero-caption">
+    2023.07–2023.11 · Product Manager<br />학내 동아리방 예약 관리 웹서비스
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="section">
+  <div class="intro-block">
+    <div class="intro-eyebrow reveal">Case 01 — RoomSync</div>
+    <h2 class="intro-title reveal">겹치지 않는 시간표는, 그냥 약속이 아니라 시스템의 문제다.</h2>
+    <p class="intro-deck reveal">
+      학내 50여 개 동아리가 공용 회의실을 수기로 예약하다 겹침 사고가 반복되던 문제. 회장단 설문으로 핵심 니즈를 검증한 뒤, 예약·취소·실시간 뷰만 남긴 MVP를 5개월 안에 출시했습니다.
+    </p>
+
+    <div class="intro-meta reveal">
+      <div>
+        <div class="label">Year</div>
+        <div class="value">2023.07 – 2023.11</div>
+      </div>
+      <div>
+        <div class="label">Role</div>
+        <div class="value">PM · 스크럼 마스터</div>
+      </div>
+      <div>
+        <div class="label">Team</div>
+        <div class="value">PM 1 · Backend 2</div>
+      </div>
+      <div>
+        <div class="label">Stack</div>
+        <div class="value">Jira · Notion · API 명세</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCOVERY — image LEFT -->
+<article class="module">
+  <div class="img-col">
+    <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문과 사용자 발견" />
+    <div class="img-caption">Chapter 01 — Discovery</div>
+  </div>
+  <div class="text-col">
+    <div class="module-eyebrow">Chapter 01 — 발견</div>
+    <h3 class="module-title">먼저 묻는다, 어디서 막히는지.</h3>
+    <div class="module-sub">회장단 구글 폼 설문으로 검증한 니즈</div>
+    <div class="module-body">
+      <p>
+        50여 개 동아리가 공용 회의실을 종이와 단톡방으로 관리하다 보니, 시간 겹침과 노쇼가 반복되고 있었습니다. 가설을 검증하기 위해 회장단 대상 구글 폼 설문을 돌렸고, ‘실시간 예약 현황을 한눈에 볼 수 있어야 한다’는 항목이 압도적인 1순위 니즈로 확인되었습니다.
+      </p>
+      <p>
+        문제는 곧 ‘기능 욕심’이 아니라 ‘현황 가시화’였습니다. 알림과 통계는 매력적이지만, 현장 운영을 무너뜨리는 진짜 통점이 아니라는 사실을 데이터로 못 박은 뒤 다음 단계로 넘어갔습니다.
+      </p>
+    </div>
+    <ul class="module-list">
+      <li data-num="01">대상: 학내 50여 개 동아리 회장단</li>
+      <li data-num="02">수단: 구글 폼 설문 — 우선순위 평가</li>
+      <li data-num="03">핵심 니즈: 실시간 예약 현황 확인</li>
+      <li data-num="04">2차 니즈로 분류: 자동 알림 · 통계 리포트</li>
+    </ul>
+  </div>
+</article>
+
+<!-- EXECUTION — image RIGHT (flip) -->
+<article class="module flip">
+  <div class="img-col">
+    <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="API 명세와 스프린트 보드" />
+    <div class="img-caption">Chapter 02 — Build</div>
+  </div>
+  <div class="text-col">
+    <div class="module-eyebrow">Chapter 02 — 실행</div>
+    <h3 class="module-title">덜어내야 빠르게 도착한다.</h3>
+    <div class="module-sub">백엔드 2명 · 일정 부족 · MVP 결정</div>
+    <div class="module-body">
+      <p>
+        백엔드 개발자는 두 명, 학기 일정은 빠듯했습니다. 모든 기능을 욕심내는 대신, 예약·취소·실시간 뷰 세 가지만 1차 스프린트에 포함시키고 알림과 통계는 2차로 미루는 결정을 팀과 합의했습니다.
+      </p>
+      <p>
+        개발 소통 비용을 줄이기 위해 API 명세서 초안을 직접 작성해 개발팀에 전달했고, Jira를 도입해 스크럼 마스터로서 데일리·회고를 운영하며 일정을 직접 관리했습니다.
+      </p>
+    </div>
+    <ul class="module-list">
+      <li data-num="01">MVP 범위: 예약 · 취소 · 실시간 뷰</li>
+      <li data-num="02">2차 백로그: 알림 · 통계 리포트</li>
+      <li data-num="03">PM이 직접 작성한 API 명세 초안</li>
+      <li data-num="04">Jira 도입 · 스크럼 마스터 · 데일리/회고 운영</li>
+    </ul>
+  </div>
+</article>
+
+<!-- RESULTS — image LEFT, with metric callout -->
+<article class="module">
+  <div class="img-col">
+    <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="출시 후 운영 리뷰" />
+    <div class="img-caption">Chapter 03 — Outcome</div>
+  </div>
+  <div class="text-col">
+    <div class="module-eyebrow">Chapter 03 — 결과</div>
+    <h3 class="module-title">덜어낸 만큼, 정확히 작동했다.</h3>
+    <div class="module-sub">출시 1개월 시점</div>
+    <div class="module-body">
+      <p>
+        ‘현황을 보이게 만든다’는 단 하나의 약속을 끝까지 지킨 결과, 출시 1개월 만에 학내 30개 동아리가 자발적으로 가입했고, 가장 큰 통점이었던 노쇼 비율은 이전 운영 대비 60% 감소했습니다. 다음 분기 백로그로는 회장단의 운영 부담을 줄여줄 알림 모듈을 우선 배치했습니다.
+      </p>
+    </div>
+
+    <div class="metric-stack">
+      <div class="metric">
+        <div class="metric-num">30</div>
+        <div class="metric-label">가입 동아리 (1개월)</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">-60%</div>
+        <div class="metric-label">노쇼율 감소</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">5<span style="font-size:0.5em;letter-spacing:0;margin-left:4px;">개월</span></div>
+        <div class="metric-label">기획 → 출시</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">3</div>
+        <div class="metric-label">MVP 핵심 기능</div>
+      </div>
+    </div>
+
+    <ul class="module-list">
+      <li data-num="01">대상: 학내 50여 개 동아리 — 1개월 만에 30개 가입</li>
+      <li data-num="02">노쇼율: 수기 운영 대비 60% 감소</li>
+      <li data-num="03">다음 백로그: 알림 모듈 · 통계 리포트</li>
+    </ul>
+  </div>
+</article>
+
+<!-- CLOSING -->
+<section class="closing reveal">
+  <p class="closing-quote">
+    “기능을 더하는 일보다, 무엇을 빼지 않을지 정하는 일이 더 어렵다.”
+  </p>
+  <div class="closing-attr">Internal Note — RoomSync, 2023</div>
+</section>
+
+<!-- NEXT -->
+<section class="next-link reveal">
+  <div class="next-eyebrow">Back to Index</div>
+  <div class="next-line">
+    <a href="index.html">전체 케이스 보기 →</a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div>© 2026 KIM TAEYOON</div>
+  <div>CASE 01 — ROOMSYNC</div>
+</footer>
+
+<script>
+  // Theme toggle
+  (function() {
+    const root = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const alba = document.getElementById('modeAlba');
+    const notte = document.getElementById('modeNotte');
+    const KEY = 'tk-theme';
+    const saved = localStorage.getItem(KEY);
+    if (saved === 'alt') {
+      root.setAttribute('data-theme', 'alt');
+      alba.classList.remove('active'); alba.classList.add('inactive');
+      notte.classList.remove('inactive'); notte.classList.add('active');
+    }
+    toggle.addEventListener('click', function() {
+      const isAlt = root.getAttribute('data-theme') === 'alt';
+      if (isAlt) {
+        root.removeAttribute('data-theme');
+        localStorage.setItem(KEY, 'default');
+        alba.classList.add('active'); alba.classList.remove('inactive');
+        notte.classList.add('inactive'); notte.classList.remove('active');
+      } else {
+        root.setAttribute('data-theme', 'alt');
+        localStorage.setItem(KEY, 'alt');
+        alba.classList.remove('active'); alba.classList.add('inactive');
+        notte.classList.remove('inactive'); notte.classList.add('active');
+      }
+    });
+  })();
+
+  // Progress bar
+  (function() {
+    const bar = document.getElementById('progressBar');
+    function update() {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
+      bar.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+
+  // Hero reveal
+  window.addEventListener('load', function() {
+    requestAnimationFrame(function() {
+      document.getElementById('heroImgWrap').classList.add('revealed');
+    });
+  });
+
+  // Intersection observer
+  (function() {
+    const els = document.querySelectorAll('.reveal, .module');
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => io.observe(el));
+  })();
+</script>
+
+</body>
+</html>

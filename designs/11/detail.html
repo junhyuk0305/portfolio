@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoomSync — 김태윤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #000000;
+    --surface: #0A0A0A;
+    --text: #FFFFFF;
+    --muted: #C4C4C8;
+    --hairline: #27272A;
+    --hairline-bright: #3F3F46;
+    --orb: rgba(120,119,198,0.15);
+    --img-filter: none;
+    --glass-bg: rgba(10,10,10,0.55);
+    --progress: #FFFFFF;
+    --ring: rgba(255,255,255,0.06);
+    --overlay: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.85) 100%);
+  }
+  [data-theme="alt"] {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --text: #0A0A0A;
+    --muted: #4B4B4B;
+    --hairline: #E5E5E5;
+    --hairline-bright: #C7C7C7;
+    --orb: rgba(120,119,198,0.08);
+    --glass-bg: rgba(255,255,255,0.55);
+    --progress: #0A0A0A;
+    --ring: rgba(0,0,0,0.06);
+    --overlay: linear-gradient(to bottom, transparent 30%, rgba(250,250,250,0.92) 100%);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body {
+    font-family: 'Inter', 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 250ms ease, color 250ms ease;
+    min-height: 100vh;
+    position: relative;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  .orb {
+    position: fixed;
+    top: -200px; right: -200px;
+    width: 900px; height: 900px;
+    background: radial-gradient(circle at center, var(--orb) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+    transition: background 250ms ease;
+    will-change: transform;
+  }
+  @media (max-width: 768px) {
+    .orb { display: none; }
+  }
+  .spotlight {
+    position: fixed; top: 0; left: 0;
+    width: 600px; height: 600px; margin: -300px 0 0 -300px;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 60%);
+    pointer-events: none; z-index: 1;
+    transition: transform 120ms cubic-bezier(.2,.7,.3,1), opacity 250ms ease;
+    will-change: transform; opacity: 0;
+  }
+  [data-theme="alt"] .spotlight {
+    background: radial-gradient(circle at center, rgba(0,0,0,0.06) 0%, transparent 60%);
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 1px; width: 0;
+    background: var(--progress);
+    z-index: 100;
+    transition: width 80ms linear, background-color 250ms ease;
+  }
+  .back-gallery {
+    position: fixed; top: 20px; left: 24px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    text-decoration: none;
+    transition: border-color 200ms ease, color 200ms ease, background-color 250ms ease;
+  }
+  .back-gallery:hover { border-color: var(--hairline-bright); color: var(--text); }
+
+  .theme-toggle {
+    position: fixed; top: 20px; right: 24px; z-index: 50;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    cursor: pointer;
+    transition: border-color 200ms ease, color 200ms ease, background-color 250ms ease;
+  }
+  .theme-toggle:hover { border-color: var(--hairline-bright); color: var(--text); }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    padding: 110px 0 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .breadcrumb a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+  .breadcrumb a:hover { color: var(--text); }
+
+  /* Hero */
+  .detail-hero {
+    padding: 16px 0 64px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .meta-row {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-row .item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .meta-row .item strong {
+    display: block;
+    color: var(--text);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: -0.005em;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .detail-hero h1 {
+    font-size: 64px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    max-width: 900px;
+  }
+  .detail-hero .sub {
+    color: var(--muted);
+    font-size: 18px;
+    max-width: 700px;
+    margin-bottom: 56px;
+  }
+
+  /* Hero plate */
+  .hero-plate {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+  }
+  .hero-plate img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    filter: var(--img-filter);
+  }
+  .hero-plate .overlay {
+    position: absolute; inset: 0;
+    background: var(--overlay);
+    pointer-events: none;
+  }
+  .hero-plate .plate-caption {
+    position: absolute;
+    bottom: 20px; left: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    z-index: 2;
+  }
+  .hero-plate .plate-tag {
+    position: absolute;
+    top: 12px; right: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--glass-bg);
+    padding: 2px 8px; border-radius: 4px;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+  }
+
+  /* Section */
+  section.block {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 40px;
+  }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .section-title {
+    font-size: 32px; font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Glass card */
+  .glass {
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 28px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: border-color 200ms ease, background-color 250ms ease;
+  }
+
+  /* Two-column for sections */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+  }
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .detail-hero h1 { font-size: 44px; }
+  }
+
+  .glass h3 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 14px;
+  }
+  .glass p {
+    color: var(--muted);
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .glass ul {
+    list-style: none;
+    margin-top: 12px;
+  }
+  .glass ul li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .glass ul li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 11px;
+    width: 6px; height: 1px;
+    background: var(--muted);
+  }
+
+  .img-glass {
+    position: relative;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    aspect-ratio: 4/3;
+  }
+  .img-glass img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    filter: var(--img-filter);
+    transition: transform 1500ms cubic-bezier(.2,.7,.3,1);
+  }
+  .img-glass .cap {
+    position: absolute; top: 10px; right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--glass-bg);
+    padding: 2px 8px; border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Metrics */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .metrics-row { grid-template-columns: 1fr; } }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .metric {
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    transition: border-color 200ms ease, background-color 250ms ease;
+  }
+  .metric .num {
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .metric .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .metric-aside {
+    position: relative;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    min-height: 320px;
+  }
+  .metric-aside img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    filter: var(--img-filter);
+    transition: transform 1500ms cubic-bezier(.2,.7,.3,1);
+  }
+  .metric-aside .cap {
+    position: absolute; top: 10px; right: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    background: var(--glass-bg);
+    padding: 2px 8px; border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Back row */
+  .back-row {
+    padding: 64px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .back-row a {
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-decoration: none;
+    border: 1px solid var(--hairline);
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    transition: border-color 200ms ease;
+  }
+  .back-row a:hover { border-color: var(--hairline-bright); }
+  .back-row .right {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  footer {
+    padding: 32px 0 48px;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.05em;
+    border-top: 1px solid var(--hairline);
+  }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 500ms cubic-bezier(.2,.7,.3,1), transform 500ms cubic-bezier(.2,.7,.3,1);
+  }
+  .reveal.in { opacity: 1; transform: none; }
+  .mask-reveal {
+    display: inline-block;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 700ms cubic-bezier(.2,.7,.3,1);
+  }
+  .mask-reveal.in { clip-path: inset(0 0 0 0); }
+  .kb img { transform: scale(1.06); transition: transform 1500ms cubic-bezier(.2,.7,.3,1), filter 250ms ease; }
+  .kb.in img { transform: scale(1.0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .mask-reveal, .kb img, .orb, .spotlight { transition: none !important; }
+    .reveal { opacity: 1; transform: none; }
+    .mask-reveal { clip-path: inset(0 0 0 0); }
+    .kb img { transform: scale(1.0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb" id="orb"></div>
+<div class="spotlight" id="spotlight"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<a class="back-gallery" href="../../index.html">← 갤러리</a>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+  <span id="themeLabel">↑ light · dark</span>
+</button>
+
+<main class="container">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb reveal">
+    <a href="index.html">→ projects</a> &nbsp;/&nbsp; <span style="color:var(--text);">roomsync</span>
+  </nav>
+
+  <!-- DETAIL HERO -->
+  <section class="detail-hero">
+    <div class="meta-row reveal">
+      <div class="item">Role <strong>서비스기획자 · 스크럼 마스터</strong></div>
+      <div class="item">Period <strong>2023.07 — 2023.11</strong></div>
+      <div class="item">Team <strong>기획 1 · BE 2 · FE 2</strong></div>
+      <div class="item">Outcome <strong>30개 동아리 · 노쇼 -60%</strong></div>
+    </div>
+    <h1 class="reveal"><span class="mask-reveal" id="heroName">RoomSync</span></h1>
+    <p class="sub reveal">학내 50여 개 동아리가 함께 쓰는 공용 회의실 예약 관리 웹서비스. 수기 예약·겹침 사고 문제를 1개월 만에 30개 동아리로 확산시킨 MVP까지 책임졌습니다.</p>
+
+    <div class="hero-plate reveal kb">
+      <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="동아리방 운영 회의" />
+      <div class="overlay"></div>
+      <span class="plate-tag">HERO_PLATE</span>
+      <div class="plate-caption">TEAM SESSION · 회장단 인터뷰 · 2023.07</div>
+    </div>
+  </section>
+
+  <!-- 문제 정의 -->
+  <section class="block">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-label">// 001</div>
+        <div class="section-title">문제 정의</div>
+      </div>
+      <div class="section-label">CONTEXT</div>
+    </div>
+    <div class="two-col">
+      <div class="glass reveal" data-stagger="0">
+        <h3>수기 예약이 만든 겹침 사고</h3>
+        <p>학내 50여 개 동아리가 공용 회의실 몇 곳을 단톡방과 종이 노트로 예약하다 보니, 같은 시간에 두 동아리가 들이닥치는 겹침 사고가 반복됐습니다.</p>
+        <ul>
+          <li>예약 정보가 단톡·메모·구글캘린더로 분산</li>
+          <li>"누가 언제 잡았는지" 회장단도 실시간으로 모름</li>
+          <li>노쇼·취소 통지가 다음 사용자에게 전달되지 않음</li>
+        </ul>
+      </div>
+      <div class="glass reveal" data-stagger="1">
+        <h3>회장단 설문에서 본 1순위 니즈</h3>
+        <p>회장단을 대상으로 구글폼 설문을 돌린 결과, "실시간 예약 현황 확인"이 압도적인 1순위 니즈로 나왔습니다. 거창한 매칭이 아니라 "지금 비어있는지"가 문제였습니다.</p>
+        <ul>
+          <li>1순위 — 실시간 예약 현황 한눈에 보기</li>
+          <li>2순위 — 예약·취소를 한 화면에서 처리</li>
+          <li>3순위 — 노쇼 방지를 위한 리마인드 알림</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 스코프 결정 -->
+  <section class="block">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-label">// 002</div>
+        <div class="section-title">스코프 결정</div>
+      </div>
+      <div class="section-label">SCOPE</div>
+    </div>
+    <div class="two-col">
+      <div class="img-glass reveal kb">
+        <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="회장단 설문 정리" />
+        <span class="cap">SURVEY · 회장단 N</span>
+      </div>
+      <div class="glass reveal" data-stagger="1">
+        <h3>백엔드 2명 · 학기 일정 안에 끝낸다</h3>
+        <p>백엔드 인력 2명과 학기 일정이라는 현실 제약을 먼저 인정했습니다. 알림·통계는 2차로 미루고, MVP는 "예약·취소·실시간 뷰" 세 가지에만 집중했습니다.</p>
+        <ul>
+          <li>MVP — 예약 생성, 취소, 실시간 캘린더 뷰</li>
+          <li>2차 — 리마인드 알림, 노쇼 카운트</li>
+          <li>API 명세 초안을 직접 작성해 BE/FE 핸드오프 단축</li>
+          <li>Jira에서 스크럼 마스터로 2주 스프린트 운영</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 실행 -->
+  <section class="block">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-label">// 003</div>
+        <div class="section-title">실행</div>
+      </div>
+      <div class="section-label">EXECUTION</div>
+    </div>
+    <div class="two-col">
+      <div class="glass reveal" data-stagger="0">
+        <h3>한 학기 안에 30개 동아리까지</h3>
+        <p>MVP 배포 후 회장단 채널을 통해 동아리들에게 순차 온보딩했고, 1개월 만에 30개 동아리가 실사용에 진입했습니다.</p>
+        <ul>
+          <li>회장단 6명 베타 → 핵심 플로우 검증 후 확산</li>
+          <li>이용 가이드 PDF 1장 + 단톡 안내 템플릿 배포</li>
+          <li>주간 사용 로그를 회장단에 공유, 불편 리포트 회수</li>
+          <li>알림(2차) — 예약 30분 전 리마인드로 노쇼 대응</li>
+        </ul>
+      </div>
+      <div class="img-glass reveal kb">
+        <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="온보딩 세션" />
+        <span class="cap">ONBOARDING · 회장단</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section class="block">
+    <div class="section-head reveal">
+      <div>
+        <div class="section-label">// 004</div>
+        <div class="section-title">결과</div>
+      </div>
+      <div class="section-label">OUTCOME</div>
+    </div>
+
+    <div class="metrics-row">
+      <div class="metric-grid">
+        <div class="metric reveal" data-stagger="0">
+          <div class="num">30</div>
+          <div class="lbl">동아리 · 1개월</div>
+        </div>
+        <div class="metric reveal" data-stagger="1">
+          <div class="num">-60%</div>
+          <div class="lbl">노쇼 감소</div>
+        </div>
+        <div class="metric reveal" data-stagger="2">
+          <div class="num">50+</div>
+          <div class="lbl">대상 동아리</div>
+        </div>
+        <div class="metric reveal" data-stagger="3">
+          <div class="num">2주</div>
+          <div class="lbl">스프린트 주기</div>
+        </div>
+      </div>
+      <div class="metric-aside reveal kb">
+        <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="PM portrait" />
+        <span class="cap">PM · KIM TAEYUN</span>
+      </div>
+    </div>
+
+    <div class="glass reveal" style="margin-top:24px;">
+      <h3>배운 것</h3>
+      <p>"기획자가 욕심내면 학기가 끝난다"는 걸 가장 크게 배웠습니다. 회장단 설문으로 1순위만 남기고, 알림·통계는 과감히 2차로 미룬 덕에 한 학기 안에 실사용까지 가져갈 수 있었습니다.</p>
+    </div>
+  </section>
+
+  <!-- Back -->
+  <div class="back-row">
+    <a href="index.html">← back to projects</a>
+    <span class="right">END OF CASE · 04 / 04</span>
+  </div>
+
+  <footer>© 2026 KIM TAEYUN · BUILT WITH RESTRAINT</footer>
+</main>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var stored = null;
+  try { stored = localStorage.getItem('tk-theme'); } catch(e) {}
+  if (stored === 'alt') root.setAttribute('data-theme', 'alt');
+
+  var btn = document.getElementById('themeToggle');
+  var label = document.getElementById('themeLabel');
+  function renderLabel() {
+    var alt = root.getAttribute('data-theme') === 'alt';
+    label.textContent = alt ? '↑ dark · light' : '↑ light · dark';
+  }
+  renderLabel();
+  btn.addEventListener('click', function(){
+    var alt = root.getAttribute('data-theme') === 'alt';
+    if (alt) { root.removeAttribute('data-theme'); try{localStorage.setItem('tk-theme','default');}catch(e){} }
+    else { root.setAttribute('data-theme','alt'); try{localStorage.setItem('tk-theme','alt');}catch(e){} }
+    renderLabel();
+  });
+
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var spotlight = document.getElementById('spotlight');
+  var orb = document.getElementById('orb');
+  window.addEventListener('mousemove', function(e){
+    spotlight.style.opacity = '1';
+    spotlight.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+    if (!rm && window.innerWidth > 768) {
+      var dx = (e.clientX - window.innerWidth/2) * 0.10;
+      var dy = (e.clientY - window.innerHeight/2) * 0.10;
+      orb.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    }
+  });
+  window.addEventListener('mouseleave', function(){ spotlight.style.opacity = '0'; });
+
+  var bar = document.getElementById('progressBar');
+  function onScroll(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = p + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting) {
+        var el = en.target;
+        var delay = 0;
+        if (el.hasAttribute('data-stagger')) {
+          delay = parseInt(el.getAttribute('data-stagger'),10) * 80;
+        }
+        setTimeout(function(){ el.classList.add('in'); }, rm ? 0 : delay);
+        io.unobserve(el);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .kb').forEach(function(el){ io.observe(el); });
+
+  setTimeout(function(){
+    document.getElementById('heroName').classList.add('in');
+  }, rm ? 0 : 250);
+})();
+</script>
+
+</body>
+</html>

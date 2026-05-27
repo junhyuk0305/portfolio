@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>김태윤 — LIFE Magazine Photo Spread</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Source+Sans+3:wght@300;400;600;700&family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EDE3;
+  --text:#1A1A1A;
+  --accent:#8B0000;
+  --muted:#5A4F3F;
+  --rule:rgba(26,26,26,.18);
+  --serif:'Spectral','Noto Serif KR',serif;
+  --serif-kr:'Noto Serif KR','Spectral',serif;
+  --sans:'Source Sans 3','Noto Serif KR',sans-serif;
+}
+[data-theme="alt"]{
+  --bg:#1A1A1A;
+  --text:#F2EDE3;
+  --accent:#FF3344;
+  --muted:#B5A993;
+  --rule:rgba(242,237,227,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100%}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  transition:background .4s ease, color .4s ease;
+}
+img{max-width:100%;display:block}
+
+/* progress bar */
+.progress{
+  position:fixed;top:0;left:0;height:2px;width:0%;
+  background:var(--accent);z-index:200;transition:width .12s ease-out;
+}
+
+/* top folio bar */
+.folio{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);z-index:150;
+  pointer-events:none;
+}
+.folio > *{pointer-events:auto}
+.folio .brand{font-weight:600;color:var(--text);letter-spacing:.32em;font-style:normal}
+.folio .page-no{font-style:italic}
+.theme-toggle{
+  background:transparent;border:0;cursor:pointer;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:var(--text);padding:8px 4px;
+  position:relative;min-height:44px;display:inline-flex;align-items:center;
+}
+.theme-toggle::after{
+  content:"";position:absolute;left:4px;right:4px;bottom:6px;
+  height:1px;background:var(--accent);
+}
+.theme-toggle .sep{margin:0 6px;opacity:.55}
+.theme-toggle .on{color:var(--accent)}
+
+/* spreads */
+.spread{
+  position:relative;
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:120px 48px 80px;
+  border-bottom:1px solid var(--rule);
+  transition:transform .3s ease, opacity .3s ease;
+}
+.spread:last-of-type{border-bottom:0}
+.spread.dimmed{transform:translateY(-16px);opacity:.3}
+
+.photo-frame{
+  position:relative;
+  width:100%;
+  height:70vh;
+  min-height:480px;
+  overflow:hidden;
+  background:#0a0a0a;
+}
+.photo-frame img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.1);
+  transition:transform 2000ms cubic-bezier(.2,.6,.2,1);
+  will-change:transform;
+}
+.spread.in .photo-frame img{transform:scale(1.0)}
+.photo-frame .overlay{
+  position:absolute;left:0;right:0;bottom:0;height:40%;
+  background:linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.45) 55%, rgba(0,0,0,0) 100%);
+  pointer-events:none;
+}
+.photo-frame .topmark{
+  position:absolute;top:24px;left:28px;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.85);
+}
+.photo-frame .topmark .red{color:#FF8888;font-weight:600;font-style:normal;letter-spacing:.3em}
+
+.headline-overlay{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:32px 36px 36px;
+  color:#fff;
+}
+.headline-overlay .kicker{
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:#FF8888;margin-bottom:14px;
+}
+.headline-overlay h1, .headline-overlay h2{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:clamp(40px,7vw,84px);line-height:.95;letter-spacing:-.01em;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+.headline-overlay h1.en, .headline-overlay h2.en{
+  font-family:var(--serif);font-weight:800;letter-spacing:-.015em;
+}
+
+.caption{
+  font-family:var(--serif);font-style:italic;font-size:14px;
+  color:var(--muted);
+  padding:14px 36px 0;
+  border-top:0;
+}
+.caption .by{font-style:normal;font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:var(--text);margin-right:10px}
+
+/* body column */
+.body-col{
+  max-width:480px;
+  margin:48px auto 0;
+  padding:0 36px;
+}
+.body-col p{margin-bottom:1.2em;color:var(--text)}
+.body-col p + p{text-indent:1.2em}
+.body-col .drop::first-letter{
+  font-family:var(--serif);font-weight:700;
+  font-size:64px;line-height:.85;float:left;
+  padding:6px 10px 0 0;color:var(--accent);
+}
+.body-col h3{
+  font-family:var(--serif-kr);font-weight:700;
+  font-size:22px;line-height:1.3;margin:1.6em 0 .6em;color:var(--text);
+}
+.body-col .meta{
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:var(--muted);margin-bottom:1.4em;letter-spacing:.04em;
+}
+
+/* split words */
+.split-word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.split-word > span{
+  display:inline-block;transform:translateY(110%);opacity:0;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1), opacity 700ms ease;
+}
+.spread.in .split-word > span{transform:translateY(0);opacity:1}
+
+/* pull quote */
+.pullquote{
+  max-width:760px;margin:64px auto 32px;
+  padding:0 36px 0 64px;position:relative;
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  font-size:clamp(22px,3vw,32px);line-height:1.35;color:var(--text);
+  transform:translateX(-30px);opacity:0;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1), opacity 700ms ease;
+}
+.pullquote::before{
+  content:"";position:absolute;left:36px;top:.3em;bottom:.3em;
+  width:3px;background:var(--accent);
+  transform:scaleY(0);transform-origin:top;
+  transition:transform 700ms cubic-bezier(.2,.7,.2,1) 100ms;
+}
+.spread.in .pullquote{transform:translateX(0);opacity:1}
+.spread.in .pullquote::before{transform:scaleY(1)}
+.pullquote .cite{
+  display:block;margin-top:14px;
+  font-family:var(--serif);font-style:normal;font-weight:600;
+  font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* project meta line */
+.spread-meta{
+  max-width:760px;margin:24px auto 0;padding:0 36px;
+  display:flex;flex-wrap:wrap;gap:18px 28px;
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:var(--muted);
+}
+.spread-meta b{font-style:normal;font-weight:600;color:var(--text);letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin-right:6px}
+
+/* metric row */
+.metric-row{
+  max-width:760px;margin:36px auto 0;padding:0 36px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:24px;
+  border-top:1px solid var(--rule);padding-top:28px;
+}
+.metric-row .m .v{font-family:var(--serif);font-weight:700;font-size:36px;line-height:1;color:var(--accent)}
+.metric-row .m .l{font-family:var(--serif);font-style:italic;font-size:12px;color:var(--muted);margin-top:8px;letter-spacing:.06em}
+
+/* read-more link */
+.read-more{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:28px;min-height:44px;
+  font-family:var(--serif);font-style:italic;font-size:14px;
+  letter-spacing:.06em;color:var(--accent);text-decoration:none;
+  border-bottom:1px solid var(--accent);padding-bottom:2px;
+}
+.read-more:hover{color:var(--text)}
+
+/* cover specific */
+.cover-meta{
+  position:absolute;top:90px;right:32px;text-align:right;
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.78);
+  z-index:3;
+}
+.cover-meta .v{display:block;margin-top:6px;color:#fff;font-weight:600}
+
+/* contact spread */
+.contact-spread{
+  padding:140px 0 120px;text-align:center;
+}
+.contact-spread .label{
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  letter-spacing:.32em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:18px;
+}
+.contact-spread .big{
+  font-family:var(--serif);font-weight:700;font-style:italic;
+  font-size:clamp(36px,6vw,72px);line-height:1.1;color:var(--text);
+  margin-bottom:36px;
+}
+.contact-spread .mail{
+  font-family:var(--serif);font-size:22px;color:var(--accent);
+  border-bottom:1px solid var(--accent);text-decoration:none;
+  padding-bottom:4px;
+}
+.contact-spread .colophon{
+  margin-top:80px;font-family:var(--serif);font-style:italic;
+  font-size:12px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;
+}
+
+/* back link */
+.back-link{
+  position:fixed;left:28px;bottom:24px;
+  font-family:var(--serif);font-style:italic;font-size:12px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--text);
+  text-decoration:none;padding:10px 4px;min-height:44px;
+  display:inline-flex;align-items:center;
+  z-index:140;
+}
+.back-link::after{
+  content:"";position:absolute;left:4px;right:4px;bottom:6px;
+  height:1px;background:var(--accent);
+}
+
+/* tablet/mobile */
+@media (max-width:880px){
+  .spread{padding:120px 24px 80px}
+  .photo-frame{height:62vh;min-height:380px}
+  .photo-frame .topmark{top:18px;left:20px;font-size:10px}
+  .headline-overlay{padding:24px 22px 26px}
+  .caption{padding:14px 22px 0;font-size:13px}
+  .body-col{padding:0 22px;margin-top:36px}
+  .pullquote{padding:0 22px 0 40px}
+  .pullquote::before{left:22px}
+  .spread-meta{padding:0 22px;gap:14px 22px}
+  .metric-row{padding:0 22px;grid-template-columns:1fr;gap:18px}
+  .metric-row{border-top:1px solid var(--rule)}
+  .folio{padding:12px 18px}
+  .back-link{left:18px;bottom:16px}
+  .cover-meta{top:78px;right:20px}
+}
+@media (max-width:520px){
+  .headline-overlay h1, .headline-overlay h2{font-size:clamp(34px,9vw,52px)}
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;animation:none !important}
+  .photo-frame img{transform:none !important}
+  .split-word > span{transform:none !important;opacity:1 !important}
+  .pullquote{transform:none !important;opacity:1 !important}
+  .pullquote::before{transform:scaleY(1) !important}
+  .spread.dimmed{transform:none !important;opacity:1 !important}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header class="folio">
+  <span class="brand">LIFE — PORTFOLIO</span>
+  <span class="page-no">VOL. 25 · MAY 22, 2026</span>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle day or night theme">
+    <span class="opt" data-mode="">DAY</span><span class="sep">·</span><span class="opt" data-mode="alt">NIGHT</span>
+  </button>
+</header>
+
+<!-- SPREAD 1: COVER -->
+<section class="spread cover-spread" data-spread="1">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_ylvv0qylvv0qylvv.png" alt="김태윤 portrait"/>
+    <div class="overlay"></div>
+    <div class="topmark"><span class="red">LIFE</span> &nbsp; · &nbsp; THE PORTFOLIO ISSUE</div>
+    <div class="cover-meta">
+      p. 042<span class="v">SPREAD 01 / 06</span>
+    </div>
+    <div class="headline-overlay">
+      <div class="kicker">A Product Manager · Seoul, 2026</div>
+      <h1>
+        <span class="split-word"><span>김</span></span><span class="split-word"><span>태</span></span><span class="split-word"><span>윤</span></span>
+      </h1>
+      <div style="margin-top:14px;font-family:var(--serif);font-style:italic;font-size:18px;color:rgba(255,255,255,.92);max-width:640px">
+        “비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자.”
+      </div>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    Portrait, study. 경영학·컴퓨터공학 복수전공 (3.9 / 4.5).
+  </div>
+</section>
+
+<!-- SPREAD 2: ABOUT -->
+<section class="spread" data-spread="2">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="강연 중인 김태윤"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 048 · PROFILE</div>
+    <div class="headline-overlay">
+      <div class="kicker">About — The Bridge</div>
+      <h2 class="en">
+        <span class="split-word"><span>Bridging</span></span>&nbsp;<span class="split-word"><span>Business</span></span>&nbsp;<span class="split-word"><span>&amp;</span></span>&nbsp;<span class="split-word"><span>Code.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2022</span>
+    동아리 정기 세미나. “언어가 다른 두 진영 사이의 통역사”라는 자기 정의.
+  </div>
+
+  <div class="body-col">
+    <p class="meta">PROFILE · 경영학 + 컴퓨터공학 복수전공 · GPA 3.9 / 4.5</p>
+    <p class="drop">비즈니스의 목적과 개발의 언어를 동시에 이해하며 프로덕트의 병목을 끊어내는 서비스 기획자 김태윤입니다. 학교에서는 회계와 마케팅을, 동시에 알고리즘과 데이터베이스를 다루며 ‘왜 이걸 만들어야 하는가’와 ‘어떻게 만들 수 있는가’를 한 문장 안에 놓는 훈련을 받았습니다.</p>
+
+    <p>도구로는 Notion으로 문서를 묶고, Figma로 화면을 그리고, GA4와 SQL로 가설을 검증합니다. Jira와 스크럼 위에서 백엔드 두 명과 함께 한 달 만에 MVP를 시장으로 밀어낸 경험이, 저의 기획이 ‘아이디어’가 아니라 ‘배포 가능한 명세’가 되어야 한다고 가르쳐 주었습니다.</p>
+
+    <h3>Toolkit</h3>
+    <p style="font-family:var(--serif);font-style:italic;color:var(--muted)">Notion · Figma(기본) · GA4 · SQL · Jira · Agile / Scrum · API 명세 초안</p>
+  </div>
+
+  <div class="pullquote">
+    “기획은 말이 아니라 배포 가능한 문서다.”
+    <span class="cite">— 김태윤, 작업노트에서</span>
+  </div>
+</section>
+
+<!-- SPREAD 3: ROOMSYNC -->
+<section class="spread" data-spread="3">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_i6tldbi6tldbi6tl.png" alt="RoomSync 팀 작업"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 054 · FEATURE No. 01</div>
+    <div class="headline-overlay">
+      <div class="kicker">2023.07 — 2023.11 · Lead PM</div>
+      <h2 class="en">
+        <span class="split-word"><span>RoomSync.</span></span>
+      </h2>
+      <h2 style="font-size:clamp(22px,3vw,32px);margin-top:8px;font-weight:600">
+        <span class="split-word"><span>50여</span></span> <span class="split-word"><span>동아리의</span></span> <span class="split-word"><span>수기</span></span> <span class="split-word"><span>예약을</span></span> <span class="split-word"><span>실시간으로.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    학내 동아리방. 예약표는 종이, 충돌은 일상이었다.
+  </div>
+
+  <div class="spread-meta">
+    <span><b>Role</b> Lead PM · 백엔드 2명</span>
+    <span><b>Period</b> 2023.07 – 2023.11 (1개월 MVP)</span>
+    <span><b>Stack</b> Jira · Scrum · Figma · API 명세</span>
+  </div>
+
+  <div class="body-col">
+    <p>학내 동아리방 예약 관리 웹서비스. 50여 개 동아리가 같은 방을 두고 종이와 단톡에 의지하던 시기, 예약이 겹치고 ‘누가 먼저였느냐’는 다툼이 반복되었습니다. 회장단을 대상으로 구글폼 설문을 돌려 가장 큰 요구가 ‘실시간 현황 확인’임을 확인하고, MVP의 범위를 예약·취소·실시간 뷰로 좁혔습니다.</p>
+
+    <p>알림은 2차 범위로 분리해 한 달 안에 배포할 수 있도록 우선순위를 잘랐습니다. API 명세 초안을 PM이 직접 잡아 백엔드 두 명과 동시에 작업을 시작했고, Jira와 스크럼으로 주간 단위 사이클을 돌렸습니다.</p>
+
+    <a class="read-more" href="detail.html">계속 읽기 — Feature 전문 →</a>
+  </div>
+
+  <div class="metric-row">
+    <div class="m"><div class="v">30</div><div class="l">참여 동아리</div></div>
+    <div class="m"><div class="v">−60%</div><div class="l">노쇼 감소</div></div>
+    <div class="m"><div class="v">1개월</div><div class="l">MVP 배포</div></div>
+  </div>
+</section>
+
+<!-- SPREAD 4: A사 -->
+<section class="spread" data-spread="4">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_dsku3ydsku3ydsku.png" alt="A사 사용성 인터뷰"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 062 · FEATURE No. 02</div>
+    <div class="headline-overlay">
+      <div class="kicker">2023.01 — 2023.06 · A사 커머스 인턴</div>
+      <h2>
+        <span class="split-word"><span>이탈을</span></span> <span class="split-word"><span>읽는</span></span> <span class="split-word"><span>다섯</span></span> <span class="split-word"><span>번의</span></span> <span class="split-word"><span>대화.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2023</span>
+    사용성 인터뷰. 다섯 명의 목소리가 12%p의 전환을 움직였다.
+  </div>
+
+  <div class="spread-meta">
+    <span><b>Role</b> PM 인턴 · 결제 플로우</span>
+    <span><b>MAU</b> 50만</span>
+    <span><b>Tools</b> GA4 · A/B 테스트 · UT 5명</span>
+  </div>
+
+  <div class="body-col">
+    <p>월간 활성 사용자 50만의 커머스 플랫폼에서, 결제 단계 이탈률 45%가 풀어야 할 한 문장이었습니다. GA4로 단계별 깔때기를 끊어 보고, 다섯 명의 사용자와 직접 마주 앉아 어디서 손이 멈추는지를 들었습니다.</p>
+
+    <p>가설은 두 가지였습니다. 배송비 안내의 ‘투명도’와 ‘위치(높이)’를 손보는 안, 그리고 무료배송까지 남은 금액을 알려주는 ‘넛지’ 안. A/B 테스트로 두 안을 동시에 돌린 결과 B안이 전환 +12%p로 더 강했고, 정규 배포로 이어졌습니다.</p>
+  </div>
+
+  <div class="metric-row">
+    <div class="m"><div class="v">50만</div><div class="l">월간 활성 사용자</div></div>
+    <div class="m"><div class="v">5명</div><div class="l">사용성 인터뷰</div></div>
+    <div class="m"><div class="v">+12%p</div><div class="l">B안 전환 상승</div></div>
+  </div>
+</section>
+
+<!-- SPREAD 5: 동아리 -->
+<section class="spread" data-spread="5">
+  <div class="photo-frame">
+    <img src="../png/Gemini_Generated_Image_o20szmo20szmo20s.png" alt="동아리 세미나"/>
+    <div class="overlay"></div>
+    <div class="topmark">PAGE 070 · FEATURE No. 03</div>
+    <div class="headline-overlay">
+      <div class="kicker">2022.03 — 2022.12 · IT 연합 동아리 회장</div>
+      <h2>
+        <span class="split-word"><span>완성률</span></span> <span class="split-word"><span>40에서</span></span> <span class="split-word"><span>85로,</span></span> <span class="split-word"><span>루틴의</span></span> <span class="split-word"><span>힘.</span></span>
+      </h2>
+    </div>
+  </div>
+  <div class="caption">
+    <span class="by">Photo by 김태윤 · 2022</span>
+    월 1회 정기 세미나. 100명의 리듬이 비로소 맞춰지기 시작한 순간.
+  </div>
+
+  <div class="spread-meta">
+    <span><b>Role</b> 회장</span>
+    <span><b>Members</b> 100명</span>
+    <span><b>Period</b> 2022.03 – 2022.12</span>
+  </div>
+
+  <div class="body-col">
+    <p>100명 규모의 IT 연합 동아리, 그러나 프로젝트 완성률은 40%에 머물러 있었습니다. 진단은 단순했습니다 — 시작은 있는데 ‘서로 보여주는 자리’가 없다는 것. 월 1회의 정기 세미나를 루틴으로 박아 넣어, 발표를 전제로 일정을 역산하게 만들었습니다.</p>
+
+    <p>9개월 뒤 완성률은 85%로 올라왔습니다. 도구는 새것이 아니었습니다. 운영의 문제를, 운영의 언어로 풀었을 뿐입니다.</p>
+  </div>
+
+  <div class="metric-row">
+    <div class="m"><div class="v">100</div><div class="l">동아리 구성원</div></div>
+    <div class="m"><div class="v">40 → 85%</div><div class="l">프로젝트 완성률</div></div>
+    <div class="m"><div class="v">월 1회</div><div class="l">정기 세미나</div></div>
+  </div>
+</section>
+
+<!-- SPREAD 6: CONTACT -->
+<section class="spread contact-spread" data-spread="6">
+  <div class="label">END OF FEATURE — TURN THE PAGE</div>
+  <div class="big">
+    <span class="split-word"><span>다음</span></span> <span class="split-word"><span>이야기를</span></span><br>
+    <span class="split-word"><span>함께</span></span> <span class="split-word"><span>쓰고</span></span> <span class="split-word"><span>싶습니다.</span></span>
+  </div>
+  <a class="mail" href="mailto:taeyoon@example.com">taeyoon@example.com</a>
+  <div class="colophon">— Colophon — Spectral · Source Sans 3 · Noto Serif KR — Printed on screen, 2026</div>
+</section>
+
+<a class="back-link" href="../../index.html">← Gallery</a>
+
+<script>
+(function(){
+  // theme
+  var saved = null;
+  try{ saved = localStorage.getItem('tk-theme'); }catch(e){}
+  if(saved === 'alt') document.documentElement.setAttribute('data-theme','alt');
+  var btn = document.getElementById('themeToggle');
+  function paint(){
+    var alt = document.documentElement.getAttribute('data-theme') === 'alt';
+    btn.querySelectorAll('.opt').forEach(function(o){
+      var on = (o.getAttribute('data-mode')||'') === (alt?'alt':'');
+      o.classList.toggle('on', on);
+    });
+  }
+  paint();
+  btn.addEventListener('click', function(){
+    var alt = document.documentElement.getAttribute('data-theme') === 'alt';
+    if(alt){
+      document.documentElement.removeAttribute('data-theme');
+      try{ localStorage.setItem('tk-theme','default'); }catch(e){}
+    }else{
+      document.documentElement.setAttribute('data-theme','alt');
+      try{ localStorage.setItem('tk-theme','alt'); }catch(e){}
+    }
+    paint();
+  });
+
+  // progress bar
+  var bar = document.getElementById('progress');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = (h.scrollHeight - h.clientHeight) || 1;
+    var p = (h.scrollTop || document.body.scrollTop) / max;
+    bar.style.width = Math.max(0, Math.min(1, p)) * 100 + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // intersection observer
+  var prm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var spreads = Array.prototype.slice.call(document.querySelectorAll('.spread'));
+
+  // stagger split-word entries
+  spreads.forEach(function(s){
+    var words = s.querySelectorAll('.split-word > span');
+    words.forEach(function(w, i){
+      w.style.transitionDelay = (i * 100) + 'ms';
+    });
+  });
+
+  if(prm){
+    spreads.forEach(function(s){ s.classList.add('in'); });
+    return;
+  }
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && e.intersectionRatio > 0.18){
+        e.target.classList.add('in');
+      }
+    });
+  }, {threshold:[0, .2, .5]});
+  spreads.forEach(function(s){ io.observe(s); });
+
+  // page-turn: dim previous spread when next is in view
+  var io2 = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var idx = spreads.indexOf(e.target);
+      spreads.forEach(function(s, i){
+        s.classList.toggle('dimmed', i < idx - 0);
+      });
+      // un-dim the last 1 (current and prev sit normally; only earlier dimmed)
+      if(idx >= 1) spreads[idx-1].classList.remove('dimmed');
+    });
+  }, {threshold:[.55]});
+  spreads.forEach(function(s){ io2.observe(s); });
+})();
+</script>
+</body>
+</html>
